@@ -100,7 +100,9 @@ fun isAppUpdateAvailable(
         val latestPart = latest.getOrElse(index) { 0 }
         if (latestPart != currentPart) return latestPart > currentPart
     }
-    return lzcyForkRevision(latestVersionName) > lzcyForkRevision(currentVersionName)
+    val currentForkVersion = lzcyForkVersion(currentVersionName) ?: LzcyForkVersion(0, 0, 0)
+    val latestForkVersion = lzcyForkVersion(latestVersionName) ?: LzcyForkVersion(0, 0, 0)
+    return latestForkVersion > currentForkVersion
 }
 
 fun normalizeAppVersionParts(versionName: String): List<Int>? {
@@ -116,22 +118,34 @@ fun normalizeAppVersionParts(versionName: String): List<Int>? {
     return parts.takeIf { it.isNotEmpty() }
 }
 
-private val lzcyForkRevisionPattern = Regex(
-    pattern = """-lzcy\.(\d+)(?:-debug)?$""",
+private data class LzcyForkVersion(
+    val major: Int,
+    val feature: Int,
+    val fix: Int,
+) : Comparable<LzcyForkVersion> {
+    override fun compareTo(other: LzcyForkVersion): Int =
+        compareValuesBy(this, other, LzcyForkVersion::major, LzcyForkVersion::feature, LzcyForkVersion::fix)
+}
+
+private val lzcyForkVersionPattern = Regex(
+    pattern = """-lzcy(\d+)\.(\d+)\.(\d+)(?:-debug)?$""",
     option = RegexOption.IGNORE_CASE,
 )
 
-private fun lzcyForkRevision(versionName: String): Int =
-    lzcyForkRevisionPattern.find(versionName.trim())
-        ?.groupValues
-        ?.getOrNull(1)
-        ?.toIntOrNull()
-        ?: 0
+private fun lzcyForkVersion(versionName: String): LzcyForkVersion? {
+    val groups = lzcyForkVersionPattern.find(versionName.trim())?.groupValues ?: return null
+    val major = groups.getOrNull(1)?.toIntOrNull() ?: return null
+    val feature = groups.getOrNull(2)?.toIntOrNull() ?: return null
+    val fix = groups.getOrNull(3)?.toIntOrNull() ?: return null
+    return LzcyForkVersion(major, feature, fix)
+}
 
 private fun normalizeAppVersionName(versionName: String): String? {
     val coreVersionName = normalizeAppVersionParts(versionName)?.joinToString(".") ?: return null
-    val forkRevision = lzcyForkRevision(versionName)
-    return if (forkRevision > 0) "$coreVersionName-lzcy.$forkRevision" else coreVersionName
+    val forkVersion = lzcyForkVersion(versionName)
+    return forkVersion?.let {
+        "$coreVersionName-lzcy${it.major}.${it.feature}.${it.fix}"
+    } ?: coreVersionName
 }
 
 private val appUpdateMoshi: Moshi = Moshi.Builder()

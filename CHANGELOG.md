@@ -6,7 +6,7 @@ When bumping `versionName`, add a new section for the release version and summar
 
 ## [Unreleased]
 
-## [1.13.2-lzcy.1] - 2026-11-02
+## [1.13.2-lzcy1.0.0] - 2026-11-02
 
 ### English
 
