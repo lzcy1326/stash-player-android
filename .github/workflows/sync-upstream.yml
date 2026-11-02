@@ -1,0 +1,121 @@
+name: Sync upstream
+
+on:
+  schedule:
+    # Run every six hours. GitHub may delay scheduled jobs during peak periods.
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-upstream-main
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out fork main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream main
+        id: upstream
+        run: |
+          git remote remove upstream 2>/dev/null || true
+          git remote add upstream https://github.com/gomeng-dev/stash-player-android.git
+          git fetch upstream main --no-tags
+          echo "sha=$(git rev-parse upstream/main)" >> "$GITHUB_OUTPUT"
+
+      - name: Check for upstream changes
+        id: delta
+        run: |
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "needs_sync=false" >> "$GITHUB_OUTPUT"
+            echo "Fork main already contains upstream main."
+          else
+            echo "needs_sync=true" >> "$GITHUB_OUTPUT"
+            echo "Upstream contains commits that are not in fork main."
+          fi
+
+      - name: Try merging upstream
+        if: steps.delta.outputs.needs_sync == 'true'
+        id: merge
+        run: |
+          git checkout -B automation/upstream-sync origin/main
+          if git merge --no-ff --no-edit upstream/main; then
+            echo "clean=true" >> "$GITHUB_OUTPUT"
+            git push --force origin HEAD:refs/heads/automation/upstream-sync
+          else
+            echo "clean=false" >> "$GITHUB_OUTPUT"
+            git merge --abort
+            git push --force origin refs/remotes/upstream/main:refs/heads/automation/upstream-conflict
+          fi
+
+      - name: Auto-merge clean upstream update
+        if: steps.merge.outputs.clean == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+        run: |
+          pr_number="$(gh pr list \
+            --base main \
+            --head automation/upstream-sync \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+          if [ -z "$pr_number" ]; then
+            gh pr create \
+              --base main \
+              --head automation/upstream-sync \
+              --title "chore: sync upstream ${UPSTREAM_SHA:0:7}" \
+              --body "Automated clean merge of upstream commit ${UPSTREAM_SHA}."
+          fi
+          pr_number="$(gh pr list \
+            --base main \
+            --head automation/upstream-sync \
+            --state open \
+            --json number \
+            --jq '.[0].number')"
+          gh pr merge "$pr_number" --merge --delete-branch
+
+          conflict_pr="$(gh pr list \
+            --base main \
+            --head automation/upstream-conflict \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+          if [ -n "$conflict_pr" ]; then
+            gh pr close "$conflict_pr" \
+              --comment "A newer upstream update merged cleanly, so this conflict review is no longer required."
+          fi
+
+      - name: Keep a conflict PR for review
+        if: steps.merge.outputs.clean == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+        run: |
+          pr_number="$(gh pr list \
+            --base main \
+            --head automation/upstream-conflict \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+          if [ -z "$pr_number" ]; then
+            gh pr create \
+              --base main \
+              --head automation/upstream-conflict \
+              --title "review: resolve upstream sync ${UPSTREAM_SHA:0:7}" \
+              --body $'Upstream cannot be merged into `main` without conflicts.\n\nResolve the conflicts locally, preserve the LZCY versioning rules in `FORK_VERSIONING.md`, and merge the resolved branch manually.\n\nUpstream commit: '"${UPSTREAM_SHA}"
+          fi

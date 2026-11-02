@@ -40,3 +40,11 @@ v1.13.2-lzcy1.1.0
 | `v1.13.3` | `v1.13.3-lzcy1.0.0` | New upstream baseline |
 
 The suffix is intentionally separate from the upstream version, so upstream version bumps remain easy to recognize and merge.
+
+## Upstream sync automation
+
+`.github/workflows/sync-upstream.yml` runs every six hours and can also be started manually.
+
+- If upstream `main` contains no new commits, the workflow exits without changes.
+- If upstream merges cleanly, the workflow creates and immediately merges an automated pull request.
+- If merging would conflict, the fork's `main` is left unchanged and an `automation/upstream-conflict` pull request is kept open for manual review.
