@@ -8,9 +8,9 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-const val STASH_ANDROID_RELEASES_URL = "https://github.com/gomeng-dev/stash-player-android/releases"
+const val STASH_ANDROID_RELEASES_URL = "https://github.com/lzcy1326/stash-player-android/releases"
 const val STASH_ANDROID_LATEST_RELEASE_API_URL =
-    "https://api.github.com/repos/gomeng-dev/stash-player-android/releases/latest"
+    "https://api.github.com/repos/lzcy1326/stash-player-android/releases/latest"
 
 data class AppUpdateApkAsset(
     val name: String,

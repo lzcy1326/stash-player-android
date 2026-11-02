@@ -1,6 +1,5 @@
 package gomeng.dev.stashplayer.feature.settings
 
-import gomeng.dev.stashplayer.core.ui.components.DeveloperSupportCard
 import gomeng.dev.stashplayer.core.ui.components.openSupportUrl
 
 import android.content.ClipData
@@ -182,7 +181,7 @@ object RecentAppsPrivacySettingCopy {
 object SupportSettingCopy {
     const val releasesUrl = STASH_ANDROID_RELEASES_URL
     const val latestReleaseApiUrl = STASH_ANDROID_LATEST_RELEASE_API_URL
-    const val issuesUrl = "https://github.com/gomeng-dev/stash-player-android/issues"
+    const val issuesUrl = "https://github.com/lzcy1326/stash-player-android/issues"
 
     @StringRes val versionTitle = R.string.settings_support_version_title
     @StringRes val updateCheckTitle = R.string.settings_support_update_check_title
@@ -710,7 +709,6 @@ fun SettingsRoute(
 ) {
     SettingsScreenScaffold(isFoldLikeLayout = isFoldLikeLayout) {
         Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineMedium)
-        DeveloperSupportCard()
         SettingsListCopy.sections.forEach { section ->
             SettingsSectionCard(
                 section = section,
