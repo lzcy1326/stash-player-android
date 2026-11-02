@@ -6,6 +6,26 @@ When bumping `versionName`, add a new section for the release version and summar
 
 ## [Unreleased]
 
+## [1.13.2-lzcy1.1.0] - 2026-11-02
+
+### English
+
+- Avoid briefly showing server setup during startup when a server is already configured.
+- Add a player button to switch between landscape fullscreen and portrait playback; move screen sizing and orientation settings into playback settings.
+- Load Home sections concurrently and expose per-load timing in the debug log.
+- Return playback information before sprite-timeline metadata finishes loading, and start playback while the resume prompt is shown.
+- Reuse one OkHttp connection pool for Stash API, thumbnail, and playback requests.
+- Prefer IPv6 when both address families are available, with IPv4 fallback and a five-second connection timeout.
+
+### 简体中文
+
+- 修复已配置服务器时冷启动短暂闪现设置页面、文字重叠的问题。
+- 播放器右下角增加横竖屏切换，横屏时自动全屏播放；画面比例与屏幕方向选项集中到播放设置。
+- 首页影片分区改为并发加载，并在调试日志中记录实际加载耗时。
+- 播放器优先加载可播放信息，精灵图时间轴改为后台延迟加载；显示续播提示时立即准备播放。
+- Stash 接口、海报缩略图与视频播放请求共用连接池，减少详情页切换时的重复 DNS/TLS 建连。
+- 双栈网络优先尝试 IPv6，保留 IPv4 回退，并将单次连接等待上限收紧到 5 秒。
+
 ## [1.13.2-lzcy1.0.0] - 2026-11-02
 
 ### English

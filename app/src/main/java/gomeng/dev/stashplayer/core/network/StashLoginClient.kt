@@ -8,7 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 class StashLoginClient(
-    private val okHttpClient: OkHttpClient = OkHttpClient(),
+    private val okHttpClient: OkHttpClient = StashHttpClient.shared,
 ) {
     suspend fun loginWithPassword(
         baseUrl: String,

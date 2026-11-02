@@ -436,6 +436,7 @@ class StashSettingsRepository(private val context: Context) {
 
     companion object {
         private val fallbackProbeHttpClient = OkHttpClient.Builder()
+            .dns(StashHttpClient.dns)
             .callTimeout(1_500, TimeUnit.MILLISECONDS)
             .connectTimeout(1_000, TimeUnit.MILLISECONDS)
             .readTimeout(1_000, TimeUnit.MILLISECONDS)

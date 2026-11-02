@@ -1153,4 +1153,12 @@
     <string name="settings_scan_favorite_scan">Scan now</string>
     <string name="settings_scan_favorite_failed">Could not save or load folder favorites. Please try again.</string>
     <string name="settings_scan_invalid_path">Select a valid absolute folder path.</string>
+    <string name="player_resumed_from_position">Playing from your last position (%1$s)</string>
+    <string name="player_restart_from_beginning">Play from beginning</string>
+    <string name="player_switch_to_landscape">Switch to landscape fullscreen</string>
+    <string name="player_switch_to_portrait">Switch to portrait</string>
+    <string name="player_playback_settings_title">Playback settings</string>
+    <string name="player_screen_size_section">Screen size</string>
+    <string name="player_orientation_section">Screen orientation</string>
+    <string name="player_stream_section">Stream</string>
 </resources>

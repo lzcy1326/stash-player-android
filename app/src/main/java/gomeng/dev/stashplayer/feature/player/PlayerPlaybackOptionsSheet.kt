@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import gomeng.dev.stashplayer.core.player.AspectRatioMode
+import gomeng.dev.stashplayer.core.player.PlaybackOrientationMode
 import gomeng.dev.stashplayer.core.player.PlayerSeparatedPlaybackOptionSheet
 import gomeng.dev.stashplayer.core.player.PlayerStreamPreferenceOption
 import gomeng.dev.stashplayer.core.player.PlayerStreamSourceOption
@@ -30,7 +31,6 @@ import gomeng.dev.stashplayer.core.player.playerPlaybackMenuMaxHeightDp
 import gomeng.dev.stashplayer.core.player.playerPlaybackModeLabel
 import gomeng.dev.stashplayer.core.player.playerPlaybackSpeedLabel
 import gomeng.dev.stashplayer.core.player.playerSeparatedPlaybackOptionSheetTitle
-import gomeng.dev.stashplayer.core.player.shouldUseScrollablePlaybackOptionsMenu
 import gomeng.dev.stashplayer.core.ui.designsystem.StashActionPill
 import gomeng.dev.stashplayer.core.ui.designsystem.StashBottomSheetContainer
 import gomeng.dev.stashplayer.core.ui.designsystem.StashSheetHeader
@@ -47,6 +47,7 @@ fun PlayerPlaybackOptionsSheet(
     streamSourceOptions: List<PlayerStreamSourceOption>,
     playbackSpeed: Float,
     aspectRatioMode: AspectRatioMode,
+    playbackOrientationMode: PlaybackOrientationMode,
     canShuffleQueue: Boolean,
     shuffleEnabled: Boolean,
     onDismiss: () -> Unit,
@@ -54,11 +55,10 @@ fun PlayerPlaybackOptionsSheet(
     onSelectStreamPreference: (String) -> Unit,
     onSelectPlaybackSpeed: (Float) -> Unit,
     onSelectAspectRatioMode: (AspectRatioMode) -> Unit,
+    onSelectPlaybackOrientationMode: (PlaybackOrientationMode) -> Unit,
     onSelectShuffleEnabled: (Boolean) -> Unit,
 ) {
     val optionsScrollState = rememberScrollState()
-    val optionsShouldScroll = sheet == PlayerSeparatedPlaybackOptionSheet.Stream &&
-        shouldUseScrollablePlaybackOptionsMenu(streamSourceOptions.size)
     val sheetSubtitle = when (sheet) {
         PlayerSeparatedPlaybackOptionSheet.Stream -> currentStreamInfoText
         PlayerSeparatedPlaybackOptionSheet.Speed -> stashString(R.string.auto_kr_0459, playerPlaybackSpeedLabel(playbackSpeed))
@@ -80,16 +80,33 @@ fun PlayerPlaybackOptionsSheet(
             Column(
                 modifier = Modifier
                     .weight(1f, fill = false)
-                    .then(if (optionsShouldScroll) Modifier.verticalScroll(optionsScrollState) else Modifier),
+                    .verticalScroll(optionsScrollState),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 StashSheetHeader(
-                    title = playerSeparatedPlaybackOptionSheetTitle(sheet),
+                    title = if (sheet == PlayerSeparatedPlaybackOptionSheet.Stream) stashString(R.string.player_playback_settings_title) else playerSeparatedPlaybackOptionSheetTitle(sheet),
                     subtitle = sheetSubtitle,
-                    contentDescription = stashString(R.string.auto_kr_0462, playerSeparatedPlaybackOptionSheetTitle(sheet)),
+                    contentDescription = if (sheet == PlayerSeparatedPlaybackOptionSheet.Stream) stashString(R.string.player_playback_settings_title) else stashString(R.string.auto_kr_0462, playerSeparatedPlaybackOptionSheetTitle(sheet)),
                 )
                 when (sheet) {
                     PlayerSeparatedPlaybackOptionSheet.Stream -> {
+                        Text(stashString(R.string.player_screen_size_section), style = MaterialTheme.typography.titleMedium)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            buildPlayerAspectRatioQuickOptions(aspectRatioMode).forEach { option ->
+                                StashActionPill(label = option.label, selected = option.selected, onClick = { onSelectAspectRatioMode(option.mode) })
+                            }
+                        }
+                        Text(stashString(R.string.player_orientation_section), style = MaterialTheme.typography.titleMedium)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(
+                                PlaybackOrientationMode.Off to R.string.settings_playback_orientation_off_label,
+                                PlaybackOrientationMode.Sensor to R.string.settings_playback_orientation_sensor_label,
+                                PlaybackOrientationMode.Landscape to R.string.settings_playback_orientation_landscape_label,
+                            ).forEach { (mode, label) ->
+                                StashActionPill(label = stashString(label), selected = playbackOrientationMode == mode, onClick = { onSelectPlaybackOrientationMode(mode) })
+                            }
+                        }
+                        Text(stashString(R.string.player_stream_section), style = MaterialTheme.typography.titleMedium)
                         streamPreferenceOptions.forEach { option ->
                             StashSheetOptionRow(
                                 title = option.title,

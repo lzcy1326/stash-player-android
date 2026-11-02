@@ -40,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -77,6 +78,7 @@ import gomeng.dev.stashplayer.core.network.AppUpdateChecker
 import gomeng.dev.stashplayer.core.network.AppUpdateNotice
 import gomeng.dev.stashplayer.core.network.StashLoginClient
 import gomeng.dev.stashplayer.core.network.StashSettingsRepository
+import gomeng.dev.stashplayer.core.network.StashServerProfile
 import gomeng.dev.stashplayer.core.network.passwordSessionStartupRefreshKey
 import gomeng.dev.stashplayer.core.network.shouldRefreshPasswordSessionOnStartup
 import gomeng.dev.stashplayer.core.player.PlaybackOrientationMode
@@ -110,6 +112,8 @@ private enum class TopLevelDestination(
     Settings("settings", topLevelDestinationLabelResource("settings"), Icons.Outlined.Settings),
 }
 
+private data class LoadedServerProfile(val profile: StashServerProfile?)
+
 private data class ActiveGalleryPhotoViewer(
     val initialIndex: Int,
     val images: List<GalleryImageModel>,
@@ -138,8 +142,15 @@ fun StashNavHost(
     val context = LocalContext.current
     val settingsRepository = remember(context) { StashSettingsRepository(context) }
     val localRepository = remember(context) { StashLocalLibraryRepository(context) }
-    val savedProfile by settingsRepository.savedServerProfile.collectAsState(initial = null)
-    val runtimeProfile by settingsRepository.serverProfile.collectAsState(initial = null)
+    val loadedProfile by produceState<LoadedServerProfile?>(initialValue = null, settingsRepository) {
+        settingsRepository.savedServerProfile.collect { profile -> value = LoadedServerProfile(profile) }
+    }
+    val savedProfile = loadedProfile?.profile
+    if (loadedProfile == null) return
+    val loadedRuntimeProfile by produceState<LoadedServerProfile?>(initialValue = null, settingsRepository) {
+        settingsRepository.serverProfile.collect { profile -> value = LoadedServerProfile(profile) }
+    }
+    val runtimeProfile = loadedRuntimeProfile?.profile
     val playbackOrientationMode by settingsRepository.playbackOrientationMode.collectAsState(
         initial = StashSettingsRepository.DEFAULT_PLAYBACK_ORIENTATION_MODE,
     )
@@ -154,6 +165,7 @@ fun StashNavHost(
     var playbackQueue by remember { mutableStateOf(PlayerPlaybackQueue.Empty) }
     var playbackQueueRestored by remember { mutableStateOf(false) }
     var playbackQueueContinuation by remember { mutableStateOf<PlayerPlaybackQueueContinuation?>(null) }
+    var playerOrientationOverride by remember { mutableStateOf<AppOrientationRequest?>(null) }
     var playerPresentationMode by remember { mutableStateOf(PlayerPresentationMode.WatchPage) }
     var playerLandscapeAutoFullscreen by remember { mutableStateOf(false) }
     var playerPlaybackSpeed by remember { mutableFloatStateOf(1f) }
@@ -171,8 +183,13 @@ fun StashNavHost(
             route = currentRoute,
             playerPresentationMode = playerPresentationMode,
             playbackOrientationMode = playbackOrientationMode,
+            playerOrientationOverride = playerOrientationOverride,
         ),
     )
+
+    LaunchedEffect(currentRoute) {
+        if (!isPlayerRoute(currentRoute)) playerOrientationOverride = null
+    }
 
     LaunchedEffect(Unit) {
         val restoredQueue = runCatching { localRepository.persistedPlaybackQueue.first() }.getOrNull()
@@ -483,8 +500,9 @@ fun StashNavHost(
                         )
                     }
                     composable(TopLevelDestination.Home.route) {
-                        HomeRoute(
+                        if (loadedRuntimeProfile != null) HomeRoute(
                             isFoldLikeLayout = isFoldLikeLayout,
+                            profile = runtimeProfile,
                             onOpenScene = { sceneId, scenes, randomShuffle ->
                                 openPlaybackQueueScene(
                                     sceneId = sceneId,
@@ -620,6 +638,13 @@ fun StashNavHost(
                                 playerLandscapeAutoFullscreen = landscapeAutoFullscreen
                             },
                             onPlaybackSpeedChange = { playerPlaybackSpeed = it },
+                            onRequestLandscape = { landscape ->
+                                playerOrientationOverride = when (landscape) {
+                                    true -> AppOrientationRequest.Landscape
+                                    false -> AppOrientationRequest.Portrait
+                                    null -> null
+                                }
+                            },
                             onOpenScene = { sceneId -> replaceCurrentPlayerScene(sceneId) },
                             onOpenSettings = { navController.navigate(TopLevelDestination.Settings.route) },
                             onExitPlayer = ::exitPlayer,

@@ -28,7 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
-import androidx.compose.material.icons.outlined.AspectRatio
+import androidx.compose.material.icons.outlined.ScreenRotation
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -76,7 +76,6 @@ import gomeng.dev.stashplayer.core.model.SimilarSceneRecommendation
 import gomeng.dev.stashplayer.core.model.SimilarVideosLayoutContext
 import gomeng.dev.stashplayer.core.model.SimilarVideosRecommendationSource
 import gomeng.dev.stashplayer.core.network.StashServerProfile
-import gomeng.dev.stashplayer.core.player.AspectRatioMode
 import gomeng.dev.stashplayer.core.player.PlayerDebugInfoUiState
 import gomeng.dev.stashplayer.core.player.PlayerExpandedStashAction
 import gomeng.dev.stashplayer.core.player.PlayerExpandedStashActionRowItem
@@ -97,7 +96,6 @@ import gomeng.dev.stashplayer.core.player.PlayerInfoDrawerState
 import gomeng.dev.stashplayer.core.player.PlayerWatchPageController
 import gomeng.dev.stashplayer.core.player.buildPlayerExpandedStashActionRowItems
 import gomeng.dev.stashplayer.core.player.formatPlayerPosition
-import gomeng.dev.stashplayer.core.player.playerAspectRatioToggleContentDescription
 import gomeng.dev.stashplayer.core.player.playerLockButtonContentDescription
 import gomeng.dev.stashplayer.core.ui.components.SimilarVideosSection
 import gomeng.dev.stashplayer.core.ui.components.ReusablePlayerSeekRow
@@ -120,7 +118,7 @@ fun PlayerBottomControls(
     sliderFraction: Float,
     transportState: PlayerOverlayTransportUiState,
     isPlaying: Boolean,
-    aspectRatioMode: AspectRatioMode,
+    isLandscape: Boolean,
     canEnterPictureInPicture: Boolean,
     ratingStep: Int,
     ratingMessage: String?,
@@ -140,7 +138,7 @@ fun PlayerBottomControls(
     onPlayPause: () -> Unit,
     onNextTransport: () -> Unit,
     onToggleLock: () -> Unit,
-    onCycleAspectRatio: () -> Unit,
+    onToggleScreenOrientation: () -> Unit,
     onEnterPictureInPicture: () -> Unit,
     onSelectRatingStep: (Int) -> Unit,
     onAddCurrentSceneToQueue: () -> Unit,
@@ -210,8 +208,8 @@ fun PlayerBottomControls(
                 onPlayPause = onPlayPause,
                 onNextTransport = onNextTransport,
                 onToggleLock = onToggleLock,
-                aspectRatioMode = aspectRatioMode,
-                onCycleAspectRatio = onCycleAspectRatio,
+                isLandscape = isLandscape,
+                onToggleScreenOrientation = onToggleScreenOrientation,
                 canEnterPictureInPicture = canEnterPictureInPicture,
                 onEnterPictureInPicture = onEnterPictureInPicture,
             )
@@ -227,8 +225,8 @@ private fun PlayerFullscreenScreenshotStyleActionRow(
     onPlayPause: () -> Unit,
     onNextTransport: () -> Unit,
     onToggleLock: () -> Unit,
-    aspectRatioMode: AspectRatioMode,
-    onCycleAspectRatio: () -> Unit,
+    isLandscape: Boolean,
+    onToggleScreenOrientation: () -> Unit,
     canEnterPictureInPicture: Boolean,
     onEnterPictureInPicture: () -> Unit,
 ) {
@@ -283,17 +281,6 @@ private fun PlayerFullscreenScreenshotStyleActionRow(
                 modifier = Modifier.size(22.dp),
             )
         }
-        PlayerFullscreenCompactTransportButton(
-            onClick = onCycleAspectRatio,
-            contentDescription = playerAspectRatioToggleContentDescription(aspectRatioMode),
-        ) {
-            Icon(
-                Icons.Outlined.AspectRatio,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.92f),
-                modifier = Modifier.size(22.dp),
-            )
-        }
         if (canEnterPictureInPicture) {
             PlayerFullscreenCompactTransportButton(
                 onClick = onEnterPictureInPicture,
@@ -306,6 +293,17 @@ private fun PlayerFullscreenScreenshotStyleActionRow(
                     modifier = Modifier.size(22.dp),
                 )
             }
+        }
+        PlayerFullscreenCompactTransportButton(
+            onClick = onToggleScreenOrientation,
+            contentDescription = stashString(if (isLandscape) R.string.player_switch_to_portrait else R.string.player_switch_to_landscape),
+        ) {
+            Icon(
+                Icons.Outlined.ScreenRotation,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.92f),
+                modifier = Modifier.size(22.dp),
+            )
         }
     }
 }

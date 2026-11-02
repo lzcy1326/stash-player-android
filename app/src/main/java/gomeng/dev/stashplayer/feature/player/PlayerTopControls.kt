@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
-import androidx.compose.material.icons.outlined.AspectRatio
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -28,7 +27,6 @@ import androidx.compose.material.icons.outlined.FullscreenExit
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.ScreenRotation
 import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Tune
@@ -53,17 +51,14 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import gomeng.dev.stashplayer.core.player.PlaybackOrientationMode
 import gomeng.dev.stashplayer.core.player.PlayerOverlayQuickAction
 import gomeng.dev.stashplayer.core.player.PlayerOverlayQuickActionState
 import gomeng.dev.stashplayer.core.player.PlayerWatchPageController
 import gomeng.dev.stashplayer.core.player.playerLockButtonContentDescription
 import gomeng.dev.stashplayer.core.player.nextPlayerPlaybackModeShuffleEnabled
-import gomeng.dev.stashplayer.core.player.playerPlaybackOrientationContentDescription
 import gomeng.dev.stashplayer.core.player.playerPlaybackModeLabel
 import gomeng.dev.stashplayer.core.player.playerPlaybackSpeedLabel
 import gomeng.dev.stashplayer.core.player.playerPlaybackSpeedOptionsContentDescription
-import gomeng.dev.stashplayer.core.player.playerStreamOptionsContentDescription
 import gomeng.dev.stashplayer.core.ui.designsystem.StashColors
 import gomeng.dev.stashplayer.core.ui.designsystem.StashPlayerYoutubeVisualTokens
 import gomeng.dev.stashplayer.R
@@ -74,7 +69,6 @@ fun PlayerTopControls(
     title: String,
     playlistItemCount: Int,
     playbackSpeed: Float,
-    playbackOrientationMode: PlaybackOrientationMode,
     shuffleEnabled: Boolean,
     canShuffleQueue: Boolean,
     quickActions: List<PlayerOverlayQuickActionState>,
@@ -83,7 +77,6 @@ fun PlayerTopControls(
     onToggleFullscreenPlayer: () -> Unit,
     onOpenStreamOptions: () -> Unit,
     onOpenSpeedOptions: () -> Unit,
-    onTogglePlaybackOrientationMode: () -> Unit,
     onTogglePlaybackMode: (Boolean) -> Unit,
     onOpenPlaylistDrawer: () -> Unit,
     onExitPlayer: () -> Unit,
@@ -134,7 +127,7 @@ fun PlayerTopControls(
             PlayerGlassIconButton(onClick = onOpenStreamOptions) {
                 Icon(
                     Icons.Outlined.Tune,
-                    contentDescription = playerStreamOptionsContentDescription(),
+                    contentDescription = stashString(R.string.player_playback_settings_title),
                     tint = Color.White,
                 )
             }
@@ -223,13 +216,7 @@ fun PlayerTopControls(
             ) {
                 Icon(Icons.Outlined.Speed, contentDescription = null, modifier = Modifier.size(StashPlayerYoutubeVisualTokens.TopChromeIconSizeDp.dp))
             }
-            PlayerGlassIconButton(onClick = onTogglePlaybackOrientationMode) {
-                Icon(
-                    Icons.Outlined.ScreenRotation,
-                    contentDescription = playerPlaybackOrientationContentDescription(playbackOrientationMode),
-                    tint = if (playbackOrientationMode != PlaybackOrientationMode.Off) StashColors.Primary else Color.White,
-                )
-            }
+
         }
     }
 }

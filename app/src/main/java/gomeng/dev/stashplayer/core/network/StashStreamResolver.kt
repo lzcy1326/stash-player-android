@@ -31,6 +31,9 @@ import gomeng.dev.stashplayer.core.model.nextStashRandomSortSeed
 import gomeng.dev.stashplayer.core.model.normalizeStashRandomSortSeed
 import gomeng.dev.stashplayer.core.model.defaultStashMainTabSections
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -116,16 +119,13 @@ class GraphQlStashStreamResolver(
 ) : StashStreamResolver {
     override suspend fun resolve(sceneId: String): StashStream {
         val scene = client.findScene(sceneId) ?: error("Scene $sceneId not found")
-        val spriteFrames = scene.spriteVttUrl
-            ?.let { vttUrl -> runCatching { client.fetchSpriteFrames(vttUrl) }.getOrDefault(emptyList()) }
-            .orEmpty()
-        return buildStashStream(profile, scene).copy(spriteFrames = spriteFrames)
+        return buildStashStream(profile, scene)
     }
 }
 
 class StashGraphQlClient(
     private val profile: StashServerProfile,
-    private val okHttpClient: OkHttpClient = OkHttpClient(),
+    private val okHttpClient: OkHttpClient = StashHttpClient.shared,
 ) : StashPluginOperationsClient {
     suspend fun testConnection(): String {
         val json = execute(VERSION_QUERY)
@@ -341,7 +341,7 @@ class StashGraphQlClient(
     suspend fun findMainTabSections(
         specs: List<StashMainTabSectionSpec> = defaultStashMainTabSections(),
     ): List<StashMainTabSection> {
-        return specs.map { spec ->
+        return loadStashMainTabSectionsConcurrently(specs) { spec ->
             val requestedPerPage = if (spec.onlyResumable) spec.perPage.coerceAtLeast(30) else spec.perPage
             val scenes = findScenes(
                 perPage = requestedPerPage,
@@ -351,7 +351,7 @@ class StashGraphQlClient(
                 if (spec.onlyResumable) rows.filter { it.progress > 0f }.take(spec.perPage) else rows
             }
             StashMainTabSection(spec = spec, scenes = scenes)
-        }.filter { it.shouldRender }
+        }
     }
 
     suspend fun findSimilarSceneRecommendations(sceneId: String, limit: Int = 10): List<SimilarSceneRecommendation> {
@@ -1446,6 +1446,15 @@ private fun List<StashImageFileType>.toImageFileExtensionRegex(): String = joinT
     prefix = """(?i)\.(""",
     postfix = ")$",
 ) { it.id.lowercase() }
+
+internal suspend fun loadStashMainTabSectionsConcurrently(
+    specs: List<StashMainTabSectionSpec>,
+    loadSection: suspend (StashMainTabSectionSpec) -> StashMainTabSection,
+): List<StashMainTabSection> = coroutineScope {
+    specs.map { spec ->
+        async { loadSection(spec) }
+    }.awaitAll()
+}.filter { it.shouldRender }
 
 internal fun findSceneQueryForTesting(): String = StashGraphQlClient.FIND_SCENE_QUERY
 

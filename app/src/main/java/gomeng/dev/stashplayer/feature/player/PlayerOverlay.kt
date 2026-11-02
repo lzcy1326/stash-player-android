@@ -80,6 +80,7 @@ fun PlayerOverlay(
         durationMs = state.durationMs,
         playbackSpeed = state.playbackSpeed,
         playbackOrientationMode = state.playbackOrientationMode,
+        isLandscape = state.isLandscape,
         aspectRatioMode = state.aspectRatioMode,
         hudText = state.hudText,
         seekPreview = state.seekPreview,
@@ -122,8 +123,8 @@ fun PlayerOverlay(
         onToggleFullscreenPlayer = callbacks.onToggleFullscreenPlayer,
         onEnterPictureInPicture = callbacks.onEnterPictureInPicture,
         onCycleSpeed = callbacks.onCycleSpeed,
-        onTogglePlaybackOrientationMode = callbacks.onTogglePlaybackOrientationMode,
-        onCycleAspectRatio = callbacks.onCycleAspectRatio,
+        onSelectPlaybackOrientationMode = callbacks.onSelectPlaybackOrientationMode,
+        onToggleScreenOrientation = callbacks.onToggleScreenOrientation,
         onSelectPlaybackSpeed = callbacks.onSelectPlaybackSpeed,
         onSelectAspectRatioMode = callbacks.onSelectAspectRatioMode,
         onSelectShuffleEnabled = callbacks.onSelectShuffleEnabled,
@@ -160,6 +161,7 @@ fun PlayerOverlay(
     durationMs: Long,
     playbackSpeed: Float,
     playbackOrientationMode: PlaybackOrientationMode,
+    isLandscape: Boolean,
     aspectRatioMode: AspectRatioMode,
     hudText: String?,
     seekPreview: PlayerSeekPreview?,
@@ -202,8 +204,8 @@ fun PlayerOverlay(
     onToggleFullscreenPlayer: () -> Unit,
     onEnterPictureInPicture: () -> Unit,
     onCycleSpeed: () -> Unit,
-    onTogglePlaybackOrientationMode: () -> Unit,
-    onCycleAspectRatio: () -> Unit,
+    onSelectPlaybackOrientationMode: (PlaybackOrientationMode) -> Unit,
+    onToggleScreenOrientation: () -> Unit,
     onSelectPlaybackSpeed: (Float) -> Unit,
     onSelectAspectRatioMode: (AspectRatioMode) -> Unit,
     onSelectShuffleEnabled: (Boolean) -> Unit,
@@ -330,7 +332,6 @@ fun PlayerOverlay(
                 title = title,
                 playlistItemCount = playlistItems.size,
                 playbackSpeed = playbackSpeed,
-                playbackOrientationMode = playbackOrientationMode,
                 shuffleEnabled = shuffleEnabled,
                 canShuffleQueue = canShuffleQueue,
                 quickActions = if (visibilityPolicy.showQuickActions) quickActions else emptyList(),
@@ -339,7 +340,6 @@ fun PlayerOverlay(
                 onToggleFullscreenPlayer = onToggleFullscreenPlayer,
                 onOpenStreamOptions = { activePlaybackOptionSheet = PlayerSeparatedPlaybackOptionSheet.Stream },
                 onOpenSpeedOptions = { activePlaybackOptionSheet = PlayerSeparatedPlaybackOptionSheet.Speed },
-                onTogglePlaybackOrientationMode = onTogglePlaybackOrientationMode,
                 onTogglePlaybackMode = onSelectShuffleEnabled,
                 onOpenPlaylistDrawer = onOpenPlaylistDrawer,
                 onExitPlayer = onExitPlayer,
@@ -407,7 +407,7 @@ fun PlayerOverlay(
                 sliderFraction = sliderFraction,
                 transportState = transportState,
                 isPlaying = isPlaying,
-                aspectRatioMode = aspectRatioMode,
+                isLandscape = isLandscape,
                 canEnterPictureInPicture = canEnterPictureInPicture,
                 ratingStep = ratingStep,
                 ratingMessage = ratingMessage,
@@ -445,7 +445,7 @@ fun PlayerOverlay(
                 onPlayPause = onPlayPause,
                 onNextTransport = onNextTransport,
                 onToggleLock = onToggleLock,
-                onCycleAspectRatio = onCycleAspectRatio,
+                onToggleScreenOrientation = onToggleScreenOrientation,
                 onEnterPictureInPicture = onEnterPictureInPicture,
                 onSelectRatingStep = onSelectRatingStep,
                 onAddCurrentSceneToQueue = onAddCurrentSceneToQueue,
@@ -483,6 +483,7 @@ fun PlayerOverlay(
             streamSourceOptions = streamSourceOptions,
             playbackSpeed = playbackSpeed,
             aspectRatioMode = aspectRatioMode,
+            playbackOrientationMode = playbackOrientationMode,
             canShuffleQueue = canShuffleQueue,
             shuffleEnabled = shuffleEnabled,
             onDismiss = { activePlaybackOptionSheet = null },
@@ -498,10 +499,8 @@ fun PlayerOverlay(
                 activePlaybackOptionSheet = null
                 onSelectPlaybackSpeed(speed)
             },
-            onSelectAspectRatioMode = { mode ->
-                activePlaybackOptionSheet = null
-                onSelectAspectRatioMode(mode)
-            },
+            onSelectAspectRatioMode = onSelectAspectRatioMode,
+            onSelectPlaybackOrientationMode = onSelectPlaybackOrientationMode,
             onSelectShuffleEnabled = { enabled ->
                 activePlaybackOptionSheet = null
                 if (enabled || enabled != shuffleEnabled) {

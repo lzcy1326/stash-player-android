@@ -61,8 +61,8 @@ android {
         minSdk = 29
         targetSdk = 35
         // LZCY fork versionCode = upstream code * 1,000,000 + major * 10,000 + feature * 100 + fix.
-        versionCode = 59_010_000
-        versionName = "1.13.2-lzcy1.0.0"
+        versionCode = 59_010_100
+        versionName = "1.13.2-lzcy1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -135,6 +135,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.compose.material:material-icons-extended")
 
+    implementation("androidx.media3:media3-datasource-okhttp:1.4.1")
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.4.1")

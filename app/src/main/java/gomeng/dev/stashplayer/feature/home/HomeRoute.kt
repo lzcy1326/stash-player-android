@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import gomeng.dev.stashplayer.core.debug.StashDebugLogBuffer
 import gomeng.dev.stashplayer.core.local.StashLocalLibraryRepository
 import gomeng.dev.stashplayer.core.model.SceneCardModel
 import gomeng.dev.stashplayer.core.model.StashMainTabSection
@@ -47,7 +48,6 @@ import gomeng.dev.stashplayer.core.model.withStashRandomShuffleSeed
 import gomeng.dev.stashplayer.core.network.buildSimilarScenesRepository
 import gomeng.dev.stashplayer.core.network.StashGraphQlClient
 import gomeng.dev.stashplayer.core.network.StashServerProfile
-import gomeng.dev.stashplayer.core.network.StashSettingsRepository
 import gomeng.dev.stashplayer.core.ui.components.SceneCard
 import gomeng.dev.stashplayer.core.ui.components.rememberStashThumbnailModel
 import gomeng.dev.stashplayer.core.ui.designsystem.StashActionPill
@@ -68,6 +68,7 @@ import gomeng.dev.stashplayer.core.ui.i18n.stashString
 @Composable
 fun HomeRoute(
     isFoldLikeLayout: Boolean,
+    profile: StashServerProfile?,
     onOpenScene: (String, List<SceneCardModel>, Boolean) -> Unit,
     onResumeScene: (String, List<SceneCardModel>) -> Unit,
     onOpenSettings: () -> Unit,
@@ -77,9 +78,7 @@ fun HomeRoute(
     onOpenShorts: () -> Unit,
 ) {
     val context = LocalContext.current
-    val settingsRepository = remember(context) { StashSettingsRepository(context) }
     val localRepository = remember(context) { StashLocalLibraryRepository(context) }
-    val profile by settingsRepository.serverProfile.collectAsState(initial = null)
     val queueScenes by localRepository.queueScenes.collectAsState(initial = emptyList())
     val watchLaterScenes by localRepository.watchLaterScenes.collectAsState(initial = emptyList())
     val favoriteScenes by localRepository.favoriteScenes.collectAsState(initial = emptyList())
@@ -100,11 +99,22 @@ fun HomeRoute(
             isLoading = false
             return@LaunchedEffect
         }
+        val loadStartedAtMs = System.currentTimeMillis()
+        StashDebugLogBuffer.record("Home", "Server sections load started")
         isLoading = true
         error = null
         runCatching { StashGraphQlClient(activeProfile).findMainTabSections() }
-            .onSuccess { sections = it }
-            .onFailure { error = homeHubErrorText(it.message ?: it::class.simpleName) ?: stashString(R.string.auto_kr_0447) }
+            .onSuccess {
+                sections = it
+                StashDebugLogBuffer.record(
+                    "Home",
+                    "Server sections loaded in ${System.currentTimeMillis() - loadStartedAtMs}ms sections=${it.size}",
+                )
+            }
+            .onFailure {
+                error = homeHubErrorText(it.message ?: it::class.simpleName) ?: stashString(R.string.auto_kr_0447)
+                StashDebugLogBuffer.record("Home", "Server sections load failed", it)
+            }
         isLoading = false
     }
 

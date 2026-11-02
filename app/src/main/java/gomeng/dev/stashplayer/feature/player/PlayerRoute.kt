@@ -10,6 +10,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,9 +50,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -141,7 +143,6 @@ import gomeng.dev.stashplayer.core.player.buildPlayerOverlayTitle
 import gomeng.dev.stashplayer.core.player.appendSimilarSceneToPlaybackQueue
 import gomeng.dev.stashplayer.core.player.buildPlayerDebugInfoUiState
 import gomeng.dev.stashplayer.core.player.buildPlayerInfoDrawerContentState
-import gomeng.dev.stashplayer.core.player.buildResumePlaybackPromptState
 import gomeng.dev.stashplayer.core.player.buildPlayerStreamPreferenceOptions
 import gomeng.dev.stashplayer.core.player.buildPlayerStreamSourceOptions
 import gomeng.dev.stashplayer.core.player.buildSingleScenePlaybackQueue
@@ -179,7 +180,6 @@ import gomeng.dev.stashplayer.core.player.markSimilarRecommendationsRequestCance
 import gomeng.dev.stashplayer.core.player.markSimilarRecommendationsRequestCompleted
 import gomeng.dev.stashplayer.core.player.markSimilarRecommendationsRequestStarted
 import gomeng.dev.stashplayer.core.player.nextPlayerMediaSessionId
-import gomeng.dev.stashplayer.core.player.nextPlaybackOrientationMode
 import gomeng.dev.stashplayer.core.player.playerPlaybackOrientationHudText
 import gomeng.dev.stashplayer.core.player.togglePlayerLockState
 import gomeng.dev.stashplayer.core.player.subtitleTrackLanguageCode
@@ -262,6 +262,7 @@ fun PlayerRoute(
     onPlaybackQueueChange: (PlayerPlaybackQueue) -> Unit = {},
     onPresentationStateChange: (PlayerPresentationMode, Boolean) -> Unit = { _, _ -> },
     onPlaybackSpeedChange: (Float) -> Unit = {},
+    onRequestLandscape: (Boolean?) -> Unit = {},
     onOpenScene: (String) -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onExitPlayer: () -> Unit = {},
@@ -344,6 +345,28 @@ fun PlayerRoute(
         }
     }
 
+    var spriteFrames by remember(stream) { mutableStateOf(stream?.spriteFrames.orEmpty()) }
+
+    LaunchedEffect(stream, client) {
+        val resolvedStream = stream ?: return@LaunchedEffect
+        val vttUrl = resolvedStream.spriteVttUrl ?: return@LaunchedEffect
+        if (resolvedStream.spriteFrames.isNotEmpty()) return@LaunchedEffect
+
+        StashDebugLogBuffer.record("Player", "Sprite preview load started sceneId=$sceneId")
+        val frames = runCatching { client.fetchSpriteFrames(vttUrl) }
+            .onFailure {
+                StashDebugLogBuffer.record("Player", "Sprite preview load failed sceneId=$sceneId", it)
+            }
+            .getOrDefault(emptyList())
+        if (frames.isNotEmpty() && stream?.sceneId == resolvedStream.sceneId) {
+            spriteFrames = frames
+            StashDebugLogBuffer.record(
+                "Player",
+                "Sprite preview loaded sceneId=$sceneId frames=${frames.size}",
+            )
+        }
+    }
+
     when {
         loadError != null -> PlayerActionMessage(
             message = stashString(R.string.auto_kr_0471, loadError),
@@ -356,6 +379,7 @@ fun PlayerRoute(
         else -> RealPlayerRoute(
             sceneId = sceneId,
             stream = stream!!,
+            spriteFrames = spriteFrames,
             profile = activeProfile,
             playerDebugOverlayEnabled = playerDebugOverlayEnabled,
             defaultStreamPreference = defaultStreamPreference,
@@ -378,6 +402,7 @@ fun PlayerRoute(
             onPlaybackQueueChange = onPlaybackQueueChange,
             onPresentationStateChange = onPresentationStateChange,
             onPlaybackSpeedChange = onPlaybackSpeedChange,
+            onRequestLandscape = onRequestLandscape,
             onOpenScene = onOpenScene,
             onOpenSettings = onOpenSettings,
             onExitPlayer = onExitPlayer,
@@ -391,6 +416,7 @@ fun PlayerRoute(
 private fun RealPlayerRoute(
     sceneId: String,
     stream: StashStream,
+    spriteFrames: List<gomeng.dev.stashplayer.core.network.StashSpriteFrame>,
     profile: StashServerProfile,
     playerDebugOverlayEnabled: Boolean,
     defaultStreamPreference: StashStreamPreference,
@@ -413,6 +439,7 @@ private fun RealPlayerRoute(
     onPlaybackQueueChange: (PlayerPlaybackQueue) -> Unit,
     onPresentationStateChange: (PlayerPresentationMode, Boolean) -> Unit,
     onPlaybackSpeedChange: (Float) -> Unit,
+    onRequestLandscape: (Boolean?) -> Unit,
     onOpenScene: (String) -> Unit,
     onOpenSettings: () -> Unit,
     onExitPlayer: () -> Unit,
@@ -784,15 +811,7 @@ private fun RealPlayerRoute(
             durationSeconds = stream.durationSeconds,
         )
     }
-    var resumeStartPositionMs by remember(stream) {
-        mutableStateOf<Long?>(
-            if (shouldShowResumePrompt) {
-                null
-            } else {
-                resolvedResumeStartPositionMs
-            },
-        )
-    }
+    var resumeStartPositionMs by remember(stream) { mutableStateOf(resolvedResumeStartPositionMs) }
     var resumePromptVisible by remember(stream) { mutableStateOf(shouldShowResumePrompt) }
 
     BackHandler {
@@ -1032,9 +1051,8 @@ private fun RealPlayerRoute(
     }
 
     LaunchedEffect(stream, resumePromptVisible) {
-        if (resumePromptVisible && resumeStartPositionMs == null) {
+        if (resumePromptVisible) {
             delay(RESUME_PROMPT_TIMEOUT_MS)
-            resumeStartPositionMs = resolvedResumeStartPositionMs
             resumePromptVisible = false
         }
     }
@@ -1296,8 +1314,8 @@ private fun RealPlayerRoute(
         }
     }
 
-    val previewFrameFor: (Long) -> gomeng.dev.stashplayer.core.network.StashSpriteFrame? = remember(stream.spriteFrames) {
-        { targetPositionMs -> findStashSpriteAtTime(stream.spriteFrames, targetPositionMs / 1000.0) }
+    val previewFrameFor: (Long) -> gomeng.dev.stashplayer.core.network.StashSpriteFrame? = remember(spriteFrames) {
+        { targetPositionMs -> findStashSpriteAtTime(spriteFrames, targetPositionMs / 1000.0) }
     }
 
     val seekTo: (Long) -> Unit = { targetPositionMs ->
@@ -1468,7 +1486,7 @@ private fun RealPlayerRoute(
         thumbnailUrl = stream.thumbnailUrl,
         spriteVttUrl = stream.spriteVttUrl,
         spriteImageUrl = stream.spriteImageUrl,
-        spriteFrameCount = stream.spriteFrames.size,
+        spriteFrameCount = spriteFrames.size,
         activeCandidateIndex = activeCandidateIndex,
         resolvedCandidateCount = resolvedCandidates.size,
         rawCandidateCount = stream.streamCandidates.size,
@@ -1810,6 +1828,7 @@ private fun RealPlayerRoute(
         durationMs = durationMs,
         playbackSpeed = playbackSpeed,
         playbackOrientationMode = playbackOrientationMode,
+        isLandscape = isLandscape,
         aspectRatioMode = aspectRatioMode,
         hudText = hudText,
         seekPreview = seekPreview,
@@ -1899,20 +1918,25 @@ private fun RealPlayerRoute(
             onPlaybackSpeedChange(playbackSpeed)
             hudText = playerPlaybackSpeedHudText(playbackSpeed)
         },
-        onTogglePlaybackOrientationMode = {
+        onSelectPlaybackOrientationMode = { mode ->
             markPlayerInteraction()
             controlsVisible = true
-            val nextMode = nextPlaybackOrientationMode(playbackOrientationMode)
+            onRequestLandscape(null)
             scope.launch {
-                settingsRepository.setPlaybackOrientationMode(nextMode)
+                settingsRepository.setPlaybackOrientationMode(mode)
             }
-            hudText = playerPlaybackOrientationHudText(nextMode)
+            hudText = playerPlaybackOrientationHudText(mode)
         },
-        onCycleAspectRatio = {
+        onToggleScreenOrientation = {
             markPlayerInteraction()
             controlsVisible = true
-            aspectRatioMode = aspectRatioMode.next()
-            hudText = playerAspectRatioHudText(aspectRatioMode)
+            val enterLandscape = !isLandscape
+            val targetMode = if (enterLandscape) PlayerPresentationMode.Fullscreen else PlayerPresentationMode.WatchPage
+            presentationRouteState = presentationRouteState.withTargetMode(targetMode).state.copy(
+                landscapeAutoFullscreen = enterLandscape,
+            )
+            onPresentationStateChange(targetMode, enterLandscape)
+            onRequestLandscape(enterLandscape)
         },
         onSelectPlaybackSpeed = { speed ->
             markPlayerInteraction()
@@ -2162,18 +2186,13 @@ private fun RealPlayerRoute(
         if (resumePromptVisible) {
             ResumePlaybackPrompt(
                 resumePositionMs = stream.startPositionMs,
-                onResume = {
-                    markPlayerInteraction()
-                    resumeStartPositionMs = stream.startPositionMs
-                    resumePromptVisible = false
-                },
                 onRestart = {
                     markPlayerInteraction()
-                    resumeStartPositionMs = 0L
+                    if (playbackPrepared) controller.seekTo(0L) else resumeStartPositionMs = 0L
                     positionMs = 0L
                     resumePromptVisible = false
                 },
-                modifier = Modifier.align(Alignment.BottomStart),
+                modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
         }
@@ -2490,50 +2509,32 @@ private fun StashTagDialog(
 @Composable
 private fun ResumePlaybackPrompt(
     resumePositionMs: Long,
-    onResume: () -> Unit,
     onRestart: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state = buildResumePlaybackPromptState(
-        resumePositionMs = resumePositionMs,
-        restartLabel = stashString(R.string.auto_kr_0489),
-    )
-    Column(
+    Row(
         modifier = modifier
-            .padding(24.dp)
-            .widthIn(max = 360.dp)
-            .background(Color.Black.copy(alpha = 0.78f), MaterialTheme.shapes.medium)
-            .padding(horizontal = 18.dp, vertical = 16.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(start = 12.dp, end = 12.dp, bottom = 68.dp)
+            .widthIn(max = 500.dp)
+            .background(Color.Black.copy(alpha = 0.85f), RoundedCornerShape(50))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = stashString(R.string.auto_kr_0488),
+            text = stashString(R.string.player_resumed_from_position, formatPlayerPosition(resumePositionMs)),
+            modifier = Modifier.weight(1f, fill = false),
             color = Color.White,
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
         )
         Text(
-            text = formatPlayerPosition(resumePositionMs),
-            color = Color.White.copy(alpha = 0.78f),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+            text = stashString(R.string.player_restart_from_beginning),
+            modifier = Modifier.clickable(onClick = onRestart).padding(start = 4.dp),
+            color = Color(0xFF64A8FF),
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
         )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedButton(onClick = onRestart) {
-                Text(state.restartLabel)
-            }
-            if (state.showResumeButton) {
-                Button(onClick = onResume) {
-                    Text(stashString(R.string.auto_kr_0059))
-                }
-            }
-        }
     }
 }
 

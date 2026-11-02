@@ -1154,5 +1154,13 @@
     <string name="settings_scan_favorite_scan">바로 스캔</string>
     <string name="settings_scan_favorite_failed">폴더 즐겨찾기를 저장하거나 불러오지 못했습니다. 다시 시도해 주세요.</string>
     <string name="settings_scan_invalid_path">유효한 절대 폴더 경로를 선택해 주세요.</string>
+    <string name="player_resumed_from_position">이전 시청 위치(%1$s)부터 재생 중</string>
+    <string name="player_restart_from_beginning">처음부터 재생</string>
+    <string name="player_switch_to_landscape">가로 전체 화면으로 전환</string>
+    <string name="player_switch_to_portrait">세로 화면으로 전환</string>
+    <string name="player_playback_settings_title">재생 설정</string>
+    <string name="player_screen_size_section">화면 비율</string>
+    <string name="player_orientation_section">화면 방향</string>
+    <string name="player_stream_section">스트림</string>
 </resources>
 
