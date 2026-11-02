@@ -5,6 +5,7 @@ import android.app.Application
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.Configuration
 import android.os.Build
 import android.view.WindowManager
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -114,8 +115,10 @@ fun StashPlayerAppRoot() {
     val localizedContext = remember(context, appLanguage) {
         context.withStashAppLanguage(appLanguage)
     }
-    val localizedConfiguration = remember(localizedContext) {
-        localizedContext.resources.configuration
+    val localizedConfiguration = remember(deviceConfiguration, localizedContext) {
+        Configuration(deviceConfiguration).apply {
+            setLocales(localizedContext.resources.configuration.locales)
+        }
     }
     updateStashStringContext(localizedContext)
     val darkTheme = resolveStashDarkTheme(themeMode, isSystemInDarkTheme())

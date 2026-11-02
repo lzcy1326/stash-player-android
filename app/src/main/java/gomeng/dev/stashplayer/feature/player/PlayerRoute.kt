@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
-import android.content.res.Configuration
 import android.util.Rational
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -423,7 +422,8 @@ private fun RealPlayerRoute(
     val context = LocalContext.current
     val settingsRepository = remember(context) { StashSettingsRepository(context) }
     val localView = LocalView.current
-    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.screenWidthDp > configuration.screenHeightDp
     val localRepository = remember(context) { StashLocalLibraryRepository(context) }
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
@@ -510,7 +510,14 @@ private fun RealPlayerRoute(
         Animatable(if (presentationRouteState.targetMode == PlayerPresentationMode.Fullscreen) 1f else 0f)
     }
     LaunchedEffect(isLandscape) {
-        presentationRouteState = presentationRouteState.forDeviceLandscape(isLandscape)
+        val nextState = presentationRouteState.forDeviceLandscape(isLandscape)
+        presentationRouteState = nextState
+        if (isLandscape && nextState.landscapeAutoFullscreen) {
+            // Rotation into landscape must never leave the player squeezed behind the detail panel.
+            presentationProgressAnimation.snapTo(1f)
+            presentationRouteState = nextState.settleAnimation()
+            controlsVisible = true
+        }
     }
     LaunchedEffect(presentationRouteState.targetMode, presentationRouteState.landscapeAutoFullscreen) {
         onPresentationStateChange(
@@ -541,7 +548,9 @@ private fun RealPlayerRoute(
             presentationRouteState = presentationRouteState.settleAnimation()
         }
     }
-    val panelMaxTranslationYPx = with(LocalDensity.current) { 360.dp.toPx() }
+    // A 360dp watch-page panel consumes the full height of many landscape phones.
+    val watchPagePanelMaxHeight = if (isLandscape) 180.dp else 360.dp
+    val panelMaxTranslationYPx = with(LocalDensity.current) { watchPagePanelMaxHeight.toPx() }
     val presentationMotionState = buildPlayerPresentationMotionState(
         transitionProgress = presentationProgressAnimation.value,
         maxWatchPageContentTranslationYPx = panelMaxTranslationYPx,
@@ -2168,7 +2177,7 @@ private fun RealPlayerRoute(
             )
         }
         }
-        if (presentationMotionState.renderWatchPageContent) {
+        if (presentationMotionState.renderWatchPageContent && !isLandscape) {
         if (!pictureInPictureActive) {
             PlayerWatchPageContent(
             state = watchPageContentState,
@@ -2206,7 +2215,7 @@ private fun RealPlayerRoute(
             },
             presentationGestureLocked = locked,
             modifier = Modifier
-                .heightIn(max = 360.dp * presentationMotionState.watchPageContentHeightFraction)
+                .heightIn(max = watchPagePanelMaxHeight * presentationMotionState.watchPageContentHeightFraction)
                 .graphicsLayer {
                     alpha = presentationMotionState.watchPageContentAlpha
                     translationY = presentationMotionState.watchPageContentTranslationYPx
