@@ -10,7 +10,7 @@
   <a href="README.md"><img alt="English README" src="https://img.shields.io/badge/README-English-7c3aed?style=for-the-badge"></a>
   <a href="README.zh-CN.md"><img alt="중국어 간체 README" src="https://img.shields.io/badge/README-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-7c3aed?style=for-the-badge"></a>
   <a href="README.zh-TW.md"><img alt="중국어 번체 README" src="https://img.shields.io/badge/README-%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-7c3aed?style=for-the-badge"></a>
-  <a href="https://github.com/gomeng-dev/stash-player-android/releases"><img alt="APK 다운로드" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
+  <a href="https://github.com/lzcy1326/stash-player-android/releases"><img alt="APK 다운로드" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
   <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-34d399?style=for-the-badge&logo=android&logoColor=white">
   <img alt="Kotlin + Compose" src="https://img.shields.io/badge/Kotlin%20%2B%20Compose-111827?style=for-the-badge&logo=kotlin&logoColor=white">
 </p>
@@ -37,7 +37,7 @@ Stash는 서버로서는 훌륭합니다. 그런데 휴대폰에서 데스크톱
 - **영상 주변 정보가 한 화면에 모입니다.** Watch page에서 메타데이터, 평점, 태그, 액션, 비슷한 영상, 플레이어를 함께 봅니다.
 - **플레이어가 손에 붙습니다.** 더블탭 탐색, 가로 스크럽, 좌우 밝기/볼륨 제스처, 길게 눌러 임시 배속, 잠금, 스트림 선택, 자막, PiP, 전체화면, 재생목록 조작을 지원합니다.
 - **갤러리와 이미지도 봅니다.** 서버 기반 갤러리와 이미지 폴더를 탐색하고, 사진 뷰어 감상 모드에서 상단바와 하단 조작부를 숨겨 볼 수 있습니다.
-- **추천 플러그인이 있으면 더 좋아집니다.** Stash Hybrid Recommendations Engine이 있으면 우선 사용하고, 없으면 Stash 기본 추천 데이터로 fallback합니다.
+- **비슷한 영상 추천.** 현재 시청 중인 영상과 관련된 다른 영상을 찾아볼 수 있습니다.
 
 ## 스크린샷
 
@@ -86,7 +86,7 @@ Up Next에 넣고, 나중에 볼 항목을 저장하고, 앱 안에서만 쓰는
 
 ### 5. 추천이 있으면 이어서 보기
 
-Stash 서버에 Hybrid Recommendations 플러그인이 설치되어 있으면 비슷한 영상을 그 엔진에서 가져옵니다. 플러그인이 없거나 꺼져 있어도 Stash 기본 추천 데이터로 대체합니다.
+시청 페이지에서 라이브러리의 비슷한 영상을 추천받을 수 있습니다.
 
 ### 6. UI 없이 이미지 감상하기
 
@@ -94,16 +94,20 @@ Images 탭에서는 검색, 정렬, 필터와 전체화면 보기를 지원합�
 
 ## 설치하기
 
-1. Android 휴대폰에서 [최신 공개 릴리즈](https://github.com/gomeng-dev/stash-player-android/releases)를 엽니다.
+1. Android 휴대폰에서 [최신 공개 릴리즈](https://github.com/lzcy1326/stash-player-android/releases)를 엽니다.
 2. APK 파일을 다운로드합니다.
 3. APK를 열고, Android가 요청하면 브라우저나 파일 관리자에 APK 설치 권한을 허용합니다.
 4. **Stash Player**를 실행하고 Stash 서버를 연결합니다.
 
-현재 공개 릴리스: **v1.13.2**
+현재 개인 포크 릴리스: **v1.13.2-lzcy1.1.0**. 이후 업데이트는 [Releases](https://github.com/lzcy1326/stash-player-android/releases)에서 확인하세요.
+
+이 개인 포크는 업스트림 앱과 다른 서명 키를 사용합니다. 같은 패키지 이름의 업스트림 앱에서 전환하려면 먼저 앱 데이터를 백업하고 업스트림 앱을 삭제한 다음 이 APK를 설치하세요. 기존 LZCY 개인 버전은 바로 업데이트할 수 있습니다.
+
+문제는 [Issues](https://github.com/lzcy1326/stash-player-android/issues)에 제보하세요. 개인 버전 규칙과 업스트림 동기화 정책은 [FORK_VERSIONING.md](FORK_VERSIONING.md)를 참고하세요.
 
 `data/...` 같은 서버 상대 경로를 즐겨찾기와 선택 스캔에서 그대로 유지하며, 빈 별·채운 별로 폴더 즐겨찾기 상태를 표시합니다.
 
-설정 → 서버 → 폴더 선택에서 자주 스캔하는 폴더를 즐겨찾기로 저장하세요. 스캔 설정 목록에서 폴더 선택 창 없이 **바로 스캔**하거나 즐겨찾기를 해제할 수 있으며, 서버·인증 프로필별로 기기에 저장됩니다. 설정에는 같은 개발자의 다른 앱을 소개하는 Google Play 카드가 추가되며, 다섯 번째 프로세스 실행부터 홈에도 닫을 수 있는 카드가 표시됩니다.
+설정 → 서버 → 폴더 선택에서 자주 스캔하는 폴더를 즐겨찾기로 저장하세요. 스캔 설정 목록에서 폴더 선택 창 없이 **바로 스캔**하거나 즐겨찾기를 해제할 수 있으며, 서버·인증 프로필별로 기기에 저장됩니다.
 
 시청 페이지와 전체화면에서 타임라인 또는 가로 드래그 탐색 중 Stash 스프라이트 썸네일을 표시하며, 미리보기가 없으면 시간 정보를 유지합니다.
 
@@ -115,7 +119,6 @@ Images 탭에서는 검색, 정렬, 필터와 전체화면 보기를 지원합�
   - 인증을 끈 신뢰 가능한 로컬 서버
   - Stash API key
   - Stash 아이디/비밀번호 로그인
-- 선택 사항: 더 풍부한 비슷한 영상 추천을 위한 [Stash Hybrid Recommendations](https://github.com/gomeng-dev/stash-recommendation-server)
 
 ## 처음 연결하기
 
@@ -147,7 +150,7 @@ Images 탭에서는 검색, 정렬, 필터와 전체화면 보기를 지원합�
 | 썸네일이 보이지 않음 | 서버 연결 테스트를 다시 실행하고, 현재 인증 방식이 Stash에서 유효한지 확인하세요. |
 | 앱 재시작 후 로그인이 풀림 | 설정에서 아이디/비밀번호를 다시 입력해 세션 갱신 정보를 업데이트하세요. |
 | 숏츠가 비어 있음 | 설정의 숏츠 최대 길이보다 짧은 영상이 라이브러리에 있는지 확인하세요. |
-| 추천이 비어 있음 | Hybrid Recommendations 플러그인이 켜져 있는지 확인하거나 Stash 기본 추천 fallback을 사용하세요. |
+| 추천이 비어 있음 | 라이브러리에 다른 영상이 있고 메타데이터를 사용할 수 있는지 확인하세요. |
 | APK 설치가 막힘 | APK를 연 브라우저/파일 관리자/설치 앱에 APK 설치 권한을 허용하세요. |
 
 ## 개발자용 정보

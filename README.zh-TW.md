@@ -10,7 +10,7 @@
   <a href="README.md"><img alt="English README" src="https://img.shields.io/badge/README-English-7c3aed?style=for-the-badge"></a>
   <a href="README.ko.md"><img alt="Korean README" src="https://img.shields.io/badge/README-%ED%95%9C%EA%B5%AD%EC%96%B4-7c3aed?style=for-the-badge"></a>
   <a href="README.zh-CN.md"><img alt="Simplified Chinese README" src="https://img.shields.io/badge/README-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-7c3aed?style=for-the-badge"></a>
-  <a href="https://github.com/gomeng-dev/stash-player-android/releases"><img alt="下載 APK" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
+  <a href="https://github.com/lzcy1326/stash-player-android/releases"><img alt="下載 APK" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
   <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-34d399?style=for-the-badge&logo=android&logoColor=white">
   <img alt="Kotlin + Compose" src="https://img.shields.io/badge/Kotlin%20%2B%20Compose-111827?style=for-the-badge&logo=kotlin&logoColor=white">
 </p>
@@ -30,7 +30,7 @@ Stash 很強大，但桌面 Web UI 在手機上不一定順手。**Stash Android
 - **短影音**：以直向動態瀏覽較短的影片。
 - **佇列 / 稍後觀看 / 收藏**：本機儲存在裝置上。
 - **觀看頁 + Media3 播放器**：支援手勢、全螢幕、串流選擇、字幕、PiP 和播放清單控制。
-- **推薦**：優先使用 Stash Hybrid Recommendations 外掛；不可用時回退到 Stash 預設推薦資料。
+- **推薦**：在觀看頁查看媒體庫中的相似影片。
 - **圖庫**：瀏覽 Stash 圖庫和圖片，支援全螢幕照片檢視器；欣賞模式會隱藏頂部列和底部工具。
 
 不需要託管服務。應用程式會直接連線到你的 Stash 伺服器，不會把媒體庫中繼資料上傳到本專案。
@@ -56,16 +56,20 @@ Stash 很強大，但桌面 Web UI 在手機上不一定順手。**Stash Android
 
 ## 安裝
 
-1. 在 Android 手機上開啟[最新發布版](https://github.com/gomeng-dev/stash-player-android/releases)。
+1. 在 Android 手機上開啟[最新發布版](https://github.com/lzcy1326/stash-player-android/releases)。
 2. 下載 APK。
 3. 開啟 APK，並在 Android 提示時允許瀏覽器或檔案管理器安裝應用程式。
 4. 啟動 **Stash Player** 並連線到你的 Stash 伺服器。
 
-> 目前公開版本：**v1.13.2**。
+> 目前個人版本：**v1.13.2-lzcy1.1.0**。後續更新請查看 [Releases](https://github.com/lzcy1326/stash-player-android/releases)。
+
+此個人版本使用不同於上游應用程式的簽署金鑰。若已安裝相同套件名稱的上游版本，請先備份應用程式資料，再解除安裝上游版本並安裝此 APK。已安裝 LZCY 個人版本的使用者可直接覆蓋升級。
+
+問題回報請提交至 [Issues](https://github.com/lzcy1326/stash-player-android/issues)；個人版本規則與上游同步策略請見 [FORK_VERSIONING.md](FORK_VERSIONING.md)。
 
 收藏和選擇性掃描保留 `data/...` 等伺服器相對路徑，並以空心或實心星號顯示資料夾收藏狀態。
 
-在設定 → 伺服器 → 資料夾選擇中收藏常用掃描資料夾，即可從掃描設定清單直接掃描或取消收藏，無須重新開啟選擇器。收藏依伺服器及驗證設定儲存在本機。設定中也會介紹同一開發者的另一款 Google Play 應用程式；從第五次程序啟動起，首頁會顯示可關閉的推廣卡。
+在設定 → 伺服器 → 資料夾選擇中收藏常用掃描資料夾，即可從掃描設定清單直接掃描或取消收藏，無須重新開啟選擇器。收藏依伺服器及驗證設定儲存在本機。
 
 在觀看頁及全螢幕播放中拖曳時間軸或水平滑動定位時顯示 Stash 精靈圖縮圖；預覽無法使用時保留時間資訊。
 
@@ -77,7 +81,6 @@ Stash 很強大，但桌面 Web UI 在手機上不一定順手。**Stash Android
   - 可信任的本機伺服器且未啟用認證，
   - Stash API Key，
   - Stash 使用者名稱/密碼登入。
-- 選用：Stash Hybrid Recommendations Engine 外掛，用於更豐富的相似影片推薦。
 
 ## 首次連線
 
@@ -142,7 +145,7 @@ Stash Android Player 是連線到你自己伺服器的直接用戶端。
 | 縮圖不顯示 | 重新測試伺服器連線，並確認目前認證方式仍然有效。 |
 | 重新啟動後登入失效 | 在設定中重新輸入使用者名稱/密碼以更新工作階段刷新材料。 |
 | 短影音為空 | 檢查媒體庫中是否有短於設定裡最大時長的影片。 |
-| 推薦為空 | 啟用 Hybrid Recommendations 外掛，或讓應用程式使用 Stash 回退推薦。 |
+| 推薦為空 | 檢查媒體庫中是否有其他影片，以及影片中繼資料是否可用。 |
 | APK 無法安裝 | 允許開啟 APK 的瀏覽器、檔案管理器或安裝器安裝未知應用程式。 |
 
 ## 開發

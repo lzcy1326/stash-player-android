@@ -10,7 +10,7 @@ A native Android client for people who already run Stash and want the phone expe
   <a href="README.ko.md"><img alt="Korean README" src="https://img.shields.io/badge/README-%ED%95%9C%EA%B5%AD%EC%96%B4-7c3aed?style=for-the-badge"></a>
   <a href="README.zh-CN.md"><img alt="Simplified Chinese README" src="https://img.shields.io/badge/README-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-7c3aed?style=for-the-badge"></a>
   <a href="README.zh-TW.md"><img alt="Traditional Chinese README" src="https://img.shields.io/badge/README-%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-7c3aed?style=for-the-badge"></a>
-  <a href="https://github.com/gomeng-dev/stash-player-android/releases"><img alt="Download APK" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
+  <a href="https://github.com/lzcy1326/stash-player-android/releases"><img alt="Download APK" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
   <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-34d399?style=for-the-badge&logo=android&logoColor=white">
   <img alt="Kotlin + Compose" src="https://img.shields.io/badge/Kotlin%20%2B%20Compose-111827?style=for-the-badge&logo=kotlin&logoColor=white">
 </p>
@@ -37,7 +37,7 @@ No hosted account. No cloud sync service. No metadata upload to this project.
 - **A watch page around the video.** Metadata, rating, tags, actions, similar videos, and the player sit together instead of making you bounce between pages.
 - **A gesture-first player.** Double-tap seek, horizontal scrub, side brightness/volume, long-press speed hold, lock mode, stream selection, subtitles, PiP, fullscreen, and playlist controls.
 - **Gallery and image browsing.** Browse server-backed galleries and image folders, open the photo viewer, and use appreciation mode when you want the top and bottom chrome out of the way.
-- **Recommendations when your server has them.** The app prefers the Stash Hybrid Recommendations Engine plugin and falls back to Stash's built-in recommendation data when the plugin is unavailable.
+- **Similar videos.** Discover other scenes related to the one you are watching.
 
 ## Screenshots
 
@@ -86,7 +86,7 @@ The player is built around touch:
 
 ### 5. Use recommendations when they help
 
-If the Hybrid Recommendations plugin is installed on your Stash server, similar videos come from that engine. If not, the app still uses Stash fallback data instead of leaving the area empty.
+The watch page can suggest similar videos from your library.
 
 ### 6. Browse images without UI chrome
 
@@ -94,16 +94,20 @@ The Images tab supports search, sort, filters, and full-screen browsing. In the 
 
 ## Install
 
-1. Open the [latest public release](https://github.com/gomeng-dev/stash-player-android/releases) on your Android phone.
+1. Open the [latest public release](https://github.com/lzcy1326/stash-player-android/releases) on your Android phone.
 2. Download the APK.
 3. Open the APK and allow installs from your browser or file manager if Android asks.
 4. Launch **Stash Player** and connect it to your Stash server.
 
-Current public release: **v1.13.2**
+Current personal fork release: **v1.13.2-lzcy1.1.0**. See [Releases](https://github.com/lzcy1326/stash-player-android/releases) for updates.
+
+This fork uses a different signing key from the upstream app. To switch from an upstream installation with the same package name, back up your app data first, then uninstall the upstream app before installing this APK. Updates to earlier LZCY releases can be installed directly.
+
+Report issues at [lzcy1326/stash-player-android/issues](https://github.com/lzcy1326/stash-player-android/issues). See [FORK_VERSIONING.md](FORK_VERSIONING.md) for the personal versioning and upstream sync policy.
 
 Server-relative paths such as `data/...` are preserved for favorites and selective scans; outlined/filled stars show the folder favorite state.
 
-Save frequently scanned folders as favorites in Settings → Server → folder selection. The scan settings list offers **Scan now** without reopening the picker, plus removal; favorites are stored locally per server/auth profile. Settings also introduces another app from the same developer on Google Play; a dismissible Home card appears from the fifth process launch.
+Save frequently scanned folders as favorites in Settings → Server → folder selection. The scan settings list offers **Scan now** without reopening the picker, plus removal; favorites are stored locally per server/auth profile.
 
 Timeline and horizontal-drag seeking show cropped Stash sprite previews in watch-page and fullscreen playback, with time information retained when previews are unavailable.
 
@@ -115,7 +119,6 @@ Timeline and horizontal-drag seeking show cropped Stash sprite previews in watch
   - trusted local server without auth,
   - Stash API key,
   - Stash username/password login.
-- Optional: [Stash Hybrid Recommendations](https://github.com/gomeng-dev/stash-recommendation-server) for richer similar-video recommendations.
 
 ## First connection
 
@@ -147,7 +150,7 @@ This app is a direct client for your server.
 | Thumbnails do not load | Re-test the server connection and confirm the selected auth method still works in Stash. |
 | Login stops working after restart | Re-enter the username/password from Settings so session refresh material is updated. |
 | Shorts is empty | Check that your library has scenes shorter than the Shorts maximum duration in Settings. |
-| Recommendations are empty | Enable the Hybrid Recommendations plugin, or let the app use Stash fallback recommendations. |
+| Recommendations are empty | Check that your library contains other scenes and that their metadata is available. |
 | APK install is blocked | Allow APK installs for the browser, file manager, or installer app that opened the APK. |
 
 ## For developers

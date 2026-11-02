@@ -10,7 +10,7 @@
   <a href="README.md"><img alt="English README" src="https://img.shields.io/badge/README-English-7c3aed?style=for-the-badge"></a>
   <a href="README.ko.md"><img alt="Korean README" src="https://img.shields.io/badge/README-%ED%95%9C%EA%B5%AD%EC%96%B4-7c3aed?style=for-the-badge"></a>
   <a href="README.zh-TW.md"><img alt="Traditional Chinese README" src="https://img.shields.io/badge/README-%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-7c3aed?style=for-the-badge"></a>
-  <a href="https://github.com/gomeng-dev/stash-player-android/releases"><img alt="下载 APK" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
+  <a href="https://github.com/lzcy1326/stash-player-android/releases"><img alt="下载 APK" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
   <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-34d399?style=for-the-badge&logo=android&logoColor=white">
   <img alt="Kotlin + Compose" src="https://img.shields.io/badge/Kotlin%20%2B%20Compose-111827?style=for-the-badge&logo=kotlin&logoColor=white">
 </p>
@@ -30,7 +30,7 @@ Stash 很强大，但桌面 Web UI 在手机上并不总是顺手。**Stash Andr
 - **短视频**：以竖向信息流浏览较短的视频。
 - **队列 / 稍后观看 / 收藏**：本地保存在设备上。
 - **观看页 + Media3 播放器**：支持手势、全屏、流选择、字幕、PiP 和播放列表控制。
-- **推荐**：优先使用 Stash Hybrid Recommendations 插件；不可用时回退到 Stash 默认推荐数据。
+- **推荐**：在观看页查看媒体库中的相似视频。
 - **图库**：浏览 Stash 图库和图片，支持全屏照片查看器；欣赏模式会隐藏顶部栏和底部工具。
 
 不需要托管服务。应用直接连接你的 Stash 服务器，不会把媒体库元数据上传到本项目。
@@ -56,16 +56,20 @@ Stash 很强大，但桌面 Web UI 在手机上并不总是顺手。**Stash Andr
 
 ## 安装
 
-1. 在 Android 手机上打开[最新发布版](https://github.com/gomeng-dev/stash-player-android/releases)。
+1. 在 Android 手机上打开[最新发布版](https://github.com/lzcy1326/stash-player-android/releases)。
 2. 下载 APK。
 3. 打开 APK，并在 Android 提示时允许浏览器或文件管理器安装应用。
 4. 启动 **Stash Player** 并连接到你的 Stash 服务器。
 
-> 当前公开版本：**v1.13.2**。
+> 当前个人版：**v1.13.2-lzcy1.1.0**。后续更新请查看 [Releases](https://github.com/lzcy1326/stash-player-android/releases)。
+
+本个人版使用独立于上游应用的签名密钥。如果已安装同包名的上游版本，请先备份应用数据，再卸载上游版本并安装本 APK。已安装 LZCY 个人版的用户可直接覆盖升级。
+
+问题反馈请提交至 [Issues](https://github.com/lzcy1326/stash-player-android/issues)；个人版本规则和上游同步策略见 [FORK_VERSIONING.md](FORK_VERSIONING.md)。
 
 收藏和选择性扫描保留 `data/...` 等服务器相对路径，并以空心或实心星标显示文件夹收藏状态。
 
-在设置 → 服务器 → 文件夹选择中收藏常用扫描文件夹，即可从扫描设置列表直接扫描或取消收藏，无需重新打开选择器。收藏按服务器及认证配置保存在本机。设置中还会介绍同一开发者的另一款 Google Play 应用；从第五次进程启动起，首页会显示可关闭的推广卡。
+在设置 → 服务器 → 文件夹选择中收藏常用扫描文件夹，即可从扫描设置列表直接扫描或取消收藏，无需重新打开选择器。收藏按服务器及认证配置保存在本机。
 
 在观看页和全屏播放中拖动时间轴或横向滑动定位时显示 Stash 精灵图缩略图；预览不可用时保留时间信息。
 
@@ -77,7 +81,6 @@ Stash 很强大，但桌面 Web UI 在手机上并不总是顺手。**Stash Andr
   - 可信本地服务器且未启用认证，
   - Stash API Key，
   - Stash 用户名/密码登录。
-- 可选：Stash Hybrid Recommendations Engine 插件，用于更丰富的相似视频推荐。
 
 ## 首次连接
 
@@ -142,7 +145,7 @@ Stash Android Player 是连接你自己服务器的直接客户端。
 | 缩略图不显示 | 重新测试服务器连接，并确认当前认证方式仍然有效。 |
 | 重启后登录失效 | 在设置中重新输入用户名/密码以更新会话刷新材料。 |
 | 短视频为空 | 检查媒体库中是否有短于设置里最大时长的视频。 |
-| 推荐为空 | 启用 Hybrid Recommendations 插件，或让应用使用 Stash 回退推荐。 |
+| 推荐为空 | 检查媒体库中是否有其他影片，以及影片元数据是否可用。 |
 | APK 无法安装 | 允许打开 APK 的浏览器、文件管理器或安装器安装未知应用。 |
 
 ## 开发
