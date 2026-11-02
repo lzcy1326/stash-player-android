@@ -60,8 +60,9 @@ android {
         applicationId = "gomeng.dev.stashplayer"
         minSdk = 29
         targetSdk = 35
-        versionCode = 59
-        versionName = "1.13.2"
+        // LZCY fork versionCode = upstream versionCode * 1000 + fork revision.
+        versionCode = 59_001
+        versionName = "1.13.2-lzcy.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

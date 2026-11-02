@@ -6,6 +6,22 @@ When bumping `versionName`, add a new section for the release version and summar
 
 ## [Unreleased]
 
+## [1.13.2-lzcy.1] - 2026-11-02
+
+### English
+
+- Start the LZCY personal fork release line from upstream v1.13.2.
+- Improve Simplified Chinese translations and player rotation/fullscreen behavior on Android.
+- Remove developer promotion cards from Home and Settings.
+- Point release, update-check, and issue-reporting links to the LZCY fork.
+
+### 简体中文
+
+- 基于上游 v1.13.2 创建 LZCY 个人分支版本序列。
+- 改进简体中文翻译，并修复 Android 播放器旋转进入横屏时无法自动全屏的问题。
+- 移除首页和设置页的开发者推广卡片。
+- 将版本、检查更新和问题反馈链接切换到 LZCY 个人分支。
+
 ## [1.13.2] - 2026-10-22
 
 - English: Fix scan-folder favorites and selective scans for server-relative library paths such as `data/...`, preserving the exact server path. Show an outlined/filled star next to the picker favorite action.

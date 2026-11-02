@@ -100,7 +100,7 @@ fun isAppUpdateAvailable(
         val latestPart = latest.getOrElse(index) { 0 }
         if (latestPart != currentPart) return latestPart > currentPart
     }
-    return false
+    return lzcyForkRevision(latestVersionName) > lzcyForkRevision(currentVersionName)
 }
 
 fun normalizeAppVersionParts(versionName: String): List<Int>? {
@@ -116,8 +116,23 @@ fun normalizeAppVersionParts(versionName: String): List<Int>? {
     return parts.takeIf { it.isNotEmpty() }
 }
 
-private fun normalizeAppVersionName(versionName: String): String? =
-    normalizeAppVersionParts(versionName)?.joinToString(".")
+private val lzcyForkRevisionPattern = Regex(
+    pattern = """-lzcy\.(\d+)(?:-debug)?$""",
+    option = RegexOption.IGNORE_CASE,
+)
+
+private fun lzcyForkRevision(versionName: String): Int =
+    lzcyForkRevisionPattern.find(versionName.trim())
+        ?.groupValues
+        ?.getOrNull(1)
+        ?.toIntOrNull()
+        ?: 0
+
+private fun normalizeAppVersionName(versionName: String): String? {
+    val coreVersionName = normalizeAppVersionParts(versionName)?.joinToString(".") ?: return null
+    val forkRevision = lzcyForkRevision(versionName)
+    return if (forkRevision > 0) "$coreVersionName-lzcy.$forkRevision" else coreVersionName
+}
 
 private val appUpdateMoshi: Moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
