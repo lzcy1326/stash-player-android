@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="navigation_editor_add">添加%1$s</string>
+    <string name="navigation_editor_remove">移除%1$s</string>
+    <string name="navigation_editor_entry">底部导航</string>
+    <string name="navigation_editor_entry_description">选择并排列底部导航中的功能</string>
+    <string name="navigation_editor_title">编辑底部导航</string>
+    <string name="navigation_editor_done">完成</string>
+    <string name="navigation_editor_hint">长按中间功能拖动排序</string>
+    <string name="navigation_editor_current">当前导航</string>
+    <string name="navigation_editor_available">可添加功能</string>
+    <string name="navigation_editor_empty">待添加</string>
+    <string name="navigation_editor_fixed">固定</string>
+    <string name="navigation_editor_limit">最多添加4个功能</string>
+    <string name="navigation_editor_save_error">保存失败，请重试</string>
     <string name="navigation_performers_label">演员</string>
     <string name="navigation_studios_label">厂商</string>
     <string name="navigation_placeholder_message">功能正在开发中</string>

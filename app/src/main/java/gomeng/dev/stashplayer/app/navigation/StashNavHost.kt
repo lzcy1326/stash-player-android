@@ -102,6 +102,7 @@ import gomeng.dev.stashplayer.feature.settings.SettingsDestinations
 import gomeng.dev.stashplayer.feature.settings.SettingsDetailRoute
 import gomeng.dev.stashplayer.feature.settings.SettingsRoute
 import gomeng.dev.stashplayer.feature.settings.SettingsSection
+import gomeng.dev.stashplayer.feature.settings.BottomNavigationEditorRoute
 import gomeng.dev.stashplayer.feature.setup.ServerSetupRoute
 import kotlinx.coroutines.flow.first
 
@@ -659,8 +660,12 @@ fun StashNavHost(
                                     }
                                 },
                                 onOpenOnboarding = { navController.navigate(SetupResetRoute) },
+                                onOpenBottomNavigationEditor = { navController.navigate(SettingsDestinations.BottomNavigation) },
                             )
                         }
+                    }
+                    composable(SettingsDestinations.BottomNavigation) {
+                        BottomNavigationEditorRoute(onNavigateBack = { navController.popBackStack() })
                     }
                     composable("player/{sceneId}") { backStackEntry ->
                         PlayerRoute(

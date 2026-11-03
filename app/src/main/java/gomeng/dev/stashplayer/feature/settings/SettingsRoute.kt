@@ -108,6 +108,7 @@ object SettingsDestinations {
     const val Playback = "settings/playback"
     const val Appearance = "settings/appearance"
     const val Interface = "settings/interface"
+    const val BottomNavigation = "settings/interface/navigation"
     const val Development = "settings/development"
     const val Support = "settings/support"
 
@@ -727,6 +728,7 @@ fun SettingsDetailRoute(
     onUpdateNoticeChange: (AppUpdateNotice?) -> Unit = {},
     onNavigateBack: () -> Unit,
     onOpenOnboarding: () -> Unit,
+    onOpenBottomNavigationEditor: () -> Unit = {},
 ) {
     SettingsScreenScaffold(isFoldLikeLayout = isFoldLikeLayout) {
         TextButton(onClick = onNavigateBack) {
@@ -738,7 +740,7 @@ fun SettingsDetailRoute(
             SettingsSection.Security -> SecuritySettingsContent()
             SettingsSection.Playback -> PlaybackSettingsContent()
             SettingsSection.Appearance -> AppearanceSettingsContent()
-            SettingsSection.Interface -> InterfaceSettingsContent()
+            SettingsSection.Interface -> InterfaceSettingsContent(onOpenBottomNavigationEditor)
             SettingsSection.Development -> DevelopmentSettingsContent()
             SettingsSection.Support -> SupportSettingsContent(
                 availableUpdateNotice = availableUpdateNotice,
@@ -2160,7 +2162,7 @@ private fun AppearanceSettingsContent() {
 }
 
 @Composable
-private fun InterfaceSettingsContent() {
+private fun InterfaceSettingsContent(onOpenBottomNavigationEditor: () -> Unit) {
     val context = LocalContext.current
     val repository = remember(context) { StashSettingsRepository(context) }
     val appLanguage by repository.appLanguage.collectAsState(
@@ -2168,6 +2170,11 @@ private fun InterfaceSettingsContent() {
     )
     val coroutineScope = rememberCoroutineScope()
 
+    SettingsLinkCard(
+        title = R.string.navigation_editor_entry,
+        descriptionText = stringResource(R.string.navigation_editor_entry_description),
+        onClick = onOpenBottomNavigationEditor,
+    )
     SettingsRadioGroupCard(
         title = LanguageSettingCopy.title,
         description = LanguageSettingCopy.description,

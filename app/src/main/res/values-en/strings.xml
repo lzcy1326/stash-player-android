@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="navigation_editor_add">Add %1$s</string>
+    <string name="navigation_editor_remove">Remove %1$s</string>
+    <string name="navigation_editor_entry">Bottom navigation</string>
+    <string name="navigation_editor_entry_description">Choose and arrange navigation features</string>
+    <string name="navigation_editor_title">Edit navigation</string>
+    <string name="navigation_editor_done">Done</string>
+    <string name="navigation_editor_hint">Hold a feature to reorder it</string>
+    <string name="navigation_editor_current">Current navigation</string>
+    <string name="navigation_editor_available">Available features</string>
+    <string name="navigation_editor_empty">Add feature</string>
+    <string name="navigation_editor_fixed">Fixed</string>
+    <string name="navigation_editor_limit">You can add up to 4 features</string>
+    <string name="navigation_editor_save_error">Could not save. Try again.</string>
     <string name="navigation_performers_label">Performers</string>
     <string name="navigation_studios_label">Studios</string>
     <string name="navigation_placeholder_message">This feature is in development.</string>
