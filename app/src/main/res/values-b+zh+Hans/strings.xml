@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="navigation_performers_label">演员</string>
+    <string name="navigation_studios_label">厂商</string>
+    <string name="navigation_placeholder_message">功能正在开发中</string>
     <string name="app_name">Stash Player</string>
     <string name="navigation_home_label">首页</string>
     <string name="navigation_browse_label">浏览</string>

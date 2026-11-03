@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="navigation_performers_label">출연자</string>
+    <string name="navigation_studios_label">제작사</string>
+    <string name="navigation_placeholder_message">이 기능은 개발 중입니다.</string>
     <string name="app_name">Stash Player</string>
     <string name="navigation_home_label">홈</string>
     <string name="navigation_browse_label">둘러보기</string>

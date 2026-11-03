@@ -12,10 +12,15 @@ import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
@@ -45,6 +50,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -109,7 +115,31 @@ private enum class TopLevelDestination(
     Shorts("shorts", topLevelDestinationLabelResource("shorts"), Icons.Outlined.PlayCircle),
     Gallery("gallery", topLevelDestinationLabelResource("gallery"), Icons.Outlined.PhotoLibrary),
     Queue("queue", topLevelDestinationLabelResource("queue"), Icons.AutoMirrored.Outlined.PlaylistPlay),
+    Performers("performers", topLevelDestinationLabelResource("performers"), Icons.Outlined.PersonOutline),
+    Studios("studios", topLevelDestinationLabelResource("studios"), Icons.Outlined.Videocam),
     Settings("settings", topLevelDestinationLabelResource("settings"), Icons.Outlined.Settings),
+}
+
+private fun NavigationFeature.destination(): TopLevelDestination = when (this) {
+    NavigationFeature.Explore -> TopLevelDestination.Explore
+    NavigationFeature.Shorts -> TopLevelDestination.Shorts
+    NavigationFeature.Gallery -> TopLevelDestination.Gallery
+    NavigationFeature.Queue -> TopLevelDestination.Queue
+    NavigationFeature.Performers -> TopLevelDestination.Performers
+    NavigationFeature.Studios -> TopLevelDestination.Studios
+}
+
+@Composable
+private fun TopLevelPlaceholder(destination: TopLevelDestination) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        androidx.compose.material3.Icon(destination.icon, contentDescription = null, modifier = Modifier.size(56.dp))
+        Text(stringResource(destination.labelRes), style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.navigation_placeholder_message), style = MaterialTheme.typography.bodyMedium)
+    }
 }
 
 private data class LoadedServerProfile(val profile: StashServerProfile?)
@@ -145,8 +175,9 @@ fun StashNavHost(
     val loadedProfile by produceState<LoadedServerProfile?>(initialValue = null, settingsRepository) {
         settingsRepository.savedServerProfile.collect { profile -> value = LoadedServerProfile(profile) }
     }
+    val navigationFeatures by settingsRepository.bottomNavigationFeatures.collectAsState(initial = null)
     val savedProfile = loadedProfile?.profile
-    if (loadedProfile == null) return
+    if (loadedProfile == null || navigationFeatures == null) return
     val loadedRuntimeProfile by produceState<LoadedServerProfile?>(initialValue = null, settingsRepository) {
         settingsRepository.serverProfile.collect { profile -> value = LoadedServerProfile(profile) }
     }
@@ -158,7 +189,8 @@ fun StashNavHost(
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val updateChecker = remember { AppUpdateChecker() }
-    val topLevelDestinations = TopLevelDestination.entries
+    val topLevelDestinations = listOf(TopLevelDestination.Home) +
+        navigationFeatures.orEmpty().map { it.destination() } + TopLevelDestination.Settings
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val currentRoute = currentDestination?.route
@@ -598,6 +630,12 @@ fun StashNavHost(
                             onOpenBrowse = { navigateTopLevel(TopLevelDestination.Explore) },
                             onOpenExplore = { navigateTopLevel(TopLevelDestination.Explore) },
                         )
+                    }
+                    composable(TopLevelDestination.Performers.route) {
+                        TopLevelPlaceholder(TopLevelDestination.Performers)
+                    }
+                    composable(TopLevelDestination.Studios.route) {
+                        TopLevelPlaceholder(TopLevelDestination.Studios)
                     }
                     composable(TopLevelDestination.Settings.route) {
                         SettingsRoute(

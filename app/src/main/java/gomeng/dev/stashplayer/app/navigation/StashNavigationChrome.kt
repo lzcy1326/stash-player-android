@@ -142,6 +142,8 @@ private val TopLevelDestinationLabelResourcesByRoute = mapOf(
     "shorts" to R.string.navigation_shorts_label,
     "gallery" to R.string.navigation_gallery_label,
     "queue" to R.string.navigation_queue_label,
+    "performers" to R.string.navigation_performers_label,
+    "studios" to R.string.navigation_studios_label,
     "settings" to R.string.navigation_settings_label,
 )
 
