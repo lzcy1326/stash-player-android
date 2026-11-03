@@ -102,6 +102,7 @@ internal fun BottomNavigationEditorScreen(
     val haptic = LocalHapticFeedback.current
     var draggingId by remember { mutableStateOf<String?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
+    var dragStartIds by remember { mutableStateOf<List<String>?>(null) }
     val currentSelection by rememberUpdatedState(selected)
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         Column(
@@ -152,10 +153,16 @@ internal fun BottomNavigationEditorScreen(
                                             onDragStart = {
                                                 draggingId = feature.id
                                                 dragOffset = 0f
+                                                dragStartIds = currentSelection.map { it.id }
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             },
-                                            onDragEnd = { draggingId = null; dragOffset = 0f },
-                                            onDragCancel = { draggingId = null; dragOffset = 0f },
+                                            onDragEnd = { draggingId = null; dragOffset = 0f; dragStartIds = null },
+                                            onDragCancel = {
+                                                dragStartIds?.let { ids = it }
+                                                draggingId = null
+                                                dragOffset = 0f
+                                                dragStartIds = null
+                                            },
                                             onDrag = { change, amount ->
                                                 change.consume()
                                                 dragOffset += amount.x

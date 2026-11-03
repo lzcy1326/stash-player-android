@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.down
 import androidx.compose.ui.test.moveBy
 import androidx.compose.ui.test.up
+import androidx.compose.ui.test.cancel
 import androidx.compose.ui.geometry.Offset
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gomeng.dev.stashplayer.app.navigation.NavigationFeature
@@ -53,5 +54,20 @@ class BottomNavigationEditorScreenTest {
             org.junit.Assert.assertEquals(NavigationFeature.Explore, saved?.get(1))
             org.junit.Assert.assertEquals(4, saved?.size)
         }
+    }
+
+    @Test fun cancellingDragRestoresOriginalOrder() {
+        var saved: List<NavigationFeature>? = null
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, { saved = it })
+        }
+        compose.onNodeWithText("Explore").performTouchInput {
+            down(center)
+            advanceEventTime(700)
+            moveBy(Offset(width * 1.2f, 0f))
+            cancel()
+        }
+        compose.onNodeWithText("Done").performClick()
+        compose.runOnIdle { org.junit.Assert.assertEquals(defaultNavigationFeatures, saved) }
     }
 }
