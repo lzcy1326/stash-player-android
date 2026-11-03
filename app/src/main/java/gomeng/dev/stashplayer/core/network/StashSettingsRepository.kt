@@ -1,6 +1,9 @@
 package gomeng.dev.stashplayer.core.network
 
 import android.content.Context
+import gomeng.dev.stashplayer.app.navigation.NavigationFeature
+import gomeng.dev.stashplayer.app.navigation.restoreNavigationFeatures
+import gomeng.dev.stashplayer.app.navigation.serializeNavigationFeatures
 import gomeng.dev.stashplayer.core.player.FastPlaybackHoldSpeedPreference
 import gomeng.dev.stashplayer.core.player.PlaybackOrientationMode
 import gomeng.dev.stashplayer.core.player.PlaybackEndAction
@@ -48,6 +51,18 @@ import java.util.concurrent.TimeUnit
 private val Context.stashSettingsDataStore by preferencesDataStore(name = "stash_settings")
 
 class StashSettingsRepository(private val context: Context) {
+    internal val bottomNavigationFeatures: Flow<List<NavigationFeature>> = context.stashSettingsDataStore.data.map { prefs ->
+        restoreNavigationFeatures(prefs[Keys.BottomNavigationFeatures])
+    }
+
+    internal suspend fun setBottomNavigationFeatures(features: List<NavigationFeature>): Boolean {
+        val serialized = serializeNavigationFeatures(features) ?: return false
+        context.stashSettingsDataStore.edit { prefs ->
+            prefs[Keys.BottomNavigationFeatures] = serialized
+        }
+        return true
+    }
+
     fun scanFavorites(profile: StashServerProfile): Flow<List<String>> =
         context.stashSettingsDataStore.data.map { StashScanFavorites.read(it, profile) }
 
@@ -394,6 +409,7 @@ class StashSettingsRepository(private val context: Context) {
     }
 
     private object Keys {
+        val BottomNavigationFeatures = stringPreferencesKey("bottom_navigation_destinations")
         val Name = stringPreferencesKey("server_name")
         val BaseUrl = stringPreferencesKey("server_base_url")
         val FallbackBaseUrl = stringPreferencesKey("server_fallback_base_url")
