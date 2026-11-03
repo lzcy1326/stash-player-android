@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="navigation_editor_move_left">Move left</string>
+    <string name="navigation_editor_move_right">Move right</string>
     <string name="navigation_editor_add">Add %1$s</string>
     <string name="navigation_editor_remove">Remove %1$s</string>
     <string name="navigation_editor_entry">Bottom navigation</string>

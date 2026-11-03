@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.outlined.*
@@ -13,6 +16,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -83,6 +97,12 @@ internal fun BottomNavigationEditorScreen(
     val candidates = navigationFeaturePool.filterNot { it in selected }
     val scope = rememberCoroutineScope()
     val limitMessage = stringResource(R.string.navigation_editor_limit)
+    val moveLeft = stringResource(R.string.navigation_editor_move_left)
+    val moveRight = stringResource(R.string.navigation_editor_move_right)
+    val haptic = LocalHapticFeedback.current
+    var draggingId by remember { mutableStateOf<String?>(null) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    val currentSelection by rememberUpdatedState(selected)
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         Column(
             Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
@@ -98,6 +118,8 @@ internal fun BottomNavigationEditorScreen(
             Text(stringResource(R.string.navigation_editor_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(stringResource(R.string.navigation_editor_current), style = MaterialTheme.typography.titleMedium)
             Card(Modifier.fillMaxWidth()) {
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val slotWidthPx = with(LocalDensity.current) { maxWidth.toPx() / 6f }
                 Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.Top) {
                     FixedNavigationItem(Icons.Outlined.Home, stringResource(R.string.navigation_home_label), Modifier.weight(1f))
                     repeat(MAX_NAVIGATION_FEATURES) { index ->
@@ -108,7 +130,51 @@ internal fun BottomNavigationEditorScreen(
                                 Text(stringResource(R.string.navigation_editor_empty), style = MaterialTheme.typography.labelSmall)
                             }
                         } else {
-                            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                            key(feature.id) {
+                            val isDragging = draggingId == feature.id
+                            val scale by animateFloatAsState(if (isDragging) 1.06f else 1f, spring(), label = "navigation drag scale")
+                            val actions = buildList {
+                                if (index > 0) add(CustomAccessibilityAction(moveLeft) {
+                                    ids = moveNavigationFeature(selected, index, index - 1).map { it.id }; true
+                                })
+                                if (index < selected.lastIndex) add(CustomAccessibilityAction(moveRight) {
+                                    ids = moveNavigationFeature(selected, index, index + 1).map { it.id }; true
+                                })
+                            }
+                            Column(
+                                Modifier.weight(1f).zIndex(if (isDragging) 1f else 0f)
+                                    .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else 0, 0) }
+                                    .scale(scale)
+                                    .shadow(if (isDragging) 6.dp else 0.dp)
+                                    .semantics { customActions = actions }
+                                    .pointerInput(feature.id, slotWidthPx) {
+                                        detectDragGesturesAfterLongPress(
+                                            onDragStart = {
+                                                draggingId = feature.id
+                                                dragOffset = 0f
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            },
+                                            onDragEnd = { draggingId = null; dragOffset = 0f },
+                                            onDragCancel = { draggingId = null; dragOffset = 0f },
+                                            onDrag = { change, amount ->
+                                                change.consume()
+                                                dragOffset += amount.x
+                                                val now = currentSelection
+                                                val from = now.indexOf(feature)
+                                                if (from >= 0 && slotWidthPx > 0f) {
+                                                    val delta = (dragOffset / slotWidthPx).roundToInt()
+                                                    val target = (from + delta).coerceIn(0, now.lastIndex)
+                                                    if (target != from) {
+                                                        ids = moveNavigationFeature(now, from, target).map { it.id }
+                                                        dragOffset -= (target - from) * slotWidthPx
+                                                    }
+                                                    dragOffset = dragOffset.coerceIn(-slotWidthPx * from, slotWidthPx * (now.lastIndex - from))
+                                                }
+                                            },
+                                        )
+                                    },
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
                                 Box(contentAlignment = Alignment.TopEnd) {
                                     Icon(feature.icon(), null, Modifier.padding(top = 14.dp, end = 10.dp).size(28.dp))
                                     val removeDescription = stringResource(R.string.navigation_editor_remove, stringResource(feature.label()))
@@ -118,9 +184,11 @@ internal fun BottomNavigationEditorScreen(
                                 }
                                 Text(stringResource(feature.label()), style = MaterialTheme.typography.labelSmall, maxLines = 1)
                             }
+                            }
                         }
                     }
                     FixedNavigationItem(Icons.Outlined.Settings, stringResource(R.string.navigation_settings_label), Modifier.weight(1f))
+                }
                 }
             }
             Text(stringResource(R.string.navigation_editor_available), style = MaterialTheme.typography.titleMedium)
