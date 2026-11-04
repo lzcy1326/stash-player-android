@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.down
 import androidx.compose.ui.test.moveBy
@@ -53,6 +54,25 @@ class BottomNavigationEditorScreenTest {
             org.junit.Assert.assertEquals(NavigationFeature.Shorts, saved?.first())
             org.junit.Assert.assertEquals(NavigationFeature.Explore, saved?.get(1))
             org.junit.Assert.assertEquals(4, saved?.size)
+        }
+    }
+
+    @Test fun remainingFeaturesAnimateIntoVacatedSlot() {
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})
+        }
+        val before = compose.onNodeWithText("Shorts").getUnclippedBoundsInRoot().left
+        compose.mainClock.autoAdvance = false
+        try {
+            compose.onNodeWithContentDescription("Remove Explore").performClick()
+            compose.mainClock.advanceTimeBy(48)
+            val during = compose.onNodeWithText("Shorts").getUnclippedBoundsInRoot().left
+            compose.mainClock.advanceTimeBy(2000)
+            val after = compose.onNodeWithText("Shorts").getUnclippedBoundsInRoot().left
+            org.junit.Assert.assertTrue("item should move left", after < before)
+            org.junit.Assert.assertTrue("item should animate between slots: $before, $during, $after", during > after && during < before)
+        } finally {
+            compose.mainClock.autoAdvance = true
         }
     }
 

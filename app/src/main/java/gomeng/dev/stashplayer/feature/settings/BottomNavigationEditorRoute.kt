@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.snap
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.outlined.*
@@ -125,17 +126,15 @@ internal fun BottomNavigationEditorScreen(
                 val slotWidthPx = with(LocalDensity.current) { maxWidth.toPx() / 6f }
                 Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.Top) {
                     FixedNavigationItem(Icons.Outlined.Home, stringResource(R.string.navigation_home_label), Modifier.weight(1f))
-                    repeat(MAX_NAVIGATION_FEATURES) { index ->
-                        val feature = selected.getOrNull(index)
-                        if (feature == null) {
-                            Column(Modifier.weight(1f).height(90.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                                Text("+", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text(stringResource(R.string.navigation_editor_empty), style = MaterialTheme.typography.labelSmall)
-                            }
-                        } else {
+                    selected.forEachIndexed { index, feature ->
                             key(feature.id) {
                             val isDragging = draggingId == feature.id
                             val scale by animateFloatAsState(if (isDragging) 1.06f else 1f, spring(), label = "navigation drag scale")
+                            val animatedPosition by animateFloatAsState(
+                                targetValue = index * slotWidthPx,
+                                animationSpec = if (isDragging) snap() else spring(),
+                                label = "navigation item position",
+                            )
                             val actions = buildList {
                                 if (index > 0) add(CustomAccessibilityAction(moveLeft) {
                                     ids = moveNavigationFeature(selected, index, index - 1).map { it.id }; true
@@ -153,7 +152,7 @@ internal fun BottomNavigationEditorScreen(
                             CompositionLocalProvider(LocalViewConfiguration provides dragViewConfiguration) {
                             Column(
                                 Modifier.weight(1f).zIndex(if (isDragging) 1f else 0f)
-                                    .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else 0, 0) }
+                                    .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else (animatedPosition - index * slotWidthPx).roundToInt(), 0) }
                                     .scale(scale)
                                     .shadow(if (isDragging) 6.dp else 0.dp)
                                     .semantics { customActions = actions }
@@ -202,6 +201,11 @@ internal fun BottomNavigationEditorScreen(
                             }
                             }
                             }
+                    }
+                    repeat(MAX_NAVIGATION_FEATURES - selected.size) {
+                        Column(Modifier.weight(1f).height(90.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                            Text("+", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.navigation_editor_empty), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                     FixedNavigationItem(Icons.Outlined.Settings, stringResource(R.string.navigation_settings_label), Modifier.weight(1f))
