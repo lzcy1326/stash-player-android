@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.zIndex
@@ -253,11 +254,15 @@ internal fun BottomNavigationEditorScreen(
                                 Box(contentAlignment = Alignment.TopEnd) {
                                     Icon(feature.icon(), null, Modifier.padding(top = 14.dp, end = 10.dp).size(28.dp))
                                     val removeDescription = stringResource(R.string.navigation_editor_remove, stringResource(feature.label()))
-                                    IconButton(onClick = {
+                                    Box(Modifier.size(48.dp).semantics { contentDescription = removeDescription }.clickable(role = Role.Button) {
                                         removedGhosts.add(RemovedNavigationGhost(nextGhostToken++, feature, index))
                                         ids = ids - feature.id
-                                    }, modifier = Modifier.size(48.dp).semantics { contentDescription = removeDescription }) {
-                                        Text("−", Modifier.background(MaterialTheme.colorScheme.error, CircleShape).padding(horizontal = 5.dp), color = MaterialTheme.colorScheme.onError)
+                                    }) {
+                                        Box(Modifier.fillMaxSize().padding(top = 2.dp, end = 2.dp), contentAlignment = Alignment.TopEnd) {
+                                            Box(Modifier.size(20.dp).background(MaterialTheme.colorScheme.error, CircleShape), contentAlignment = Alignment.Center) {
+                                                Text("−", color = MaterialTheme.colorScheme.onError, style = MaterialTheme.typography.labelMedium)
+                                            }
+                                        }
                                     }
                                 }
                                 Text(stringResource(feature.label()), style = MaterialTheme.typography.labelSmall, maxLines = 1)
@@ -291,8 +296,10 @@ internal fun BottomNavigationEditorScreen(
                         ) {
                             Box(contentAlignment = Alignment.TopEnd) {
                                 Icon(ghost.feature.icon(), null, Modifier.padding(top = 14.dp, end = 10.dp).size(28.dp))
-                                Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-                                    Text("−", Modifier.background(MaterialTheme.colorScheme.error, CircleShape).padding(horizontal = 5.dp), color = MaterialTheme.colorScheme.onError)
+                                Box(Modifier.size(48.dp).padding(top = 2.dp, end = 2.dp), contentAlignment = Alignment.TopEnd) {
+                                    Box(Modifier.size(20.dp).background(MaterialTheme.colorScheme.error, CircleShape), contentAlignment = Alignment.Center) {
+                                        Text("−", color = MaterialTheme.colorScheme.onError, style = MaterialTheme.typography.labelMedium)
+                                    }
                                 }
                             }
                             Text(stringResource(ghost.feature.label()), style = MaterialTheme.typography.labelSmall, maxLines = 1)
