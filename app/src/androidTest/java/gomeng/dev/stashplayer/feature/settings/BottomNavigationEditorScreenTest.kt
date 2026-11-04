@@ -144,6 +144,33 @@ class BottomNavigationEditorScreenTest {
         }
     }
 
+    @Test fun saveFailureKeepsDraftAndAllowsImmediateRetry() {
+        var attempts = 0
+        var navigatedBack = false
+        var saved: List<NavigationFeature>? = null
+        compose.setContent {
+            BottomNavigationEditorController(defaultNavigationFeatures, { navigatedBack = true }) { selection ->
+                attempts++
+                when (attempts) {
+                    1 -> false
+                    2 -> throw java.io.IOException("simulated write failure")
+                    else -> { saved = selection; true }
+                }
+            }
+        }
+        compose.onNodeWithContentDescription("Remove Gallery").performClick()
+        compose.onNodeWithContentDescription("Add Performers").performClick()
+        compose.onNodeWithText("Done").performClick()
+        compose.onNodeWithText("Could not save. Try again.").assertExists()
+        compose.onNodeWithText("Done").assertIsEnabled().performClick()
+        compose.runOnIdle { org.junit.Assert.assertFalse(navigatedBack) }
+        compose.onNodeWithText("Done").assertIsEnabled().performClick()
+        compose.runOnIdle {
+            org.junit.Assert.assertTrue(navigatedBack)
+            org.junit.Assert.assertEquals(listOf(NavigationFeature.Explore, NavigationFeature.Shorts, NavigationFeature.Queue, NavigationFeature.Performers), saved)
+        }
+    }
+
     @Test fun accessibilityActionsReorderMiddleFeatures() {
         var saved: List<NavigationFeature>? = null
         compose.setContent {

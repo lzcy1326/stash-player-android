@@ -78,6 +78,15 @@ fun BottomNavigationEditorRoute(onNavigateBack: () -> Unit) {
     val repository = remember(context) { StashSettingsRepository(context) }
     val saved by repository.bottomNavigationFeatures.collectAsState(initial = null)
     val initial = saved ?: return
+    BottomNavigationEditorController(initial, onNavigateBack, repository::setBottomNavigationFeatures)
+}
+
+@Composable
+internal fun BottomNavigationEditorController(
+    initial: List<NavigationFeature>,
+    onNavigateBack: () -> Unit,
+    save: suspend (List<NavigationFeature>) -> Boolean,
+) {
     val scope = rememberCoroutineScope()
     var saving by remember { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
@@ -86,13 +95,14 @@ fun BottomNavigationEditorRoute(onNavigateBack: () -> Unit) {
         if (!saving) {
             saving = true
             scope.launch {
-                try {
-                    if (repository.setBottomNavigationFeatures(selection)) onNavigateBack()
-                    else snackbar.showSnackbar(saveError)
+                val succeeded = try {
+                    save(selection)
                 } catch (error: Exception) {
                     if (error is kotlinx.coroutines.CancellationException) throw error
-                    snackbar.showSnackbar(saveError)
+                    false
                 } finally { saving = false }
+                if (succeeded) onNavigateBack()
+                else scope.launch { snackbar.showSnackbar(saveError) }
             }
         }
     }
