@@ -23,6 +23,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
@@ -41,6 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -48,6 +51,8 @@ import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.app.navigation.*
 import gomeng.dev.stashplayer.core.network.StashSettingsRepository
 import kotlinx.coroutines.launch
+
+private data class RemovedNavigationGhost(val token: Long, val feature: NavigationFeature, val index: Int)
 
 private fun NavigationFeature.label(): Int = when (this) {
     NavigationFeature.Explore -> R.string.navigation_explore_label
@@ -112,6 +117,8 @@ internal fun BottomNavigationEditorScreen(
     var draggingId by remember { mutableStateOf<String?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var dragStartIds by remember { mutableStateOf<List<String>?>(null) }
+    val removedGhosts = remember { mutableStateListOf<RemovedNavigationGhost>() }
+    var nextGhostToken by remember { mutableLongStateOf(0L) }
     val currentSelection by rememberUpdatedState(selected)
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         Column(
@@ -215,7 +222,10 @@ internal fun BottomNavigationEditorScreen(
                                 Box(contentAlignment = Alignment.TopEnd) {
                                     Icon(feature.icon(), null, Modifier.padding(top = 14.dp, end = 10.dp).size(28.dp))
                                     val removeDescription = stringResource(R.string.navigation_editor_remove, stringResource(feature.label()))
-                                    IconButton(onClick = { ids = ids - feature.id }, modifier = Modifier.size(48.dp).semantics { contentDescription = removeDescription }) {
+                                    IconButton(onClick = {
+                                        removedGhosts.add(RemovedNavigationGhost(nextGhostToken++, feature, index))
+                                        ids = ids - feature.id
+                                    }, modifier = Modifier.size(48.dp).semantics { contentDescription = removeDescription }) {
                                         Text("−", Modifier.background(MaterialTheme.colorScheme.error, CircleShape).padding(horizontal = 5.dp), color = MaterialTheme.colorScheme.onError)
                                     }
                                 }
@@ -232,6 +242,31 @@ internal fun BottomNavigationEditorScreen(
                         }
                     }
                     FixedNavigationItem(Icons.Outlined.Settings, stringResource(R.string.navigation_settings_label), Modifier.weight(1f))
+                }
+                removedGhosts.forEach { ghost ->
+                    key(ghost.token) {
+                        val progress = remember { Animatable(0f) }
+                        LaunchedEffect(ghost.token) {
+                            progress.animateTo(1f, tween(200))
+                            removedGhosts.remove(ghost)
+                        }
+                        Column(
+                            Modifier.offset(x = maxWidth / 6 * (ghost.index + 1), y = 12.dp)
+                                .width(maxWidth / 6)
+                                .clearAndSetSemantics { testTag = "navigation-removal-animation" }
+                                .alpha(1f - progress.value)
+                                .scale(1f - 0.12f * progress.value),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Box(contentAlignment = Alignment.TopEnd) {
+                                Icon(ghost.feature.icon(), null, Modifier.padding(top = 14.dp, end = 10.dp).size(28.dp))
+                                Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                                    Text("−", Modifier.background(MaterialTheme.colorScheme.error, CircleShape).padding(horizontal = 5.dp), color = MaterialTheme.colorScheme.onError)
+                                }
+                            }
+                            Text(stringResource(ghost.feature.label()), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                        }
+                    }
                 }
                 }
             }

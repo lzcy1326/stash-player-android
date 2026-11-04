@@ -4,6 +4,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -71,6 +72,26 @@ class BottomNavigationEditorScreenTest {
             val after = compose.onNodeWithText("Shorts").getUnclippedBoundsInRoot().left
             org.junit.Assert.assertTrue("item should move left", after < before)
             org.junit.Assert.assertTrue("item should animate between slots: $before, $during, $after", during > after && during < before)
+        } finally {
+            compose.mainClock.autoAdvance = true
+        }
+    }
+
+    @Test fun removalAnimationDoesNotDelayDraftChanges() {
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})
+        }
+        compose.waitForIdle()
+        compose.mainClock.autoAdvance = false
+        try {
+            compose.onNodeWithContentDescription("Remove Gallery").performClick()
+            compose.mainClock.advanceTimeBy(48)
+            compose.onNodeWithTag("navigation-removal-animation").assertExists()
+            compose.onNodeWithContentDescription("Add Performers").performClick()
+            compose.mainClock.advanceTimeBy(32)
+            compose.onNodeWithText("Done").assertIsEnabled()
+            compose.mainClock.advanceTimeBy(1000)
+            compose.onNodeWithTag("navigation-removal-animation").assertDoesNotExist()
         } finally {
             compose.mainClock.autoAdvance = true
         }
