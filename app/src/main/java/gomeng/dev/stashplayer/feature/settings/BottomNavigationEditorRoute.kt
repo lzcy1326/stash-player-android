@@ -36,6 +36,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
@@ -126,6 +127,7 @@ internal fun BottomNavigationEditorScreen(
     val limitMessage = stringResource(R.string.navigation_editor_limit)
     val moveLeft = stringResource(R.string.navigation_editor_move_left)
     val moveRight = stringResource(R.string.navigation_editor_move_right)
+    val draggingDescription = stringResource(R.string.navigation_editor_dragging)
     val haptic = LocalHapticFeedback.current
     var draggingId by remember { mutableStateOf<String?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
@@ -205,7 +207,10 @@ internal fun BottomNavigationEditorScreen(
                                     .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else (animatedPosition - index * slotWidthPx + releaseOffset.value).roundToInt(), 0) }
                                     .scale(scale)
                                     .shadow(if (isDragging) 6.dp else 0.dp)
-                                    .semantics { customActions = actions }
+                                    .semantics {
+                                        customActions = actions
+                                        if (isDragging) stateDescription = draggingDescription
+                                    }
                                     .pointerInput(feature.id, slotWidthPx) {
                                         detectDragGesturesAfterLongPress(
                                             onDragStart = {

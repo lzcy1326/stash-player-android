@@ -6,6 +6,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
@@ -146,6 +147,23 @@ class BottomNavigationEditorScreenTest {
         } finally {
             compose.mainClock.autoAdvance = true
         }
+    }
+
+    @Test fun draggingExposesAccessibilityState() {
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})
+        }
+        val explore = SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions) and hasAnyDescendant(hasText("Explore"))
+        compose.onNodeWithText("Explore").performTouchInput {
+            down(center)
+            advanceEventTime(220)
+            moveBy(Offset(width * 0.1f, 0f))
+        }
+        val state = compose.onNode(explore, useUnmergedTree = true).fetchSemanticsNode().config[SemanticsProperties.StateDescription]
+        org.junit.Assert.assertEquals("Reordering", state)
+        compose.onNodeWithText("Explore").performTouchInput { up() }
+        compose.waitForIdle()
+        org.junit.Assert.assertFalse(compose.onNode(explore, useUnmergedTree = true).fetchSemanticsNode().config.contains(SemanticsProperties.StateDescription))
     }
 
     @Test fun longPressOnFeatureIconReordersWithoutRemoving() {

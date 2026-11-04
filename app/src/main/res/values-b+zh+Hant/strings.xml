@@ -2,6 +2,7 @@
 <resources>
     <string name="navigation_editor_move_left">向左移動</string>
     <string name="navigation_editor_move_right">向右移動</string>
+    <string name="navigation_editor_dragging">正在調整順序</string>
     <string name="navigation_editor_add">新增%1$s</string>
     <string name="navigation_editor_remove">移除%1$s</string>
     <string name="navigation_editor_entry">底部導覽</string>
