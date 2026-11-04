@@ -133,7 +133,7 @@ internal fun BottomNavigationEditorScreen(
     val currentSelection by rememberUpdatedState(selected)
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         Column(
-            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 8.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

@@ -1,6 +1,10 @@
 package gomeng.dev.stashplayer.feature.settings
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyDescendant
@@ -142,6 +146,20 @@ class BottomNavigationEditorScreenTest {
         } finally {
             compose.mainClock.autoAdvance = true
         }
+    }
+
+    @Test fun narrowScreenRemoveTargetsAreLargeAndSeparate() {
+        compose.setContent {
+            Box(Modifier.width(309.dp)) {
+                BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})
+            }
+        }
+        val first = compose.onNodeWithContentDescription("Remove Explore").getUnclippedBoundsInRoot()
+        val second = compose.onNodeWithContentDescription("Remove Shorts").getUnclippedBoundsInRoot()
+        org.junit.Assert.assertTrue("first target width: ${first.right - first.left}", (first.right - first.left) >= 48.dp)
+        org.junit.Assert.assertTrue("second target width: ${second.right - second.left}", (second.right - second.left) >= 48.dp)
+        org.junit.Assert.assertTrue("targets must not overlap", first.right <= second.left)
+        org.junit.Assert.assertTrue("target height: ${first.bottom - first.top}", (first.bottom - first.top) >= 48.dp)
     }
 
     @Test fun saveFailureKeepsDraftAndAllowsImmediateRetry() {
