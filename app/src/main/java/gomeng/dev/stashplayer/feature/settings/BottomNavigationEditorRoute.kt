@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.snap
@@ -129,6 +130,7 @@ internal fun BottomNavigationEditorScreen(
                     selected.forEachIndexed { index, feature ->
                             key(feature.id) {
                             val isDragging = draggingId == feature.id
+                            val releaseOffset = remember { Animatable(0f) }
                             val scale by animateFloatAsState(if (isDragging) 1.06f else 1f, spring(), label = "navigation drag scale")
                             val animatedPosition by animateFloatAsState(
                                 targetValue = index * slotWidthPx,
@@ -152,7 +154,7 @@ internal fun BottomNavigationEditorScreen(
                             CompositionLocalProvider(LocalViewConfiguration provides dragViewConfiguration) {
                             Column(
                                 Modifier.weight(1f).zIndex(if (isDragging) 1f else 0f)
-                                    .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else (animatedPosition - index * slotWidthPx).roundToInt(), 0) }
+                                    .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else (animatedPosition - index * slotWidthPx + releaseOffset.value).roundToInt(), 0) }
                                     .scale(scale)
                                     .shadow(if (isDragging) 6.dp else 0.dp)
                                     .semantics { customActions = actions }
@@ -164,7 +166,16 @@ internal fun BottomNavigationEditorScreen(
                                                 dragStartIds = currentSelection.map { it.id }
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             },
-                                            onDragEnd = { draggingId = null; dragOffset = 0f; dragStartIds = null },
+                                            onDragEnd = {
+                                                val releasedAt = dragOffset
+                                                scope.launch {
+                                                    releaseOffset.snapTo(releasedAt)
+                                                    draggingId = null
+                                                    dragOffset = 0f
+                                                    dragStartIds = null
+                                                    releaseOffset.animateTo(0f, spring())
+                                                }
+                                            },
                                             onDragCancel = {
                                                 dragStartIds?.let { ids = it }
                                                 draggingId = null

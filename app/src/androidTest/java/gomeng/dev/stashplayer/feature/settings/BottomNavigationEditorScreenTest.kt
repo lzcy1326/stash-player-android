@@ -76,6 +76,30 @@ class BottomNavigationEditorScreenTest {
         }
     }
 
+    @Test fun releasedItemAnimatesBackToItsSlot() {
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})
+        }
+        val resting = compose.onNodeWithText("Explore").getUnclippedBoundsInRoot().left
+        compose.mainClock.autoAdvance = false
+        try {
+            compose.onNodeWithText("Explore").performTouchInput {
+                down(center)
+                advanceEventTime(220)
+                moveBy(Offset(width * 0.3f, 0f))
+                up()
+            }
+            compose.mainClock.advanceTimeBy(48)
+            val during = compose.onNodeWithText("Explore").getUnclippedBoundsInRoot().left
+            compose.mainClock.advanceTimeBy(2000)
+            val after = compose.onNodeWithText("Explore").getUnclippedBoundsInRoot().left
+            org.junit.Assert.assertTrue("item should return from the released position: $resting, $during, $after", during > after)
+            org.junit.Assert.assertEquals(resting.value, after.value, 1f)
+        } finally {
+            compose.mainClock.autoAdvance = true
+        }
+    }
+
     @Test fun cancellingDragRestoresOriginalOrder() {
         var saved: List<NavigationFeature>? = null
         compose.setContent {
