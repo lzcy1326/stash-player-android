@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -55,6 +56,8 @@ import gomeng.dev.stashplayer.app.navigation.*
 import gomeng.dev.stashplayer.core.network.StashSettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+internal val NavigationItemVisibleKey = SemanticsPropertyKey<Boolean>("NavigationItemVisible")
 
 private data class RemovedNavigationGhost(val token: Long, val feature: NavigationFeature, val index: Int)
 
@@ -131,6 +134,8 @@ internal fun BottomNavigationEditorScreen(
     val haptic = LocalHapticFeedback.current
     var draggingId by remember { mutableStateOf<String?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
+    val releaseOffset = remember { Animatable(0f) }
+    var releaseId by remember { mutableStateOf<String?>(null) }
     var dragStartIds by remember { mutableStateOf<List<String>?>(null) }
     var dragAborted by remember { mutableStateOf(false) }
     var enteringId by remember { mutableStateOf<String?>(null) }
@@ -154,6 +159,13 @@ internal fun BottomNavigationEditorScreen(
             Card(Modifier.fillMaxWidth()) {
                 BoxWithConstraints(Modifier.fillMaxWidth()) {
                 val slotWidthPx = with(LocalDensity.current) { maxWidth.toPx() / 6f }
+                val systemViewConfiguration = LocalViewConfiguration.current
+                val dragViewConfiguration = remember(systemViewConfiguration) {
+                    object : ViewConfiguration by systemViewConfiguration {
+                        override val longPressTimeoutMillis: Long = 180L
+                    }
+                }
+                CompositionLocalProvider(LocalViewConfiguration provides dragViewConfiguration) {
                 Row(
                     Modifier.fillMaxWidth().padding(vertical = 12.dp).pointerInput(Unit) {
                         awaitPointerEventScope {
@@ -168,6 +180,58 @@ internal fun BottomNavigationEditorScreen(
                                 }
                             }
                         }
+                    }.pointerInput(slotWidthPx) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = { position ->
+                                val index = (position.x / slotWidthPx).toInt() - 1
+                                val feature = currentSelection.getOrNull(index)
+                                if (feature != null && position.x >= slotWidthPx && position.x < slotWidthPx * 5) {
+                                    dragAborted = false
+                                    draggingId = feature.id
+                                    dragOffset = 0f
+                                    dragStartIds = currentSelection.map { it.id }
+                                    releaseId = null
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                }
+                            },
+                            onDragEnd = {
+                                val id = draggingId
+                                val releasedAt = dragOffset
+                                if (!dragAborted && id != null) scope.launch {
+                                    releaseOffset.snapTo(releasedAt)
+                                    releaseId = id
+                                    draggingId = null
+                                    dragOffset = 0f
+                                    dragStartIds = null
+                                    releaseOffset.animateTo(0f, spring())
+                                    if (releaseId == id) releaseId = null
+                                }
+                            },
+                            onDragCancel = {
+                                dragStartIds?.let { ids = it }
+                                draggingId = null
+                                dragOffset = 0f
+                                dragStartIds = null
+                            },
+                            onDrag = { change, amount ->
+                                val id = draggingId
+                                if (!dragAborted && id != null) {
+                                    change.consume()
+                                    dragOffset += amount.x
+                                    val now = currentSelection
+                                    val from = now.indexOfFirst { it.id == id }
+                                    if (from >= 0 && slotWidthPx > 0f) {
+                                        val delta = (dragOffset / slotWidthPx).roundToInt()
+                                        val target = (from + delta).coerceIn(0, now.lastIndex)
+                                        if (target != from) {
+                                            ids = moveNavigationFeature(now, from, target).map { it.id }
+                                            dragOffset -= (target - from) * slotWidthPx
+                                        }
+                                        dragOffset = dragOffset.coerceIn(-slotWidthPx * target, slotWidthPx * (now.lastIndex - target))
+                                    }
+                                }
+                            },
+                        )
                     },
                     verticalAlignment = Alignment.Top,
                 ) {
@@ -175,7 +239,6 @@ internal fun BottomNavigationEditorScreen(
                     selected.forEachIndexed { index, feature ->
                             key(feature.id) {
                             val isDragging = draggingId == feature.id
-                            val releaseOffset = remember { Animatable(0f) }
                             val scale by animateFloatAsState(if (isDragging) 1.06f else 1f, spring(), label = "navigation drag scale")
                             val animatedPosition by animateFloatAsState(
                                 targetValue = index * slotWidthPx,
@@ -190,13 +253,6 @@ internal fun BottomNavigationEditorScreen(
                                     ids = moveNavigationFeature(selected, index, index + 1).map { it.id }; true
                                 })
                             }
-                            val systemViewConfiguration = LocalViewConfiguration.current
-                            val dragViewConfiguration = remember(systemViewConfiguration) {
-                                object : ViewConfiguration by systemViewConfiguration {
-                                    override val longPressTimeoutMillis: Long = 180L
-                                }
-                            }
-                            CompositionLocalProvider(LocalViewConfiguration provides dragViewConfiguration) {
                             val visibility = remember { MutableTransitionState(feature.id != enteringId).apply { targetState = true } }
                             LaunchedEffect(visibility.currentState, visibility.targetState) {
                                 if (visibility.currentState && visibility.targetState && enteringId == feature.id) enteringId = null
@@ -208,55 +264,13 @@ internal fun BottomNavigationEditorScreen(
                             ) {
                             Column(
                                 Modifier.fillMaxWidth()
-                                    .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else (animatedPosition - index * slotWidthPx + releaseOffset.value).roundToInt(), 0) }
+                                    .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else (animatedPosition - index * slotWidthPx + if (releaseId == feature.id) releaseOffset.value else 0f).roundToInt(), 0) }
                                     .scale(scale)
                                     .shadow(if (isDragging) 6.dp else 0.dp)
                                     .semantics {
                                         customActions = actions
+                                        this[NavigationItemVisibleKey] = visibility.currentState
                                         if (isDragging) stateDescription = draggingDescription
-                                    }
-                                    .pointerInput(feature.id, slotWidthPx) {
-                                        detectDragGesturesAfterLongPress(
-                                            onDragStart = {
-                                                dragAborted = false
-                                                draggingId = feature.id
-                                                dragOffset = 0f
-                                                dragStartIds = currentSelection.map { it.id }
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            },
-                                            onDragEnd = {
-                                                val releasedAt = dragOffset
-                                                if (!dragAborted) scope.launch {
-                                                    releaseOffset.snapTo(releasedAt)
-                                                    draggingId = null
-                                                    dragOffset = 0f
-                                                    dragStartIds = null
-                                                    releaseOffset.animateTo(0f, spring())
-                                                }
-                                            },
-                                            onDragCancel = {
-                                                dragStartIds?.let { ids = it }
-                                                draggingId = null
-                                                dragOffset = 0f
-                                                dragStartIds = null
-                                            },
-                                            onDrag = { change, amount ->
-                                                change.consume()
-                                                if (dragAborted) return@detectDragGesturesAfterLongPress
-                                                dragOffset += amount.x
-                                                val now = currentSelection
-                                                val from = now.indexOf(feature)
-                                                if (from >= 0 && slotWidthPx > 0f) {
-                                                    val delta = (dragOffset / slotWidthPx).roundToInt()
-                                                    val target = (from + delta).coerceIn(0, now.lastIndex)
-                                                    if (target != from) {
-                                                        ids = moveNavigationFeature(now, from, target).map { it.id }
-                                                        dragOffset -= (target - from) * slotWidthPx
-                                                    }
-                                                    dragOffset = dragOffset.coerceIn(-slotWidthPx * target, slotWidthPx * (now.lastIndex - target))
-                                                }
-                                            },
-                                        )
                                     },
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
@@ -278,7 +292,6 @@ internal fun BottomNavigationEditorScreen(
                             }
                             }
                             }
-                            }
                     }
                     repeat(MAX_NAVIGATION_FEATURES - selected.size) {
                         Column(Modifier.weight(1f).height(90.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -287,6 +300,7 @@ internal fun BottomNavigationEditorScreen(
                         }
                     }
                     FixedNavigationItem(Icons.Outlined.Settings, stringResource(R.string.navigation_settings_label), Modifier.weight(1f))
+                }
                 }
                 removedGhosts.forEach { ghost ->
                     key(ghost.token) {

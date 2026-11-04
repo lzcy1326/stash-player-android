@@ -24,8 +24,6 @@ import androidx.compose.ui.test.moveBy
 import androidx.compose.ui.test.up
 import androidx.compose.ui.test.cancel
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.test.captureToImage
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gomeng.dev.stashplayer.app.navigation.NavigationFeature
 import gomeng.dev.stashplayer.app.navigation.defaultNavigationFeatures
@@ -116,11 +114,13 @@ class BottomNavigationEditorScreenTest {
         compose.waitForIdle()
         compose.mainClock.autoAdvance = false
         try {
-            val before = compose.onNodeWithText("Queue").captureToImage().asAndroidBitmap()
+            val previous = SemanticsMatcher.keyIsDefined(NavigationItemVisibleKey) and hasAnyDescendant(hasText("Queue"))
+            org.junit.Assert.assertTrue(compose.onNode(previous, useUnmergedTree = true).fetchSemanticsNode().config[NavigationItemVisibleKey])
             compose.onNodeWithContentDescription("Add Performers").performClick()
             compose.mainClock.advanceTimeBy(48)
-            val during = compose.onNodeWithText("Queue").captureToImage().asAndroidBitmap()
-            org.junit.Assert.assertTrue("previous feature must not fade when another is added", before.sameAs(during))
+            org.junit.Assert.assertTrue("previous feature must not fade when another is added", compose.onNode(previous, useUnmergedTree = true).fetchSemanticsNode().config[NavigationItemVisibleKey])
+            val added = SemanticsMatcher.keyIsDefined(NavigationItemVisibleKey) and hasAnyDescendant(hasText("Performers"))
+            org.junit.Assert.assertFalse("new feature should still be entering", compose.onNode(added, useUnmergedTree = true).fetchSemanticsNode().config[NavigationItemVisibleKey])
         } finally {
             compose.mainClock.autoAdvance = true
         }
@@ -200,6 +200,49 @@ class BottomNavigationEditorScreenTest {
         compose.onNodeWithText("Done").assertIsEnabled().performClick()
         compose.runOnIdle {
             org.junit.Assert.assertEquals(listOf(NavigationFeature.Shorts, NavigationFeature.Explore, NavigationFeature.Gallery, NavigationFeature.Queue), saved)
+        }
+    }
+
+    @Test fun dragFirstAcrossEachSlotToLast() {
+        var saved: List<NavigationFeature>? = null
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, { saved = it })
+        }
+        val first = compose.onNodeWithText("Explore").getUnclippedBoundsInRoot()
+        val last = compose.onNodeWithText("Queue").getUnclippedBoundsInRoot()
+        val step = with(compose.density) { ((last.left - first.left) / 3).toPx() }
+        compose.onNodeWithText("Explore").performTouchInput {
+            down(center)
+            advanceEventTime(220)
+            repeat(3) {
+                moveBy(Offset(step, 0f))
+                advanceEventTime(100)
+            }
+            up()
+        }
+        compose.onNodeWithText("Done").performClick()
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(listOf(NavigationFeature.Shorts, NavigationFeature.Gallery, NavigationFeature.Queue, NavigationFeature.Explore), saved)
+        }
+    }
+
+    @Test fun dragLastAcrossEachSlotToFirst() {
+        var saved: List<NavigationFeature>? = null
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, { saved = it })
+        }
+        val first = compose.onNodeWithText("Explore").getUnclippedBoundsInRoot()
+        val last = compose.onNodeWithText("Queue").getUnclippedBoundsInRoot()
+        val step = with(compose.density) { ((last.left - first.left) / 3).toPx() }
+        compose.onNodeWithText("Queue").performTouchInput {
+            down(center)
+            advanceEventTime(220)
+            repeat(3) { moveBy(Offset(-step, 0f)); advanceEventTime(100) }
+            up()
+        }
+        compose.onNodeWithText("Done").performClick()
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(listOf(NavigationFeature.Queue, NavigationFeature.Explore, NavigationFeature.Shorts, NavigationFeature.Gallery), saved)
         }
     }
 
