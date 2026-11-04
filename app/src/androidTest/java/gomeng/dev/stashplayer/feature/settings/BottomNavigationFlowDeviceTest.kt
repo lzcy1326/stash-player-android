@@ -32,6 +32,7 @@ class BottomNavigationFlowDeviceTest {
             compose.onNodeWithText("Bottom navigation").performClick()
             compose.onNodeWithContentDescription("Remove Gallery").performClick()
             compose.onNodeWithContentDescription("Add Performers").performClick()
+            assertEquals(defaultNavigationFeatures, runBlocking { repository.bottomNavigationFeatures.first() })
             compose.onNodeWithText("Done").performClick()
             compose.waitUntil(20_000) { runBlocking { repository.bottomNavigationFeatures.first().contains(NavigationFeature.Performers) } }
             assertEquals(
