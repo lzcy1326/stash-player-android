@@ -148,6 +148,23 @@ class BottomNavigationEditorScreenTest {
         }
     }
 
+    @Test fun secondFingerCancelsInProgressReorder() {
+        var saved: List<NavigationFeature>? = null
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, { saved = it })
+        }
+        compose.onNodeWithText("Explore").performTouchInput {
+            down(0, center)
+            advanceEventTime(220)
+            moveBy(0, Offset(width * 1.2f, 0f))
+            down(1, center)
+            up(1)
+            up(0)
+        }
+        compose.onNodeWithText("Done").performClick()
+        compose.runOnIdle { org.junit.Assert.assertEquals(defaultNavigationFeatures, saved) }
+    }
+
     @Test fun draggingPastEndStaysInsideEditableSlots() {
         compose.setContent {
             BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})

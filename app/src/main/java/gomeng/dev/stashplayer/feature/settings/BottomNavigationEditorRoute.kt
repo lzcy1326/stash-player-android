@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalDensity
@@ -128,6 +129,7 @@ internal fun BottomNavigationEditorScreen(
     var draggingId by remember { mutableStateOf<String?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var dragStartIds by remember { mutableStateOf<List<String>?>(null) }
+    var dragAborted by remember { mutableStateOf(false) }
     val removedGhosts = remember { mutableStateListOf<RemovedNavigationGhost>() }
     var nextGhostToken by remember { mutableLongStateOf(0L) }
     val currentSelection by rememberUpdatedState(selected)
@@ -148,7 +150,23 @@ internal fun BottomNavigationEditorScreen(
             Card(Modifier.fillMaxWidth()) {
                 BoxWithConstraints(Modifier.fillMaxWidth()) {
                 val slotWidthPx = with(LocalDensity.current) { maxWidth.toPx() / 6f }
-                Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.Top) {
+                Row(
+                    Modifier.fillMaxWidth().padding(vertical = 12.dp).pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                if (draggingId != null && event.changes.count { it.pressed } > 1) {
+                                    dragAborted = true
+                                    dragStartIds?.let { ids = it }
+                                    draggingId = null
+                                    dragOffset = 0f
+                                    dragStartIds = null
+                                }
+                            }
+                        }
+                    },
+                    verticalAlignment = Alignment.Top,
+                ) {
                     FixedNavigationItem(Icons.Outlined.Home, stringResource(R.string.navigation_home_label), Modifier.weight(1f))
                     selected.forEachIndexed { index, feature ->
                             key(feature.id) {
@@ -190,6 +208,7 @@ internal fun BottomNavigationEditorScreen(
                                     .pointerInput(feature.id, slotWidthPx) {
                                         detectDragGesturesAfterLongPress(
                                             onDragStart = {
+                                                dragAborted = false
                                                 draggingId = feature.id
                                                 dragOffset = 0f
                                                 dragStartIds = currentSelection.map { it.id }
@@ -197,7 +216,7 @@ internal fun BottomNavigationEditorScreen(
                                             },
                                             onDragEnd = {
                                                 val releasedAt = dragOffset
-                                                scope.launch {
+                                                if (!dragAborted) scope.launch {
                                                     releaseOffset.snapTo(releasedAt)
                                                     draggingId = null
                                                     dragOffset = 0f
@@ -213,6 +232,7 @@ internal fun BottomNavigationEditorScreen(
                                             },
                                             onDrag = { change, amount ->
                                                 change.consume()
+                                                if (dragAborted) return@detectDragGesturesAfterLongPress
                                                 dragOffset += amount.x
                                                 val now = currentSelection
                                                 val from = now.indexOf(feature)
