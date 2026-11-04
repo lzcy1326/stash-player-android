@@ -167,11 +167,11 @@ internal fun BottomNavigationEditorScreen(
                             val visibility = remember { MutableTransitionState(false).apply { targetState = true } }
                             AnimatedVisibility(
                                 visibleState = visibility,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f).zIndex(if (isDragging) 1f else 0f),
                                 enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 5 },
                             ) {
                             Column(
-                                Modifier.fillMaxWidth().zIndex(if (isDragging) 1f else 0f)
+                                Modifier.fillMaxWidth()
                                     .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else (animatedPosition - index * slotWidthPx + releaseOffset.value).roundToInt(), 0) }
                                     .scale(scale)
                                     .shadow(if (isDragging) 6.dp else 0.dp)
