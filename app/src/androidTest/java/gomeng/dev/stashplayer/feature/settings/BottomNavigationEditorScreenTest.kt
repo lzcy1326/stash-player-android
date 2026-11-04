@@ -24,6 +24,8 @@ import androidx.compose.ui.test.moveBy
 import androidx.compose.ui.test.up
 import androidx.compose.ui.test.cancel
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.captureToImage
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gomeng.dev.stashplayer.app.navigation.NavigationFeature
 import gomeng.dev.stashplayer.app.navigation.defaultNavigationFeatures
@@ -101,6 +103,24 @@ class BottomNavigationEditorScreenTest {
             compose.onNodeWithText("Done").assertIsEnabled()
             compose.mainClock.advanceTimeBy(1000)
             compose.onNodeWithTag("navigation-removal-animation").assertDoesNotExist()
+        } finally {
+            compose.mainClock.autoAdvance = true
+        }
+    }
+
+    @Test fun addingFeatureDoesNotFadePreviousFeature() {
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})
+        }
+        compose.onNodeWithContentDescription("Remove Gallery").performClick()
+        compose.waitForIdle()
+        compose.mainClock.autoAdvance = false
+        try {
+            val before = compose.onNodeWithText("Queue").captureToImage().asAndroidBitmap()
+            compose.onNodeWithContentDescription("Add Performers").performClick()
+            compose.mainClock.advanceTimeBy(48)
+            val during = compose.onNodeWithText("Queue").captureToImage().asAndroidBitmap()
+            org.junit.Assert.assertTrue("previous feature must not fade when another is added", before.sameAs(during))
         } finally {
             compose.mainClock.autoAdvance = true
         }

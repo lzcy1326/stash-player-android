@@ -133,6 +133,7 @@ internal fun BottomNavigationEditorScreen(
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var dragStartIds by remember { mutableStateOf<List<String>?>(null) }
     var dragAborted by remember { mutableStateOf(false) }
+    var enteringId by remember { mutableStateOf<String?>(null) }
     val removedGhosts = remember { mutableStateListOf<RemovedNavigationGhost>() }
     var nextGhostToken by remember { mutableLongStateOf(0L) }
     val currentSelection by rememberUpdatedState(selected)
@@ -196,7 +197,10 @@ internal fun BottomNavigationEditorScreen(
                                 }
                             }
                             CompositionLocalProvider(LocalViewConfiguration provides dragViewConfiguration) {
-                            val visibility = remember { MutableTransitionState(false).apply { targetState = true } }
+                            val visibility = remember { MutableTransitionState(feature.id != enteringId).apply { targetState = true } }
+                            LaunchedEffect(visibility.currentState, visibility.targetState) {
+                                if (visibility.currentState && visibility.targetState && enteringId == feature.id) enteringId = null
+                            }
                             AnimatedVisibility(
                                 visibleState = visibility,
                                 modifier = Modifier.weight(1f).zIndex(if (isDragging) 1f else 0f),
@@ -323,7 +327,10 @@ internal fun BottomNavigationEditorScreen(
                             val addDescription = stringResource(R.string.navigation_editor_add, stringResource(feature.label()))
                             IconButton(modifier = Modifier.semantics { contentDescription = addDescription }, onClick = {
                                 when (val result = addNavigationFeature(selected, feature)) {
-                                    is AddNavigationFeatureResult.Added -> ids = result.features.map { it.id }
+                                    is AddNavigationFeatureResult.Added -> {
+                                        enteringId = feature.id
+                                        ids = result.features.map { it.id }
+                                    }
                                     AddNavigationFeatureResult.AtCapacity -> scope.launch { snackbar.showSnackbar(limitMessage) }
                                     AddNavigationFeatureResult.AlreadySelected -> Unit
                                 }
