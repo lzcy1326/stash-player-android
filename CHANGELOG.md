@@ -6,6 +6,9 @@ When bumping `versionName`, add a new section for the release version and summar
 
 ## [Unreleased]
 
+- Customize and reorder the four middle navigation items, with performer and studio placeholder pages.
+- 支持自定义和排序底部导航的四个中间功能，并新增演员、厂商占位页面。
+
 ## [1.13.2-lzcy1.1.0] - 2026-11-02
 
 ### English
