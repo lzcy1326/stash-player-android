@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.app.navigation.*
 import gomeng.dev.stashplayer.core.network.StashSettingsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 private data class RemovedNavigationGhost(val token: Long, val feature: NavigationFeature, val index: Int)
@@ -94,7 +95,7 @@ internal fun BottomNavigationEditorController(
     BottomNavigationEditorScreen(initial, saving, snackbar, onNavigateBack) { selection ->
         if (!saving) {
             saving = true
-            scope.launch {
+            scope.launch(Dispatchers.Main.immediate) {
                 val succeeded = try {
                     save(selection)
                 } catch (error: Exception) {
