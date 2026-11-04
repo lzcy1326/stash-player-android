@@ -1,6 +1,10 @@
 package gomeng.dev.stashplayer.feature.settings
 
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -137,6 +141,21 @@ class BottomNavigationEditorScreenTest {
             org.junit.Assert.assertEquals(resting.value, after.value, 1f)
         } finally {
             compose.mainClock.autoAdvance = true
+        }
+    }
+
+    @Test fun accessibilityActionsReorderMiddleFeatures() {
+        var saved: List<NavigationFeature>? = null
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, { saved = it })
+        }
+        val explore = SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions) and hasAnyDescendant(hasText("Explore"))
+        val actions = compose.onNode(explore, useUnmergedTree = true).fetchSemanticsNode().config[SemanticsActions.CustomActions]
+        org.junit.Assert.assertEquals(listOf("Move right"), actions.map { it.label })
+        compose.runOnIdle { org.junit.Assert.assertTrue(actions.single().action()) }
+        compose.onNodeWithText("Done").performClick()
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(listOf(NavigationFeature.Shorts, NavigationFeature.Explore, NavigationFeature.Gallery, NavigationFeature.Queue), saved)
         }
     }
 
