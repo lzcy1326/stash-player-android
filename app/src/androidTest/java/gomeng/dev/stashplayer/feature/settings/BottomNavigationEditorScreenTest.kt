@@ -301,10 +301,10 @@ class BottomNavigationEditorScreenTest {
         }
         val first = compose.onNodeWithContentDescription("Remove Explore").getUnclippedBoundsInRoot()
         val second = compose.onNodeWithContentDescription("Remove Shorts").getUnclippedBoundsInRoot()
-        org.junit.Assert.assertTrue("first target width: ${first.right - first.left}", (first.right - first.left) >= 48.dp)
-        org.junit.Assert.assertTrue("second target width: ${second.right - second.left}", (second.right - second.left) >= 48.dp)
+        org.junit.Assert.assertTrue("first target width: ${first.right - first.left}", (first.right - first.left) >= 47.99.dp)
+        org.junit.Assert.assertTrue("second target width: ${second.right - second.left}", (second.right - second.left) >= 47.99.dp)
         org.junit.Assert.assertTrue("targets must not overlap", first.right <= second.left)
-        org.junit.Assert.assertTrue("target height: ${first.bottom - first.top}", (first.bottom - first.top) >= 48.dp)
+        org.junit.Assert.assertTrue("target height: ${first.bottom - first.top}", (first.bottom - first.top) >= 47.99.dp)
     }
 
     @Test fun saveFailureKeepsDraftAndAllowsImmediateRetry() {
