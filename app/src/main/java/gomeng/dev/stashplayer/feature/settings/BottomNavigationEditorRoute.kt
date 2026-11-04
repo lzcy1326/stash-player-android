@@ -21,6 +21,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -142,6 +144,13 @@ internal fun BottomNavigationEditorScreen(
                                     ids = moveNavigationFeature(selected, index, index + 1).map { it.id }; true
                                 })
                             }
+                            val systemViewConfiguration = LocalViewConfiguration.current
+                            val dragViewConfiguration = remember(systemViewConfiguration) {
+                                object : ViewConfiguration by systemViewConfiguration {
+                                    override val longPressTimeoutMillis: Long = 180L
+                                }
+                            }
+                            CompositionLocalProvider(LocalViewConfiguration provides dragViewConfiguration) {
                             Column(
                                 Modifier.weight(1f).zIndex(if (isDragging) 1f else 0f)
                                     .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else 0, 0) }
@@ -190,6 +199,7 @@ internal fun BottomNavigationEditorScreen(
                                     }
                                 }
                                 Text(stringResource(feature.label()), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                            }
                             }
                             }
                         }

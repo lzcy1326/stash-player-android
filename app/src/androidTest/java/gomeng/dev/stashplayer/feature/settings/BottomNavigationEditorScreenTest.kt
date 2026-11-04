@@ -44,7 +44,7 @@ class BottomNavigationEditorScreenTest {
         }
         compose.onNodeWithText("Explore").performTouchInput {
             down(center)
-            advanceEventTime(700)
+            advanceEventTime(220)
             moveBy(Offset(width * 1.2f, 0f))
             up()
         }
