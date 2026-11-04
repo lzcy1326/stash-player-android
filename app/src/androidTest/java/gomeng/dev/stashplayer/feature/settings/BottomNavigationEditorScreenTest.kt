@@ -251,6 +251,24 @@ class BottomNavigationEditorScreenTest {
         }
     }
 
+    @Test fun accessibilityMoveLeftStopsAtFirstEditableSlot() {
+        var saved: List<NavigationFeature>? = null
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, { saved = it })
+        }
+        val queue = SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions) and hasAnyDescendant(hasText("Queue"))
+        repeat(3) {
+            val actions = compose.onNode(queue, useUnmergedTree = true).fetchSemanticsNode().config[SemanticsActions.CustomActions]
+            compose.runOnIdle { org.junit.Assert.assertTrue(actions.first { it.label == "Move left" }.action()) }
+        }
+        val actions = compose.onNode(queue, useUnmergedTree = true).fetchSemanticsNode().config[SemanticsActions.CustomActions]
+        org.junit.Assert.assertEquals(listOf("Move right"), actions.map { it.label })
+        compose.onNodeWithText("Done").performClick()
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(listOf(NavigationFeature.Queue, NavigationFeature.Explore, NavigationFeature.Shorts, NavigationFeature.Gallery), saved)
+        }
+    }
+
     @Test fun cancellingDragRestoresOriginalOrder() {
         var saved: List<NavigationFeature>? = null
         compose.setContent {
