@@ -264,8 +264,8 @@ internal fun BottomNavigationEditorScreen(
                                         ids = ids - feature.id
                                     }) {
                                         Box(Modifier.fillMaxSize().padding(top = 2.dp, end = 2.dp), contentAlignment = Alignment.TopEnd) {
-                                            Box(Modifier.size(20.dp).background(MaterialTheme.colorScheme.error, CircleShape), contentAlignment = Alignment.Center) {
-                                                Text("−", color = MaterialTheme.colorScheme.onError, style = MaterialTheme.typography.labelMedium)
+                                            Box(Modifier.size(20.dp).background(Color(0xFFE52F2F), CircleShape), contentAlignment = Alignment.Center) {
+                                                Icon(Icons.Outlined.Remove, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
                                             }
                                         }
                                     }
@@ -302,8 +302,8 @@ internal fun BottomNavigationEditorScreen(
                             Box(contentAlignment = Alignment.TopEnd) {
                                 Icon(ghost.feature.icon(), null, Modifier.padding(top = 14.dp, end = 10.dp).size(28.dp))
                                 Box(Modifier.size(48.dp).padding(top = 2.dp, end = 2.dp), contentAlignment = Alignment.TopEnd) {
-                                    Box(Modifier.size(20.dp).background(MaterialTheme.colorScheme.error, CircleShape), contentAlignment = Alignment.Center) {
-                                        Text("−", color = MaterialTheme.colorScheme.onError, style = MaterialTheme.typography.labelMedium)
+                                    Box(Modifier.size(20.dp).background(Color(0xFFE52F2F), CircleShape), contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Outlined.Remove, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
                                     }
                                 }
                             }
@@ -327,7 +327,11 @@ internal fun BottomNavigationEditorScreen(
                                     AddNavigationFeatureResult.AtCapacity -> scope.launch { snackbar.showSnackbar(limitMessage) }
                                     AddNavigationFeatureResult.AlreadySelected -> Unit
                                 }
-                            }) { Text("+", Modifier.background(Color(0xFF4ADE80), CircleShape).padding(horizontal = 5.dp), color = Color.Black) }
+                            }) {
+                                Box(Modifier.size(20.dp).background(Color(0xFF56D484), CircleShape), contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
+                                }
+                            }
                         }
                     }
                 }
