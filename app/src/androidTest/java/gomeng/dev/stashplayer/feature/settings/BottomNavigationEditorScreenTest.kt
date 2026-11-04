@@ -148,6 +148,23 @@ class BottomNavigationEditorScreenTest {
         }
     }
 
+    @Test fun longPressOnFeatureIconReordersWithoutRemoving() {
+        var saved: List<NavigationFeature>? = null
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, { saved = it })
+        }
+        compose.onNodeWithContentDescription("Remove Explore").performTouchInput {
+            down(center)
+            advanceEventTime(220)
+            moveBy(Offset(width * 1.4f, 0f))
+            up()
+        }
+        compose.onNodeWithText("Done").assertIsEnabled().performClick()
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(listOf(NavigationFeature.Shorts, NavigationFeature.Explore, NavigationFeature.Gallery, NavigationFeature.Queue), saved)
+        }
+    }
+
     @Test fun secondFingerCancelsInProgressReorder() {
         var saved: List<NavigationFeature>? = null
         compose.setContent {
