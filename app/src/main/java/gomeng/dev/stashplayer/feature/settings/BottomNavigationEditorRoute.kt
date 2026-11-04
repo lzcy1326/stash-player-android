@@ -1,5 +1,10 @@
 package gomeng.dev.stashplayer.feature.settings
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -152,8 +157,14 @@ internal fun BottomNavigationEditorScreen(
                                 }
                             }
                             CompositionLocalProvider(LocalViewConfiguration provides dragViewConfiguration) {
+                            val visibility = remember { MutableTransitionState(false).apply { targetState = true } }
+                            AnimatedVisibility(
+                                visibleState = visibility,
+                                modifier = Modifier.weight(1f),
+                                enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 5 },
+                            ) {
                             Column(
-                                Modifier.weight(1f).zIndex(if (isDragging) 1f else 0f)
+                                Modifier.fillMaxWidth().zIndex(if (isDragging) 1f else 0f)
                                     .offset { IntOffset(if (isDragging) dragOffset.roundToInt() else (animatedPosition - index * slotWidthPx + releaseOffset.value).roundToInt(), 0) }
                                     .scale(scale)
                                     .shadow(if (isDragging) 6.dp else 0.dp)
@@ -209,6 +220,7 @@ internal fun BottomNavigationEditorScreen(
                                     }
                                 }
                                 Text(stringResource(feature.label()), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                            }
                             }
                             }
                             }

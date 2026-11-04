@@ -76,6 +76,25 @@ class BottomNavigationEditorScreenTest {
         }
     }
 
+    @Test fun addedFeatureSlidesIntoItsSlot() {
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})
+        }
+        compose.onNodeWithContentDescription("Remove Explore").performClick()
+        compose.waitForIdle()
+        compose.mainClock.autoAdvance = false
+        try {
+            compose.onNodeWithContentDescription("Add Performers").performClick()
+            compose.mainClock.advanceTimeBy(48)
+            val during = compose.onNodeWithText("Performers").getUnclippedBoundsInRoot().top
+            compose.mainClock.advanceTimeBy(1000)
+            val after = compose.onNodeWithText("Performers").getUnclippedBoundsInRoot().top
+            org.junit.Assert.assertTrue("added item should slide up: $during, $after", during > after)
+        } finally {
+            compose.mainClock.autoAdvance = true
+        }
+    }
+
     @Test fun releasedItemAnimatesBackToItsSlot() {
         compose.setContent {
             BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})
