@@ -148,6 +148,21 @@ class BottomNavigationEditorScreenTest {
         }
     }
 
+    @Test fun draggingPastEndStaysInsideEditableSlots() {
+        compose.setContent {
+            BottomNavigationEditorScreen(defaultNavigationFeatures, false, SnackbarHostState(), {}, {})
+        }
+        val lastSlot = compose.onNodeWithText("Queue").getUnclippedBoundsInRoot().left
+        compose.onNodeWithText("Explore").performTouchInput {
+            down(center)
+            advanceEventTime(220)
+            moveBy(Offset(width * 8f, 0f))
+        }
+        val dragged = compose.onNodeWithText("Explore").getUnclippedBoundsInRoot().left
+        compose.onNodeWithText("Explore").performTouchInput { up() }
+        org.junit.Assert.assertTrue("dragged item crossed the last editable slot: $dragged > $lastSlot", dragged <= lastSlot + 2.dp)
+    }
+
     @Test fun narrowScreenRemoveTargetsAreLargeAndSeparate() {
         compose.setContent {
             Box(Modifier.width(309.dp)) {

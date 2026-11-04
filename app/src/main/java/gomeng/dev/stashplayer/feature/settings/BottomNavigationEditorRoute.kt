@@ -223,7 +223,7 @@ internal fun BottomNavigationEditorScreen(
                                                         ids = moveNavigationFeature(now, from, target).map { it.id }
                                                         dragOffset -= (target - from) * slotWidthPx
                                                     }
-                                                    dragOffset = dragOffset.coerceIn(-slotWidthPx * from, slotWidthPx * (now.lastIndex - from))
+                                                    dragOffset = dragOffset.coerceIn(-slotWidthPx * target, slotWidthPx * (now.lastIndex - target))
                                                 }
                                             },
                                         )
