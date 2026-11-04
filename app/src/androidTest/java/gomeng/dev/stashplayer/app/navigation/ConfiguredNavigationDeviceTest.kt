@@ -29,9 +29,11 @@ class ConfiguredNavigationDeviceTest {
             compose.onNodeWithText("Performers").assertExists()
             compose.onNodeWithText("Studios").assertExists()
             compose.onNodeWithText("Performers").performClick()
-            compose.onNodeWithText("This feature is in development.").assertExists()
+            compose.onNodeWithText("Performers feature in development").assertExists()
+            compose.onNodeWithText("Browse and filter performers here in a future update.").assertExists()
             compose.onNodeWithText("Studios").performClick()
-            compose.onNodeWithText("This feature is in development.").assertExists()
+            compose.onNodeWithText("Studios feature in development").assertExists()
+            compose.onNodeWithText("Browse and filter studios here in a future update.").assertExists()
         } finally {
             runBlocking { repository.setBottomNavigationFeatures(original) }
         }

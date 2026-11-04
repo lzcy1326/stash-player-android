@@ -18,6 +18,10 @@
     <string name="navigation_performers_label">Performers</string>
     <string name="navigation_studios_label">Studios</string>
     <string name="navigation_placeholder_message">This feature is in development.</string>
+    <string name="navigation_performers_placeholder_title">Performers feature in development</string>
+    <string name="navigation_performers_placeholder_description">Browse and filter performers here in a future update.</string>
+    <string name="navigation_studios_placeholder_title">Studios feature in development</string>
+    <string name="navigation_studios_placeholder_description">Browse and filter studios here in a future update.</string>
     <string name="app_name">Stash Player</string>
     <string name="navigation_home_label">Home</string>
     <string name="navigation_browse_label">Browse</string>

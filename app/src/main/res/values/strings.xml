@@ -18,6 +18,10 @@
     <string name="navigation_performers_label">출연자</string>
     <string name="navigation_studios_label">제작사</string>
     <string name="navigation_placeholder_message">이 기능은 개발 중입니다.</string>
+    <string name="navigation_performers_placeholder_title">배우 기능 개발 중</string>
+    <string name="navigation_performers_placeholder_description">이곳에서 배우를 탐색하고 필터링할 수 있습니다.</string>
+    <string name="navigation_studios_placeholder_title">제작사 기능 개발 중</string>
+    <string name="navigation_studios_placeholder_description">이곳에서 제작사를 탐색하고 필터링할 수 있습니다.</string>
     <string name="app_name">Stash Player</string>
     <string name="navigation_home_label">홈</string>
     <string name="navigation_browse_label">둘러보기</string>

@@ -18,6 +18,10 @@
     <string name="navigation_performers_label">演員</string>
     <string name="navigation_studios_label">廠商</string>
     <string name="navigation_placeholder_message">功能正在開發中</string>
+    <string name="navigation_performers_placeholder_title">演員功能正在開發</string>
+    <string name="navigation_performers_placeholder_description">後續將在這裡瀏覽和篩選演員</string>
+    <string name="navigation_studios_placeholder_title">片商功能正在開發</string>
+    <string name="navigation_studios_placeholder_description">後續將在這裡瀏覽和篩選片商</string>
     <string name="app_name">Stash Player</string>
     <string name="navigation_home_label">首頁</string>
     <string name="navigation_browse_label">瀏覽</string>

@@ -139,7 +139,13 @@ private fun TopLevelPlaceholder(destination: TopLevelDestination) {
     ) {
         androidx.compose.material3.Icon(destination.icon, contentDescription = null, modifier = Modifier.size(56.dp))
         Text(stringResource(destination.labelRes), style = MaterialTheme.typography.headlineMedium)
-        Text(stringResource(R.string.navigation_placeholder_message), style = MaterialTheme.typography.bodyMedium)
+        val (title, description) = when (destination) {
+            TopLevelDestination.Performers -> R.string.navigation_performers_placeholder_title to R.string.navigation_performers_placeholder_description
+            TopLevelDestination.Studios -> R.string.navigation_studios_placeholder_title to R.string.navigation_studios_placeholder_description
+            else -> return@Column
+        }
+        Text(stringResource(title), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(description), style = MaterialTheme.typography.bodyMedium)
     }
 }
 
