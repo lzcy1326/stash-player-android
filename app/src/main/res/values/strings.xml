@@ -1185,5 +1185,15 @@
     <string name="player_screen_size_section">화면 비율</string>
     <string name="player_orientation_section">화면 방향</string>
     <string name="player_stream_section">스트림</string>
+    <string name="performers_title">배우</string>
+    <string name="performers_search">검색</string>
+    <string name="performers_refresh">새로고침</string>
+    <string name="performers_retry">다시 시도</string>
+    <string name="performers_empty">배우가 없습니다</string>
+    <string name="performers_load_more">더 보기</string>
+    <string name="performers_favorite">즐겨찾기</string>
+    <string name="performers_scene_count">영상 %1$d개</string>
+    <string name="performers_age">%1$d세</string>
+    <string name="performers_load_error">배우를 불러오지 못했습니다</string>
 </resources>
 

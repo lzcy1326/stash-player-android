@@ -3,6 +3,8 @@ package gomeng.dev.stashplayer.core.network
 import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import java.time.LocalDate
+import java.time.Period
 
 /** Minimal list response, separate from the existing id/name entity selector. */
 data class StashPerformerCard(
@@ -20,6 +22,19 @@ data class StashPerformerCard(
 )
 
 data class StashPerformerPage(val performers: List<StashPerformerCard>, val count: Int)
+
+internal fun performerAge(birthdate: String?, deathDate: String?, today: LocalDate = LocalDate.now()): Int? {
+    val birth = birthdate?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return null
+    val end = deathDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: today
+    if (end.isBefore(birth) || end.isAfter(today)) return null
+    return Period.between(birth, end).years
+}
+
+internal fun performerCountryFlag(country: String?): String? {
+    val code = country?.uppercase(java.util.Locale.ROOT) ?: return null
+    if (code.length != 2 || code.any { it !in 'A'..'Z' }) return null
+    return code.map { Character.toChars(0x1F1E6 + (it - 'A')).concatToString() }.joinToString("")
+}
 
 internal val performerCardsQuery = """
     query PerformerCards(${'$'}filter: FindFilterType, ${'$'}performerFilter: PerformerFilterType) {

@@ -1184,4 +1184,14 @@
     <string name="player_screen_size_section">Screen size</string>
     <string name="player_orientation_section">Screen orientation</string>
     <string name="player_stream_section">Stream</string>
+    <string name="performers_title">Performers</string>
+    <string name="performers_search">Search</string>
+    <string name="performers_refresh">Refresh</string>
+    <string name="performers_retry">Retry</string>
+    <string name="performers_empty">No performers found</string>
+    <string name="performers_load_more">Load more</string>
+    <string name="performers_favorite">Favorite</string>
+    <string name="performers_scene_count">%1$d scenes</string>
+    <string name="performers_age">Age %1$d</string>
+    <string name="performers_load_error">Could not load performers</string>
 </resources>

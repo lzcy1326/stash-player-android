@@ -93,6 +93,7 @@ import gomeng.dev.stashplayer.core.ui.theme.StashUiScaleProvider
 import gomeng.dev.stashplayer.feature.gallery.GalleryDetailRoute
 import gomeng.dev.stashplayer.feature.gallery.GalleryPhotoViewerOverlay
 import gomeng.dev.stashplayer.feature.gallery.GalleryRoute
+import gomeng.dev.stashplayer.feature.performers.PerformersRoute
 import gomeng.dev.stashplayer.feature.home.HomeRoute
 import gomeng.dev.stashplayer.feature.player.PlayerRoute
 import gomeng.dev.stashplayer.feature.queue.QueueRoute
@@ -639,7 +640,7 @@ fun StashNavHost(
                         )
                     }
                     composable(TopLevelDestination.Performers.route) {
-                        TopLevelPlaceholder(TopLevelDestination.Performers)
+                        PerformersRoute(profile = runtimeProfile)
                     }
                     composable(TopLevelDestination.Studios.route) {
                         TopLevelPlaceholder(TopLevelDestination.Studios)

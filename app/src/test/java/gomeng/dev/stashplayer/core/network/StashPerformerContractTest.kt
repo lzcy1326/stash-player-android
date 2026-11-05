@@ -6,8 +6,19 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
 
 class StashPerformerContractTest {
+    @Test fun `age respects birthdays and unknown or invalid dates`() {
+        val today = LocalDate.of(2026, 11, 5)
+        assertEquals(25, performerAge("2000-11-06", null, today))
+        assertEquals(26, performerAge("2000-11-05", null, today))
+        assertEquals(20, performerAge("2000-01-01", "2020-06-01", today))
+        assertNull(performerAge("2000", null, today))
+        assertNull(performerAge("2030-01-01", null, today))
+        assertNull(performerCountryFlag("unknown"))
+        assertEquals("🇯🇵", performerCountryFlag("jp"))
+    }
     @Test fun `list parses minimal and nullable data without losing aliases or count`() {
         val result = parsePerformerCards(
             """{"data":{"findPerformers":{"count":2,"performers":[

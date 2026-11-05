@@ -1183,4 +1183,14 @@
     <string name="player_screen_size_section">畫面比例</string>
     <string name="player_orientation_section">螢幕方向</string>
     <string name="player_stream_section">播放來源</string>
+    <string name="performers_title">演員</string>
+    <string name="performers_search">搜尋</string>
+    <string name="performers_refresh">重新整理</string>
+    <string name="performers_retry">重試</string>
+    <string name="performers_empty">沒有找到演員</string>
+    <string name="performers_load_more">載入更多</string>
+    <string name="performers_favorite">已收藏</string>
+    <string name="performers_scene_count">%1$d 部影片</string>
+    <string name="performers_age">%1$d 歲</string>
+    <string name="performers_load_error">演員載入失敗</string>
 </resources>

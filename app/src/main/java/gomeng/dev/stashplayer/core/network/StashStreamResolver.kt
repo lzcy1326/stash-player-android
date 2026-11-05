@@ -483,6 +483,17 @@ class StashGraphQlClient(
         return parseFindPerformersResponse(execute(FIND_PERFORMERS_QUERY, buildFindTagsVariables(perPage, page, query)))
     }
 
+    suspend fun findPerformerCardsPage(
+        page: Int = 1,
+        perPage: Int = 40,
+        query: String? = null,
+        sort: String = "name",
+        direction: String = "ASC",
+        performerFilter: Map<String, Any?>? = null,
+    ): StashPerformerPage = parsePerformerCards(
+        execute(performerCardsQuery, performerCardsVariables(page, perPage, query, sort, direction, performerFilter)),
+    )
+
     suspend fun findSceneEntities(
         perPage: Int = 50,
         page: Int = 1,
