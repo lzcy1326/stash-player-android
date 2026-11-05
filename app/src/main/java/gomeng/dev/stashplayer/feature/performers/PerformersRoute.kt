@@ -1,6 +1,7 @@
 package gomeng.dev.stashplayer.feature.performers
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.core.network.StashGraphQlClient
 import gomeng.dev.stashplayer.core.network.StashPerformerCard
@@ -60,32 +62,58 @@ import kotlinx.coroutines.isActive
 
 private const val PERFORMERS_PAGE_SIZE = 40
 
+internal data class PerformerRequestKey(val profile: StashServerProfile, val query: String, val page: Int, val refresh: Int, val retry: Int)
+
+internal class PerformerListViewModel : ViewModel() {
+    var input by mutableStateOf("")
+    var query by mutableStateOf("")
+    var refresh by mutableIntStateOf(0)
+    var retry by mutableIntStateOf(0)
+    var requestSerial by mutableIntStateOf(0)
+    var page by mutableIntStateOf(1)
+    var items by mutableStateOf(emptyList<StashPerformerCard>())
+    var count by mutableIntStateOf(0)
+    var hasMore by mutableStateOf(false)
+    var loading by mutableStateOf(false)
+    var error by mutableStateOf(false)
+    var resetScroll by mutableStateOf(false)
+    var activeProfile: StashServerProfile? = null
+    var lastSuccess: PerformerRequestKey? = null
+}
+
 @Composable
 fun PerformersRoute(
     profile: StashServerProfile?,
     modifier: Modifier = Modifier,
+    onOpenPerformer: (String, Boolean) -> Unit = { _, _ -> },
     loadPage: suspend (StashServerProfile, Int, String) -> StashPerformerPage = { server, page, query ->
         StashGraphQlClient(server).findPerformerCardsPage(page = page, query = query)
     },
 ) {
-    var input by rememberSaveable { mutableStateOf("") }
-    var query by rememberSaveable { mutableStateOf("") }
-    var refresh by remember { mutableIntStateOf(0) }
-    var retry by remember { mutableIntStateOf(0) }
-    var requestSerial by remember { mutableIntStateOf(0) }
-    var page by remember { mutableIntStateOf(1) }
-    var items by remember(profile) { mutableStateOf(emptyList<StashPerformerCard>()) }
-    var count by remember(profile) { mutableIntStateOf(0) }
-    var hasMore by remember(profile) { mutableStateOf(false) }
-    var loading by remember(profile) { mutableStateOf(false) }
-    var error by remember(profile) { mutableStateOf(false) }
+    val state: PerformerListViewModel = viewModel()
+    var input by state::input
+    var query by state::query
+    var refresh by state::refresh
+    var retry by state::retry
+    var requestSerial by state::requestSerial
+    var page by state::page
+    var items by state::items
+    var count by state::count
+    var hasMore by state::hasMore
+    var loading by state::loading
+    var error by state::error
+    var resetScroll by state::resetScroll
     val gridState = rememberLazyGridState()
 
     LaunchedEffect(profile) {
-        page = 1
-        items = emptyList()
-        count = 0
-        hasMore = false
+        if (state.activeProfile != profile) {
+            state.activeProfile = profile
+            state.lastSuccess = null
+            page = 1
+            items = emptyList()
+            count = 0
+            hasMore = false
+        }
     }
     LaunchedEffect(input) {
         delay(300)
@@ -93,6 +121,7 @@ fun PerformersRoute(
         if (query != nextQuery) {
             page = 1
             items = emptyList()
+            resetScroll = true
             query = nextQuery
         }
     }
@@ -100,6 +129,8 @@ fun PerformersRoute(
         val serial = ++requestSerial
         error = false
         if (profile == null) return@LaunchedEffect
+        val key = PerformerRequestKey(profile, query, page, refresh, retry)
+        if (key == state.lastSuccess) return@LaunchedEffect
         loading = true
         try {
             val result = loadPage(profile, page, query)
@@ -107,7 +138,11 @@ fun PerformersRoute(
             items = if (page == 1) result.performers else (items + result.performers).distinctBy { it.id }
             count = result.count
             hasMore = result.performers.isNotEmpty() && page * PERFORMERS_PAGE_SIZE < count
-            if (page == 1) gridState.scrollToItem(0)
+            state.lastSuccess = key
+            if (page == 1 && resetScroll) {
+                gridState.scrollToItem(0)
+                resetScroll = false
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -120,7 +155,7 @@ fun PerformersRoute(
     Column(modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.performers_title), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
-            TextButton(onClick = { page = 1; refresh++ }, enabled = !loading) { Text(stringResource(R.string.performers_refresh)) }
+            TextButton(onClick = { page = 1; resetScroll = true; refresh++ }, enabled = !loading) { Text(stringResource(R.string.performers_refresh)) }
         }
         OutlinedTextField(
             value = input, onValueChange = { input = it }, singleLine = true,
@@ -140,7 +175,9 @@ fun PerformersRoute(
             horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize().testTag("performers-grid"),
         ) {
-            items(items, key = { it.id }) { performer -> PerformerListCard(performer, profile) }
+            items(items, key = { it.id }) { performer ->
+                PerformerListCard(performer, profile, onOpenPerformer)
+            }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     when {
@@ -156,9 +193,13 @@ fun PerformersRoute(
 }
 
 @Composable
-private fun PerformerListCard(performer: StashPerformerCard, profile: StashServerProfile?) {
+private fun PerformerListCard(
+    performer: StashPerformerCard,
+    profile: StashServerProfile?,
+    onOpenPerformer: (String, Boolean) -> Unit,
+) {
     Column {
-        Box(Modifier.fillMaxWidth().aspectRatio(0.7f).background(MaterialTheme.colorScheme.surfaceVariant)) {
+        Box(Modifier.fillMaxWidth().aspectRatio(0.7f).background(MaterialTheme.colorScheme.surfaceVariant).clickable { onOpenPerformer(performer.id, false) }) {
             if (performer.imagePath != null) {
                 AsyncImage(
                     model = rememberStashThumbnailModel(performer.imagePath, profile), contentDescription = null,
@@ -181,10 +222,12 @@ private fun PerformerListCard(performer: StashPerformerCard, profile: StashServe
             "FEMALE", "TRANSGENDER_FEMALE" -> "♀ "
             else -> ""
         }
-        Text(gender + performer.name, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(gender + performer.name, modifier = Modifier.clickable { onOpenPerformer(performer.id, false) }, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
         performerAge(performer.birthdate, performer.deathDate)?.let { age ->
             Text(stringResource(R.string.performers_age, age), style = MaterialTheme.typography.bodySmall)
         }
-        Text(stringResource(R.string.performers_scene_count, performer.sceneCount), style = MaterialTheme.typography.bodySmall)
+        TextButton(onClick = { onOpenPerformer(performer.id, true) }, contentPadding = PaddingValues(0.dp)) {
+            Text(stringResource(R.string.performers_scene_count, performer.sceneCount), style = MaterialTheme.typography.bodySmall)
+        }
     }
 }

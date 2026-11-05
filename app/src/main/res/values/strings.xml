@@ -1195,5 +1195,32 @@
     <string name="performers_scene_count">영상 %1$d개</string>
     <string name="performers_age">%1$d세</string>
     <string name="performers_load_error">배우를 불러오지 못했습니다</string>
+    <string name="performer_back">뒤로</string>
+    <string name="performer_hide_info">정보 접기</string>
+    <string name="performer_show_info">정보 펼치기</string>
+    <string name="performer_show_details">상세 정보</string>
+    <string name="performer_hide_details">상세 정보 접기</string>
+    <string name="performer_scenes">영상</string>
+    <string name="performer_detail_error">배우 정보를 불러오지 못했습니다</string>
+    <string name="performer_scenes_error">영상 정보를 불러오지 못했습니다</string>
+    <string name="performer_summary">영상 %1$d개 · %2$s · %3$s</string>
+    <string name="performer_scenes_in_progress">영상 기능 개발 중</string>
+    <string name="performer_close">닫기</string>
+    <string name="performer_birthdate">생년월일</string>
+    <string name="performer_height">키</string>
+    <string name="performer_measurements">신체 치수</string>
+    <string name="performer_ethnicity">인종</string>
+    <string name="performer_hair">머리색</string>
+    <string name="performer_eyes">눈 색깔</string>
+    <string name="performer_career">활동 시기</string>
+    <string name="performer_bio">소개</string>
+    <string name="performer_tags">태그</string>
+    <string name="performer_stash_ids">Stash ID</string>
+    <string name="performer_gender_male">남성</string>
+    <string name="performer_gender_female">여성</string>
+    <string name="performer_gender_trans_male">트랜스젠더 남성</string>
+    <string name="performer_gender_trans_female">트랜스젠더 여성</string>
+    <string name="performer_gender_intersex">인터섹스</string>
+    <string name="performer_gender_non_binary">논바이너리</string>
 </resources>
 

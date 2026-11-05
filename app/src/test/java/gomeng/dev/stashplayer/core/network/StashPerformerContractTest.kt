@@ -38,6 +38,22 @@ class StashPerformerContractTest {
         assertThrows(IllegalStateException::class.java) { parsePerformerCards("""{"data":{}}""") }
     }
 
+    @Test fun `detail and scene summary preserve optional fields and aggregates`() {
+        val detail = parsePerformerDetail("""{"data":{"findPerformer":{
+            "id":"1","name":"Example","alias_list":["Alias"],"favorite":false,"scene_count":2,
+            "height_cm":165,"urls":["https://example.test"],"tags":[{"name":"Tag"}],
+            "stash_ids":[{"endpoint":"https://example.test/graphql","stash_id":"abc"}]
+        }}}""")!!
+        assertEquals(165, detail.heightCm)
+        assertEquals(listOf("Tag"), detail.tags)
+        assertEquals(listOf("https://example.test/graphql: abc"), detail.stashIds)
+        assertNull(detail.eyeColor)
+        assertNull(parsePerformerDetail("""{"data":{"findPerformer":null}}"""))
+        assertThrows(IllegalStateException::class.java) { parsePerformerDetail("""{"data":null}""") }
+        val summary = parsePerformerSceneSummary("""{"data":{"findScenes":{"count":2,"duration":125.5,"filesize":5000.0}}}""")
+        assertEquals(StashPerformerSceneSummary(2, 125.5, 5000.0), summary)
+    }
+
     @Test fun `required performer survives user filters and clearing them`() {
         val userFilter = mapOf("rating100" to mapOf("value" to 70, "modifier" to "GREATER_THAN"))
         val combined = withRequiredPerformer(userFilter, " 42 ")

@@ -23,6 +23,41 @@ data class StashPerformerCard(
 
 data class StashPerformerPage(val performers: List<StashPerformerCard>, val count: Int)
 
+data class StashPerformerDetail(
+    val card: StashPerformerCard,
+    val urls: List<String>,
+    val ethnicity: String?,
+    val eyeColor: String?,
+    val heightCm: Int?,
+    val measurements: String?,
+    val careerStart: String?,
+    val careerEnd: String?,
+    val hairColor: String?,
+    val details: String?,
+    val tags: List<String>,
+    val stashIds: List<String>,
+)
+
+data class StashPerformerSceneSummary(val count: Int, val durationSeconds: Double, val sizeBytes: Double)
+
+internal val performerDetailQuery = """
+    query PerformerDetail(${'$'}id: ID!) {
+      findPerformer(id: ${'$'}id) {
+        id name alias_list image_path gender country birthdate death_date favorite rating100 scene_count
+        urls ethnicity eye_color height_cm measurements career_start career_end hair_color details
+        tags { name } stash_ids { endpoint stash_id }
+      }
+    }
+""".trimIndent()
+
+internal val performerSummaryQuery = """
+    query PerformerSceneSummary(${'$'}id: ID!) {
+      findScenes(filter: { page: 1, per_page: 1 }, scene_filter: { performers: { value: [${'$'}id], modifier: INCLUDES } }) {
+        count duration filesize
+      }
+    }
+""".trimIndent()
+
 internal fun performerAge(birthdate: String?, deathDate: String?, today: LocalDate = LocalDate.now()): Int? {
     val birth = birthdate?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return null
     val end = deathDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: today
@@ -84,27 +119,44 @@ internal fun parsePerformerCards(json: String): StashPerformerPage {
     val result = response.data?.findPerformers ?: error("Missing performer data")
     return StashPerformerPage(
         count = result.count,
-        performers = result.performers.map { performer ->
-            StashPerformerCard(
-                id = performer.id,
-                name = performer.name,
-                aliases = performer.aliasList,
-                imagePath = performer.imagePath,
-                gender = performer.gender,
-                country = performer.country,
-                birthdate = performer.birthdate,
-                deathDate = performer.deathDate,
-                favorite = performer.favorite,
-                rating100 = performer.rating100,
-                sceneCount = performer.sceneCount,
-            )
-        },
+        performers = result.performers.map(PerformerPayload::toCard),
     )
 }
+
+internal fun parsePerformerDetail(json: String): StashPerformerDetail? {
+    val response = performerMoshi.adapter(PerformerDetailEnvelope::class.java).fromJson(json)
+        ?: error("Empty GraphQL response")
+    response.errors?.firstOrNull()?.message?.let { error("GraphQL error: ${redactStashCredentialText(it)}") }
+    val p = (response.data ?: error("Missing performer data")).findPerformer ?: return null
+    return StashPerformerDetail(
+        p.toCard(), p.urls.orEmpty(), p.ethnicity, p.eyeColor, p.heightCm, p.measurements,
+        p.careerStart, p.careerEnd, p.hairColor, p.details,
+        p.tags.map { it.name }, p.stashIds.map { "${it.endpoint}: ${it.stashId}" },
+    )
+}
+
+internal fun parsePerformerSceneSummary(json: String): StashPerformerSceneSummary {
+    val response = performerMoshi.adapter(PerformerSummaryEnvelope::class.java).fromJson(json)
+        ?: error("Empty GraphQL response")
+    response.errors?.firstOrNull()?.message?.let { error("GraphQL error: ${redactStashCredentialText(it)}") }
+    val result = response.data?.findScenes ?: error("Missing scene summary")
+    return StashPerformerSceneSummary(result.count, result.duration, result.filesize)
+}
+
+private fun PerformerPayload.toCard() = StashPerformerCard(
+    id, name, aliasList, imagePath, gender, country, birthdate, deathDate, favorite, rating100, sceneCount,
+)
 
 private data class PerformerEnvelope(val data: PerformerData? = null, val errors: List<PerformerError>? = null)
 private data class PerformerError(val message: String)
 private data class PerformerData(val findPerformers: PerformerResult? = null)
+private data class PerformerDetailEnvelope(val data: PerformerDetailData? = null, val errors: List<PerformerError>? = null)
+private data class PerformerDetailData(val findPerformer: PerformerPayload? = null)
+private data class PerformerSummaryEnvelope(val data: PerformerSummaryData? = null, val errors: List<PerformerError>? = null)
+private data class PerformerSummaryData(val findScenes: PerformerSummaryPayload? = null)
+private data class PerformerSummaryPayload(val count: Int, val duration: Double, val filesize: Double)
+private data class PerformerTag(val name: String)
+private data class PerformerStashId(val endpoint: String, @Json(name = "stash_id") val stashId: String)
 private data class PerformerResult(val count: Int, val performers: List<PerformerPayload>)
 private data class PerformerPayload(
     val id: String,
@@ -118,4 +170,15 @@ private data class PerformerPayload(
     val favorite: Boolean = false,
     val rating100: Int? = null,
     @Json(name = "scene_count") val sceneCount: Int = 0,
+    val urls: List<String>? = null,
+    val ethnicity: String? = null,
+    @Json(name = "eye_color") val eyeColor: String? = null,
+    @Json(name = "height_cm") val heightCm: Int? = null,
+    val measurements: String? = null,
+    @Json(name = "career_start") val careerStart: String? = null,
+    @Json(name = "career_end") val careerEnd: String? = null,
+    @Json(name = "hair_color") val hairColor: String? = null,
+    val details: String? = null,
+    val tags: List<PerformerTag> = emptyList(),
+    @Json(name = "stash_ids") val stashIds: List<PerformerStashId> = emptyList(),
 )

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
+import android.net.Uri
 import gomeng.dev.stashplayer.core.ui.components.openSupportUrl
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
@@ -94,6 +95,7 @@ import gomeng.dev.stashplayer.feature.gallery.GalleryDetailRoute
 import gomeng.dev.stashplayer.feature.gallery.GalleryPhotoViewerOverlay
 import gomeng.dev.stashplayer.feature.gallery.GalleryRoute
 import gomeng.dev.stashplayer.feature.performers.PerformersRoute
+import gomeng.dev.stashplayer.feature.performers.PerformerDetailRoute
 import gomeng.dev.stashplayer.feature.home.HomeRoute
 import gomeng.dev.stashplayer.feature.player.PlayerRoute
 import gomeng.dev.stashplayer.feature.queue.QueueRoute
@@ -640,7 +642,17 @@ fun StashNavHost(
                         )
                     }
                     composable(TopLevelDestination.Performers.route) {
-                        PerformersRoute(profile = runtimeProfile)
+                        PerformersRoute(profile = runtimeProfile, onOpenPerformer = { id, scenes ->
+                            navController.navigate("performer/${Uri.encode(id)}/${if (scenes) "scenes" else "profile"}")
+                        })
+                    }
+                    composable("performer/{performerId}/{section}") { entry ->
+                        PerformerDetailRoute(
+                            performerId = entry.arguments?.getString("performerId").orEmpty(),
+                            showScenes = entry.arguments?.getString("section") == "scenes",
+                            profile = runtimeProfile,
+                            onBack = { navController.popBackStack() },
+                        )
                     }
                     composable(TopLevelDestination.Studios.route) {
                         TopLevelPlaceholder(TopLevelDestination.Studios)

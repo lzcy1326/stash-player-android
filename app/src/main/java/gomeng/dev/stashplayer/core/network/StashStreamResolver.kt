@@ -494,6 +494,12 @@ class StashGraphQlClient(
         execute(performerCardsQuery, performerCardsVariables(page, perPage, query, sort, direction, performerFilter)),
     )
 
+    suspend fun findPerformerDetail(id: String): StashPerformerDetail? =
+        parsePerformerDetail(execute(performerDetailQuery, mapOf("id" to id)))
+
+    suspend fun findPerformerSceneSummary(id: String): StashPerformerSceneSummary =
+        parsePerformerSceneSummary(execute(performerSummaryQuery, mapOf("id" to id)))
+
     suspend fun findSceneEntities(
         perPage: Int = 50,
         page: Int = 1,
