@@ -5,6 +5,7 @@ import gomeng.dev.stashplayer.core.model.SceneCardModel
 import gomeng.dev.stashplayer.core.model.SimilarSceneRecommendation
 import gomeng.dev.stashplayer.core.model.StashSortDirection
 import gomeng.dev.stashplayer.core.model.StashVideoFilterState
+import gomeng.dev.stashplayer.core.network.StashServerProfile
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import gomeng.dev.stashplayer.R
@@ -43,6 +44,18 @@ sealed interface PlayerPlaybackQueueContinuation {
         override val pageSize: Int,
         override val hasMore: Boolean,
     ) : PlayerPlaybackQueueContinuation
+
+    data class Performer(
+        val profile: StashServerProfile,
+        val performerId: String,
+        val query: String,
+        val sort: String,
+        val direction: StashSortDirection,
+        val videoFilter: StashVideoFilterState,
+        override val nextPage: Int,
+        override val pageSize: Int,
+        override val hasMore: Boolean,
+    ) : PlayerPlaybackQueueContinuation
 }
 
 fun PlayerPlaybackQueueContinuation.afterLoadedPage(
@@ -54,6 +67,7 @@ fun PlayerPlaybackQueueContinuation.afterLoadedPage(
     return when (this) {
         is PlayerPlaybackQueueContinuation.Browse -> copy(nextPage = nextPage, hasMore = hasMore)
         is PlayerPlaybackQueueContinuation.Explore -> copy(nextPage = nextPage, hasMore = hasMore)
+        is PlayerPlaybackQueueContinuation.Performer -> copy(nextPage = nextPage, hasMore = hasMore)
     }
 }
 

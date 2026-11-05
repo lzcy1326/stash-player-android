@@ -1222,5 +1222,16 @@
     <string name="performer_gender_trans_female">트랜스젠더 여성</string>
     <string name="performer_gender_intersex">인터섹스</string>
     <string name="performer_gender_non_binary">논바이너리</string>
+    <string name="performer_scene_search">영상 검색</string>
+    <string name="performer_scene_sort">정렬</string>
+    <string name="performer_scenes_empty">영상이 없습니다</string>
+    <string name="performer_scene_filter">필터 (%1$d)</string>
+    <string name="performer_scene_filter_title">영상 필터</string>
+    <string name="performer_scene_date_duration">날짜, 길이 및 재생</string>
+    <string name="performer_scene_rating_format">평점 및 형식</string>
+    <string name="performer_scene_favorites_on">즐겨찾기만: 켜짐</string>
+    <string name="performer_scene_favorites_off">즐겨찾기만: 꺼짐</string>
+    <string name="performer_scene_clear_filters">필터 지우기</string>
+    <string name="performer_tags_error">태그를 불러오지 못했습니다</string>
 </resources>
 

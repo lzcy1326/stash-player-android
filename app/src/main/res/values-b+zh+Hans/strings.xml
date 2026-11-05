@@ -1220,4 +1220,15 @@
     <string name="performer_gender_trans_female">跨性别女性</string>
     <string name="performer_gender_intersex">双性人</string>
     <string name="performer_gender_non_binary">非二元性别</string>
+    <string name="performer_scene_search">搜索影片</string>
+    <string name="performer_scene_sort">排序</string>
+    <string name="performer_scenes_empty">没有找到影片</string>
+    <string name="performer_scene_filter">筛选（%1$d）</string>
+    <string name="performer_scene_filter_title">影片筛选</string>
+    <string name="performer_scene_date_duration">日期、时长和播放状态</string>
+    <string name="performer_scene_rating_format">评分和格式</string>
+    <string name="performer_scene_favorites_on">仅收藏：开</string>
+    <string name="performer_scene_favorites_off">仅收藏：关</string>
+    <string name="performer_scene_clear_filters">清除筛选</string>
+    <string name="performer_tags_error">标签加载失败</string>
 </resources>

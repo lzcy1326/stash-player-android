@@ -4,16 +4,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gomeng.dev.stashplayer.core.network.StashPerformerCard
 import gomeng.dev.stashplayer.core.network.StashPerformerDetail
 import gomeng.dev.stashplayer.core.network.StashPerformerSceneSummary
 import gomeng.dev.stashplayer.core.network.StashServerProfile
+import gomeng.dev.stashplayer.core.network.StashSceneCardPage
+import gomeng.dev.stashplayer.core.model.SceneCardModel
+import gomeng.dev.stashplayer.core.player.PlayerPlaybackQueueContinuation
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import org.junit.Rule
 import org.junit.Test
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -27,6 +34,7 @@ class PerformerDetailRouteDeviceTest {
                 PerformerDetailRoute("1", false, StashServerProfile(baseUrl = "http://localhost"), {},
                     loadDetail = { _, _ -> if (attempts.incrementAndGet() == 1) error("offline") else detail() },
                     loadSummary = { _, _ -> StashPerformerSceneSummary(2, 120.0, 1024.0) },
+                    loadScenes = { _, _, _, _, _, _, _ -> StashSceneCardPage(emptyList(), 0) },
                 )
             }
         }
@@ -44,6 +52,7 @@ class PerformerDetailRouteDeviceTest {
                 PerformerDetailRoute("1", false, StashServerProfile(baseUrl = "http://localhost"), {},
                     loadDetail = { _, _ -> detail() },
                     loadSummary = { _, _ -> if (attempts.incrementAndGet() == 1) error("offline") else StashPerformerSceneSummary(2, 120.0, 1024.0) },
+                    loadScenes = { _, _, _, _, _, _, _ -> StashSceneCardPage(emptyList(), 0) },
                 )
             }
         }
@@ -51,6 +60,32 @@ class PerformerDetailRouteDeviceTest {
         assertTrue(compose.onAllNodes(hasText("Example")).fetchSemanticsNodes().isNotEmpty())
         compose.onNodeWithText("Retry").performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("2 scenes · 02:00 · 1.0 KB")).fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    @Test fun scenePlaybackCapturesPerformerAndPagingContext() {
+        val continuation = AtomicReference<PlayerPlaybackQueueContinuation?>()
+        val requestedPerformer = AtomicReference<String>()
+        compose.setContent {
+            MaterialTheme {
+                PerformerDetailRoute("42", true, StashServerProfile(baseUrl = "http://localhost"), {},
+                    onOpenScene = { _, _, _, next -> continuation.set(next) },
+                    loadDetail = { _, _ -> detail() },
+                    loadSummary = { _, _ -> StashPerformerSceneSummary(13, 120.0, 1024.0) },
+                    loadScenes = { _, id, _, _, _, _, _ ->
+                        requestedPerformer.set(id)
+                        StashSceneCardPage((1..12).map { SceneCardModel("$it", "Scene $it", "", "", 0f) }, 13)
+                    },
+                )
+            }
+        }
+        compose.waitUntil(10_000) { requestedPerformer.get() != null }
+        compose.onNodeWithTag("performer-detail-list").performScrollToNode(hasText("Scene 1"))
+        compose.onNodeWithText("Scene 1").performClick()
+        val next = continuation.get() as PlayerPlaybackQueueContinuation.Performer
+        assertEquals("42", requestedPerformer.get())
+        assertEquals("42", next.performerId)
+        assertEquals(2, next.nextPage)
+        assertTrue(next.hasMore)
     }
 
     private fun detail() = StashPerformerDetail(

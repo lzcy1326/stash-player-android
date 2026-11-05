@@ -270,6 +270,9 @@ fun PlayerRoute(
 ) {
     val context = LocalContext.current
     val settingsRepository = remember(context) { StashSettingsRepository(context) }
+    LaunchedEffect(sceneId) {
+        onPlaylistDrawerOpen(sceneId, 2)
+    }
     val profile by settingsRepository.serverProfile.collectAsState(initial = null)
     val playerDebugOverlayEnabled by settingsRepository.playerDebugOverlayEnabled.collectAsState(
         initial = StashSettingsRepository.DEFAULT_PLAYER_DEBUG_OVERLAY_ENABLED,

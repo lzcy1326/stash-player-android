@@ -1221,4 +1221,15 @@
     <string name="performer_gender_trans_female">Transgender female</string>
     <string name="performer_gender_intersex">Intersex</string>
     <string name="performer_gender_non_binary">Non-binary</string>
+    <string name="performer_scene_search">Search scenes</string>
+    <string name="performer_scene_sort">Sort</string>
+    <string name="performer_scenes_empty">No scenes found</string>
+    <string name="performer_scene_filter">Filters (%1$d)</string>
+    <string name="performer_scene_filter_title">Scene filters</string>
+    <string name="performer_scene_date_duration">Date, duration and playback</string>
+    <string name="performer_scene_rating_format">Rating and format</string>
+    <string name="performer_scene_favorites_on">Favorites only: on</string>
+    <string name="performer_scene_favorites_off">Favorites only: off</string>
+    <string name="performer_scene_clear_filters">Clear filters</string>
+    <string name="performer_tags_error">Could not load tags</string>
 </resources>

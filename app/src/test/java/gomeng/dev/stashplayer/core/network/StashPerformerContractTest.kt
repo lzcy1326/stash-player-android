@@ -7,6 +7,11 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
+import gomeng.dev.stashplayer.core.model.StashRatingRange
+import gomeng.dev.stashplayer.core.model.StashSortDirection
+import gomeng.dev.stashplayer.core.model.StashVideoFilterState
+import gomeng.dev.stashplayer.core.player.PlayerPlaybackQueueContinuation
+import gomeng.dev.stashplayer.core.player.afterLoadedPage
 
 class StashPerformerContractTest {
     @Test fun `age respects birthdays and unknown or invalid dates`() {
@@ -61,6 +66,32 @@ class StashPerformerContractTest {
         assertEquals(mapOf("value" to listOf("42"), "modifier" to "INCLUDES"), combined["performers"])
         assertTrue(withRequiredPerformer(null, "42").containsKey("performers"))
         assertThrows(IllegalArgumentException::class.java) { withRequiredPerformer(null, " ") }
+    }
+
+    @Test fun `scene paging preserves performer scope and user criteria without changing ordinary requests`() {
+        val filter = StashVideoFilterState(ratingRange = StashRatingRange(min = 60))
+        val scoped = buildFindScenesVariables(24, 2, "term", "date", StashSortDirection.Desc, filter, "42")
+        val sceneFilter = scoped["sceneFilter"] as Map<*, *>
+        assertEquals(mapOf("value" to listOf("42"), "modifier" to "INCLUDES"), sceneFilter["performers"])
+        assertEquals(mapOf("rating100" to mapOf("value" to 59, "modifier" to "GREATER_THAN")), sceneFilter["AND"])
+        val ordinary = buildFindScenesVariables(24, 1, null, "date", StashSortDirection.Desc, filter)
+        assertFalse((ordinary["sceneFilter"] as Map<*, *>).containsKey("performers"))
+        val cleared = buildFindScenesVariables(24, 1, null, "date", StashSortDirection.Desc, performerId = "42")
+        assertTrue((cleared["sceneFilter"] as Map<*, *>).containsKey("performers"))
+    }
+
+    @Test fun `performer queue continuation carries immutable scope across pages`() {
+        val original = PlayerPlaybackQueueContinuation.Performer(
+            profile = StashServerProfile(baseUrl = "https://example.test"), performerId = "42", query = "term",
+            sort = "date", direction = StashSortDirection.Desc, videoFilter = StashVideoFilterState(),
+            nextPage = 2, pageSize = 24, hasMore = true,
+        )
+        val next = original.afterLoadedPage(2, 49) as PlayerPlaybackQueueContinuation.Performer
+        assertEquals("42", next.performerId)
+        assertEquals("term", next.query)
+        assertEquals(3, next.nextPage)
+        assertTrue(next.hasMore)
+        assertFalse((next.afterLoadedPage(3, 49) as PlayerPlaybackQueueContinuation.Performer).hasMore)
     }
 
     @Test fun `paging normalizes values without affecting sort or filter`() {

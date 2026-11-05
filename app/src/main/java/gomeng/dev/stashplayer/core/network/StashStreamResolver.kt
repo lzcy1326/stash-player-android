@@ -213,6 +213,7 @@ class StashGraphQlClient(
         sort: String = "updated_at",
         direction: StashSortDirection = StashSortDirection.Desc,
         videoFilter: StashVideoFilterState = StashVideoFilterState(),
+        performerId: String? = null,
     ): StashSceneCardPage {
         val variables = buildFindScenesVariables(
             perPage = perPage,
@@ -221,6 +222,7 @@ class StashGraphQlClient(
             sort = serverSortForStashVideoFilters(sort, videoFilter),
             direction = direction,
             videoFilter = videoFilter,
+            performerId = performerId,
         )
         val parsedPage = parseFindScenesPageResponse(execute(FIND_SCENES_QUERY, variables))
         return parsedPage.copy(
@@ -1134,13 +1136,15 @@ internal fun buildFindScenesVariables(
     sort: String,
     direction: StashSortDirection,
     videoFilter: StashVideoFilterState = StashVideoFilterState(),
+    performerId: String? = null,
 ): Map<String, Any?> = buildMap {
     put("perPage", perPage)
     put("page", page.coerceAtLeast(1))
     put("q", query?.trim()?.takeIf { it.isNotBlank() })
     put("sort", sort)
     put("direction", direction.graphQlValue)
-    put("sceneFilter", videoFilter.toGraphQlSceneFilterOrNull())
+    val userFilter = videoFilter.toGraphQlSceneFilterOrNull()
+    put("sceneFilter", if (performerId == null) userFilter else withRequiredPerformer(userFilter, performerId))
 }
 
 internal fun buildFindGalleriesVariables(

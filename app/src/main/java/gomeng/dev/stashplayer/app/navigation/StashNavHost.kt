@@ -49,6 +49,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
@@ -192,6 +193,7 @@ fun StashNavHost(
         settingsRepository.serverProfile.collect { profile -> value = LoadedServerProfile(profile) }
     }
     val runtimeProfile = loadedRuntimeProfile?.profile
+    val latestRuntimeProfile by rememberUpdatedState(runtimeProfile)
     val playbackOrientationMode by settingsRepository.playbackOrientationMode.collectAsState(
         initial = StashSettingsRepository.DEFAULT_PLAYBACK_ORIENTATION_MODE,
     )
@@ -333,6 +335,7 @@ fun StashNavHost(
     suspend fun ensurePlaylistTrailingItems(sceneId: String, minimumTrailingCount: Int) {
         val activeProfile = runtimeProfile ?: return
         var continuation = playbackQueueContinuation ?: return
+        if (continuation is PlayerPlaybackQueueContinuation.Performer && continuation.profile != activeProfile) return
         var queue = playbackQueue.withCurrent(sceneId)
         if (
             !shouldLoadMorePlayerPlaylistItems(
@@ -372,13 +375,26 @@ fun StashNavHost(
                         direction = activeContinuation.direction,
                         videoFilter = activeContinuation.videoFilter,
                     )
+                    is PlayerPlaybackQueueContinuation.Performer -> client.findSceneCardsPage(
+                        perPage = activeContinuation.pageSize,
+                        page = pageToLoad,
+                        query = activeContinuation.query,
+                        sort = activeContinuation.sort,
+                        direction = activeContinuation.direction,
+                        videoFilter = activeContinuation.videoFilter,
+                        performerId = activeContinuation.performerId,
+                    )
                 }
             }.getOrNull() ?: break
+            if (latestRuntimeProfile != activeProfile || playbackQueueContinuation != continuation) break
             val scenes = result.scenes.applyLocalFavoriteFilter(
                 continuation.videoFilterState().localFavoriteOnly,
                 favoriteSceneIds,
             )
             continuation = continuation.afterLoadedPage(pageToLoad, result.totalCount)
+            if (result.scenes.isEmpty() && continuation is PlayerPlaybackQueueContinuation.Performer) {
+                continuation = continuation.copy(hasMore = false)
+            }
             queue = appendLoadedResultPlaybackQueue(queue, scenes)
             updatePlaybackQueue(queue)
             playbackQueueContinuation = continuation
@@ -652,6 +668,9 @@ fun StashNavHost(
                             showScenes = entry.arguments?.getString("section") == "scenes",
                             profile = runtimeProfile,
                             onBack = { navController.popBackStack() },
+                            onOpenScene = { sceneId, scenes, randomShuffle, continuation ->
+                                openPlaybackQueueScene(sceneId, scenes, randomShuffle, continuation)
+                            },
                         )
                     }
                     composable(TopLevelDestination.Studios.route) {
@@ -824,6 +843,7 @@ private fun isTopLevelDestinationSelected(
 private fun PlayerPlaybackQueueContinuation.videoFilterState() = when (this) {
     is PlayerPlaybackQueueContinuation.Browse -> videoFilter
     is PlayerPlaybackQueueContinuation.Explore -> videoFilter
+    is PlayerPlaybackQueueContinuation.Performer -> videoFilter
 }
 
 @Composable
