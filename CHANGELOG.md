@@ -6,8 +6,25 @@ When bumping `versionName`, add a new section for the release version and summar
 
 ## [Unreleased]
 
-- Customize and reorder the four middle navigation items, with performer and studio placeholder pages.
-- 支持自定义和排序底部导航的四个中间功能，并新增演员、厂商占位页面。
+## [1.13.2-lzcy1.2.0] - 2026-11-10
+
+### English
+
+- Add customizable bottom navigation and performer browsing with search, sorting, filters, and pagination. The studio page remains a placeholder.
+- Add performer profiles, scene summaries, performer-scoped scene browsing, and playback across pages.
+- Synchronize performer favorites and ratings with the Stash server, including error recovery and server isolation.
+- Refine performer and scene controls with compact layouts and a themed sort-direction button.
+- Fix a layout crash when applying or clearing performer tag filters.
+- Request the system-provided large heap to give playback more memory headroom.
+
+### 简体中文
+
+- 支持自定义底部导航；新增演员列表，支持搜索、排序、筛选和分页。厂商页面仍为占位页。
+- 新增演员资料、影片汇总和关联影片浏览，支持从演员影片列表播放及跨页续播。
+- 演员收藏和评分与 Stash 服务端同步，支持失败提示、重试和服务器切换隔离。
+- 优化演员和影片的搜索、排序、筛选及详情布局；排序方向按钮跟随主题颜色。
+- 修复应用或清除演员标签筛选时可能出现的布局崩溃。
+- 申请系统提供的大堆空间，为播放提供更多内存余量。
 
 ## [1.13.2-lzcy1.1.0] - 2026-11-02
 

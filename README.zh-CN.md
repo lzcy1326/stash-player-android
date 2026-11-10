@@ -61,7 +61,7 @@ Stash 很强大，但桌面 Web UI 在手机上并不总是顺手。**Stash Andr
 3. 打开 APK，并在 Android 提示时允许浏览器或文件管理器安装应用。
 4. 启动 **Stash Player** 并连接到你的 Stash 服务器。
 
-> 当前个人版：**v1.13.2-lzcy1.1.0**。后续更新请查看 [Releases](https://github.com/lzcy1326/stash-player-android/releases)。
+> 当前个人版：**v1.13.2-lzcy1.2.0**。后续更新请查看 [Releases](https://github.com/lzcy1326/stash-player-android/releases)。
 
 本个人版使用独立于上游应用的签名密钥。如果已安装同包名的上游版本，请先备份应用数据，再卸载上游版本并安装本 APK。已安装 LZCY 个人版的用户可直接覆盖升级。
 

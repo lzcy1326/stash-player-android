@@ -99,7 +99,7 @@ The Images tab supports search, sort, filters, and full-screen browsing. In the 
 3. Open the APK and allow installs from your browser or file manager if Android asks.
 4. Launch **Stash Player** and connect it to your Stash server.
 
-Current personal fork release: **v1.13.2-lzcy1.1.0**. See [Releases](https://github.com/lzcy1326/stash-player-android/releases) for updates.
+Current personal fork release: **v1.13.2-lzcy1.2.0**. See [Releases](https://github.com/lzcy1326/stash-player-android/releases) for updates.
 
 This fork uses a different signing key from the upstream app. To switch from an upstream installation with the same package name, back up your app data first, then uninstall the upstream app before installing this APK. Updates to earlier LZCY releases can be installed directly.
 
