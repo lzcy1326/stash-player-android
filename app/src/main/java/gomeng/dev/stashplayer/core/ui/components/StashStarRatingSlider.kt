@@ -37,8 +37,6 @@ import gomeng.dev.stashplayer.core.player.playerStarRatingContentDescription
 import gomeng.dev.stashplayer.core.player.ratingStepFromTouchPosition
 import gomeng.dev.stashplayer.core.player.resolvePlayerStarRatingDragPolicy
 import gomeng.dev.stashplayer.core.player.starFillStatesForRatingStep
-import gomeng.dev.stashplayer.R
-import gomeng.dev.stashplayer.core.ui.i18n.stashString
 
 @Composable
 fun StashStarRatingSlider(
@@ -124,7 +122,7 @@ private fun StashStarRatingSliderButton(
     onSelectRatingStep: (Int) -> Unit,
 ) {
     val fullStep = (starIndex + 1) * 2
-    val selectedContentDescription = playerStarRatingContentDescription(fullStep) + stashString(R.string.auto_kr_0363)
+    val selectedContentDescription = playerStarRatingContentDescription(fullStep)
     val shape = CircleShape
     val buttonContainer = when (fillState) {
         PlayerStarFillState.Empty -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.92f)

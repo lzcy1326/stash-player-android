@@ -39,6 +39,13 @@ data class StashPerformerDetail(
 )
 
 data class StashPerformerSceneSummary(val count: Int, val durationSeconds: Double, val sizeBytes: Double)
+data class StashPerformerMutableFields(val id: String, val favorite: Boolean, val rating100: Int?)
+
+internal val performerUpdateQuery = """
+    mutation PerformerUpdate(${'$'}input: PerformerUpdateInput!) {
+      performerUpdate(input: ${'$'}input) { id favorite rating100 }
+    }
+""".trimIndent()
 
 internal val performerDetailQuery = """
     query PerformerDetail(${'$'}id: ID!) {
@@ -143,6 +150,14 @@ internal fun parsePerformerSceneSummary(json: String): StashPerformerSceneSummar
     return StashPerformerSceneSummary(result.count, result.duration, result.filesize)
 }
 
+internal fun parsePerformerUpdate(json: String): StashPerformerMutableFields {
+    val response = performerMoshi.adapter(PerformerUpdateEnvelope::class.java).fromJson(json)
+        ?: error("Empty GraphQL response")
+    response.errors?.firstOrNull()?.message?.let { error("GraphQL error: ${redactStashCredentialText(it)}") }
+    val result = response.data?.performerUpdate ?: error("Missing performer update")
+    return StashPerformerMutableFields(result.id, result.favorite, result.rating100)
+}
+
 private fun PerformerPayload.toCard() = StashPerformerCard(
     id, name, aliasList, imagePath, gender, country, birthdate, deathDate, favorite, rating100, sceneCount,
 )
@@ -152,6 +167,9 @@ private data class PerformerError(val message: String)
 private data class PerformerData(val findPerformers: PerformerResult? = null)
 private data class PerformerDetailEnvelope(val data: PerformerDetailData? = null, val errors: List<PerformerError>? = null)
 private data class PerformerDetailData(val findPerformer: PerformerPayload? = null)
+private data class PerformerUpdateEnvelope(val data: PerformerUpdateData? = null, val errors: List<PerformerError>? = null)
+private data class PerformerUpdateData(val performerUpdate: PerformerUpdatePayload? = null)
+private data class PerformerUpdatePayload(val id: String, val favorite: Boolean, val rating100: Int?)
 private data class PerformerSummaryEnvelope(val data: PerformerSummaryData? = null, val errors: List<PerformerError>? = null)
 private data class PerformerSummaryData(val findScenes: PerformerSummaryPayload? = null)
 private data class PerformerSummaryPayload(val count: Int, val duration: Double, val filesize: Double)

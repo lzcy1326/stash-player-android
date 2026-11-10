@@ -29,8 +29,10 @@ class ConfiguredNavigationDeviceTest {
             compose.onNodeWithText("Performers").assertExists()
             compose.onNodeWithText("Studios").assertExists()
             compose.onNodeWithText("Performers").performClick()
-            compose.onNodeWithText("Performers feature in development").assertExists()
-            compose.onNodeWithText("Browse and filter performers here in a future update.").assertExists()
+            compose.waitUntil(15_000) {
+                compose.onAllNodes(androidx.compose.ui.test.hasText("Performer filters")).fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithText("Performer filters").assertExists()
             compose.onNodeWithText("Studios").performClick()
             compose.onNodeWithText("Studios feature in development").assertExists()
             compose.onNodeWithText("Browse and filter studios here in a future update.").assertExists()

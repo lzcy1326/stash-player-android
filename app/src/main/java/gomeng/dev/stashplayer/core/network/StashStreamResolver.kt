@@ -502,6 +502,12 @@ class StashGraphQlClient(
     suspend fun findPerformerSceneSummary(id: String): StashPerformerSceneSummary =
         parsePerformerSceneSummary(execute(performerSummaryQuery, mapOf("id" to id)))
 
+    suspend fun updatePerformerFavorite(id: String, favorite: Boolean): StashPerformerMutableFields =
+        parsePerformerUpdate(execute(performerUpdateQuery, mapOf("input" to mapOf("id" to id, "favorite" to favorite))))
+
+    suspend fun updatePerformerRating(id: String, rating100: Int?): StashPerformerMutableFields =
+        parsePerformerUpdate(execute(performerUpdateQuery, mapOf("input" to mapOf("id" to id, "rating100" to rating100))))
+
     suspend fun findSceneEntities(
         perPage: Int = 50,
         page: Int = 1,

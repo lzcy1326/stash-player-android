@@ -50,6 +50,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
@@ -97,6 +98,7 @@ import gomeng.dev.stashplayer.feature.gallery.GalleryPhotoViewerOverlay
 import gomeng.dev.stashplayer.feature.gallery.GalleryRoute
 import gomeng.dev.stashplayer.feature.performers.PerformersRoute
 import gomeng.dev.stashplayer.feature.performers.PerformerDetailRoute
+import gomeng.dev.stashplayer.feature.performers.PerformerMutationCoordinator
 import gomeng.dev.stashplayer.feature.home.HomeRoute
 import gomeng.dev.stashplayer.feature.player.PlayerRoute
 import gomeng.dev.stashplayer.feature.queue.QueueRoute
@@ -194,6 +196,10 @@ fun StashNavHost(
     }
     val runtimeProfile = loadedRuntimeProfile?.profile
     val latestRuntimeProfile by rememberUpdatedState(runtimeProfile)
+    val performerMutationScope = rememberCoroutineScope()
+    val performerMutations = remember(runtimeProfile) {
+        runtimeProfile?.let { PerformerMutationCoordinator(it, performerMutationScope) }
+    }
     val playbackOrientationMode by settingsRepository.playbackOrientationMode.collectAsState(
         initial = StashSettingsRepository.DEFAULT_PLAYBACK_ORIENTATION_MODE,
     )
@@ -658,7 +664,7 @@ fun StashNavHost(
                         )
                     }
                     composable(TopLevelDestination.Performers.route) {
-                        PerformersRoute(profile = runtimeProfile, onOpenPerformer = { id, scenes ->
+                        PerformersRoute(profile = runtimeProfile, mutations = performerMutations, onOpenPerformer = { id, scenes ->
                             navController.navigate("performer/${Uri.encode(id)}/${if (scenes) "scenes" else "profile"}")
                         })
                     }
@@ -667,6 +673,7 @@ fun StashNavHost(
                             performerId = entry.arguments?.getString("performerId").orEmpty(),
                             showScenes = entry.arguments?.getString("section") == "scenes",
                             profile = runtimeProfile,
+                            mutations = performerMutations,
                             onBack = { navController.popBackStack() },
                             onOpenScene = { sceneId, scenes, randomShuffle, continuation ->
                                 openPlaybackQueueScene(sceneId, scenes, randomShuffle, continuation)

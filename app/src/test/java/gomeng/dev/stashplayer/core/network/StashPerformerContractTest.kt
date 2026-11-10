@@ -59,6 +59,12 @@ class StashPerformerContractTest {
         assertEquals(StashPerformerSceneSummary(2, 125.5, 5000.0), summary)
     }
 
+    @Test fun `performer update parses authoritative values and errors`() {
+        assertEquals(StashPerformerMutableFields("1", true, null), parsePerformerUpdate("""{"data":{"performerUpdate":{"id":"1","favorite":true,"rating100":null}}}"""))
+        assertThrows(IllegalStateException::class.java) { parsePerformerUpdate("""{"errors":[{"message":"failure"}]}""") }
+        assertThrows(IllegalStateException::class.java) { parsePerformerUpdate("""{"data":{"performerUpdate":null}}""") }
+    }
+
     @Test fun `required performer survives user filters and clearing them`() {
         val userFilter = mapOf("rating100" to mapOf("value" to 70, "modifier" to "GREATER_THAN"))
         val combined = withRequiredPerformer(userFilter, " 42 ")

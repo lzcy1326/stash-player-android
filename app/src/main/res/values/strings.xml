@@ -1233,5 +1233,36 @@
     <string name="performer_scene_favorites_off">즐겨찾기만: 꺼짐</string>
     <string name="performer_scene_clear_filters">필터 지우기</string>
     <string name="performer_tags_error">태그를 불러오지 못했습니다</string>
+    <string name="performer_update_error">업데이트 실패. 다시 시도하세요</string>
+    <string name="performer_add_favorite">즐겨찾기 추가</string>
+    <string name="performer_remove_favorite">즐겨찾기 해제</string>
+    <string name="performer_rating">배우 평점</string>
+    <string name="performer_clear_rating">평점 지우기</string>
+    <string name="performer_filter_title">배우 필터</string>
+    <string name="performer_filter_favorites">즐겨찾기만</string>
+    <string name="performer_filter_gender">성별</string>
+    <string name="performer_filter_any">전체</string>
+    <string name="performer_filter_tags">태그 (%1$d)</string>
+    <string name="performer_filter_age">나이</string>
+    <string name="performer_filter_rating">평점 (0–100)</string>
+    <string name="performer_filter_country">국가 코드 (예: JP)</string>
+    <string name="performer_filter_scenes">영상 수</string>
+    <string name="performer_filter_height">키 (cm)</string>
+    <string name="performer_filter_career">활동 시작 이후 / 종료 이전 (연도)</string>
+    <string name="performer_filter_missing">누락된 정보</string>
+    <string name="performer_missing_image">사진</string>
+    <string name="performer_missing_country">국가</string>
+    <string name="performer_filter_invalid">입력값과 범위를 확인하세요</string>
+    <string name="performer_filter_apply">적용</string>
+    <string name="performer_filter_clear">초기화</string>
+    <string name="performer_filter_min">최소</string>
+    <string name="performer_filter_max">최대</string>
+    <string name="performer_sort_name">이름</string>
+    <string name="performer_sort_rating">평점</string>
+    <string name="performer_sort_scenes">영상 수</string>
+    <string name="performer_sort_latest">최신 영상</string>
+    <string name="performer_sort_plays">재생 횟수</string>
+    <string name="performer_sort_updated">수정일</string>
+    <string name="performer_sort_random">무작위</string>
 </resources>
 

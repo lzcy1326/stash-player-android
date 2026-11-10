@@ -10,11 +10,15 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gomeng.dev.stashplayer.core.network.StashPerformerCard
 import gomeng.dev.stashplayer.core.network.StashPerformerPage
 import gomeng.dev.stashplayer.core.network.StashServerProfile
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -26,11 +30,34 @@ import org.junit.runner.RunWith
 class PerformersRouteDeviceTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun favoriteFilterAndSortAreSentToServerAndCanBeCleared() {
+        val request = AtomicReference<Pair<String, Map<String, Any?>?>>()
+        compose.setContent {
+            MaterialTheme {
+                PerformersRoute(StashServerProfile(baseUrl = "http://localhost"), loadPage = { _, _, _, sort, _, filter ->
+                    request.set(sort to filter)
+                    StashPerformerPage(listOf(card(1)), 1)
+                })
+            }
+        }
+        compose.waitUntil(10_000) { request.get() != null }
+        compose.onNodeWithText("Name").performClick()
+        compose.onNodeWithText("Latest scene").performClick()
+        compose.waitUntil(10_000) { request.get()?.first == "latest_scene" }
+        compose.onNodeWithText("Performer filters").performClick()
+        compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Checkbox))[0].performClick()
+        compose.onNodeWithText("Apply").performClick()
+        compose.waitUntil(10_000) { request.get()?.second?.get("filter_favorites") == true }
+        compose.onNodeWithText("Performer filters").performClick()
+        compose.onNodeWithText("Clear").performClick()
+        compose.waitUntil(10_000) { request.get()?.second == null }
+    }
+
     @Test fun secondPageFailureRetriesWithoutSkippingOrDuplicating() {
         val pageTwoAttempts = AtomicInteger()
         compose.setContent {
             MaterialTheme {
-                PerformersRoute(StashServerProfile(baseUrl = "http://localhost"), loadPage = { _, page, _ ->
+                PerformersRoute(StashServerProfile(baseUrl = "http://localhost"), loadPage = { _, page, _, _, _, _ ->
                     if (page == 2 && pageTwoAttempts.incrementAndGet() == 1) error("offline")
                     val ids = if (page == 1) 1..40 else 41..41
                     StashPerformerPage(ids.map { card(it) }, 41)
@@ -53,7 +80,7 @@ class PerformersRouteDeviceTest {
         val slowStarted = AtomicInteger()
         compose.setContent {
             MaterialTheme {
-                PerformersRoute(StashServerProfile(baseUrl = "http://localhost"), loadPage = { _, _, query ->
+                PerformersRoute(StashServerProfile(baseUrl = "http://localhost"), loadPage = { _, _, query, _, _, _ ->
                     if (query == "old") {
                         slowStarted.incrementAndGet()
                         withContext(NonCancellable) { delay(1_500) }
