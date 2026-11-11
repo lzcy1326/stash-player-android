@@ -1,5 +1,6 @@
 package gomeng.dev.stashplayer.feature.performers
 
+import gomeng.dev.stashplayer.core.ui.components.StashEntityBrowseControls
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.getValue
@@ -27,7 +28,7 @@ class PerformerSortThemeDeviceTest {
         var accent by mutableStateOf(first)
         compose.setContent {
             MaterialTheme(colorScheme = lightColorScheme(primary = accent)) {
-                PerformerBrowseControls("", {}, "Search", "Name", {}, true, {}, "Filters", {}, {})
+                StashEntityBrowseControls("", {}, "Search", "Name", {}, true, {}, "Filters", {}, {})
             }
         }
         fun assertTriangleColor(expected: Color) {

@@ -2,6 +2,7 @@ package gomeng.dev.stashplayer.feature.performers
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
+import gomeng.dev.stashplayer.core.ui.components.StashEntityBrowseControls
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -31,7 +32,7 @@ class PerformerControlsLargeTextDeviceTest {
             CompositionLocalProvider(LocalDensity provides Density(density.density, 1.3f)) {
                 MaterialTheme {
                     Column(Modifier.width(320.dp)) {
-                        PerformerBrowseControls(query = "", onQueryChange = {}, searchLabel = "Search scenes",
+                        StashEntityBrowseControls(query = "", onQueryChange = {}, searchLabel = "Search scenes",
                             sortLabel = "Recently released", onOpenSort = { sortClicks.incrementAndGet() }, ascending = false, onToggleDirection = {},
                             filterLabel = "Filters (3)", onOpenFilter = { filterClicks.incrementAndGet() }, sortMenu = {})
                     }

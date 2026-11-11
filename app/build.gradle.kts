@@ -61,8 +61,8 @@ android {
         minSdk = 29
         targetSdk = 35
         // LZCY fork versionCode = upstream code * 1,000,000 + major * 10,000 + feature * 100 + fix.
-        versionCode = 59_010_200
-        versionName = "1.13.2-lzcy1.2.0"
+        versionCode = 59_010_300
+        versionName = "1.13.2-lzcy1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -144,6 +144,7 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("io.coil-kt:coil-gif:2.7.0")
+    implementation("io.coil-kt:coil-svg:2.7.0")
 
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")

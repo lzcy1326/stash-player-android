@@ -214,6 +214,8 @@ class StashGraphQlClient(
         direction: StashSortDirection = StashSortDirection.Desc,
         videoFilter: StashVideoFilterState = StashVideoFilterState(),
         performerId: String? = null,
+        studioId: String? = null,
+        includeStudioChildren: Boolean = false,
     ): StashSceneCardPage {
         val variables = buildFindScenesVariables(
             perPage = perPage,
@@ -223,6 +225,8 @@ class StashGraphQlClient(
             direction = direction,
             videoFilter = videoFilter,
             performerId = performerId,
+            studioId = studioId,
+            includeStudioChildren = includeStudioChildren,
         )
         val parsedPage = parseFindScenesPageResponse(execute(FIND_SCENES_QUERY, variables))
         return parsedPage.copy(
@@ -495,6 +499,23 @@ class StashGraphQlClient(
     ): StashPerformerPage = parsePerformerCards(
         execute(performerCardsQuery, performerCardsVariables(page, perPage, query, sort, direction, performerFilter)),
     )
+
+    suspend fun findStudioCardsPage(
+        page: Int = 1, perPage: Int = 40, query: String? = null, sort: String = "name",
+        direction: String = "ASC", studioFilter: Map<String, Any?>? = null,
+    ): StashStudioPage = parseStudioCards(execute(studioCardsQuery, studioCardsVariables(page, perPage, query, sort, direction, studioFilter)))
+
+    suspend fun findStudioDetail(id: String): StashStudioCard? =
+        parseStudioDetail(execute(studioDetailQuery, mapOf("id" to id)))
+
+    suspend fun findStudioSceneSummary(id: String, includeChildren: Boolean = false): StashPerformerSceneSummary =
+        parseStudioSummary(execute(studioSummaryQuery, mapOf("id" to id, "depth" to if (includeChildren) -1 else 0)))
+
+    suspend fun updateStudioFavorite(id: String, favorite: Boolean): StashStudioMutableFields =
+        parseStudioUpdate(execute(studioUpdateQuery, mapOf("input" to mapOf("id" to id, "favorite" to favorite))))
+
+    suspend fun updateStudioRating(id: String, rating100: Int?): StashStudioMutableFields =
+        parseStudioUpdate(execute(studioUpdateQuery, mapOf("input" to mapOf("id" to id, "rating100" to rating100))))
 
     suspend fun findPerformerDetail(id: String): StashPerformerDetail? =
         parsePerformerDetail(execute(performerDetailQuery, mapOf("id" to id)))
@@ -1143,6 +1164,8 @@ internal fun buildFindScenesVariables(
     direction: StashSortDirection,
     videoFilter: StashVideoFilterState = StashVideoFilterState(),
     performerId: String? = null,
+    studioId: String? = null,
+    includeStudioChildren: Boolean = false,
 ): Map<String, Any?> = buildMap {
     put("perPage", perPage)
     put("page", page.coerceAtLeast(1))
@@ -1150,7 +1173,8 @@ internal fun buildFindScenesVariables(
     put("sort", sort)
     put("direction", direction.graphQlValue)
     val userFilter = videoFilter.toGraphQlSceneFilterOrNull()
-    put("sceneFilter", if (performerId == null) userFilter else withRequiredPerformer(userFilter, performerId))
+    val performerScoped = if (performerId == null) userFilter else withRequiredPerformer(userFilter, performerId)
+    put("sceneFilter", if (studioId == null) performerScoped else withRequiredStudio(performerScoped, studioId, includeStudioChildren))
 }
 
 internal fun buildFindGalleriesVariables(

@@ -2,9 +2,23 @@
 
 All notable changes to Stash Android Player are documented here.
 
-When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. The public release workflow uses the matching section for GitHub Release notes.
+When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. Use the matching section for the GitHub Release notes.
 
 ## [Unreleased]
+
+## [1.13.2-lzcy1.3.0] - 2026-11-11
+
+### English
+
+- Open the Studios browser from the customizable bottom navigation. Browse studio logos, search by name or alias, and sort, filter, or page through the results.
+- Open studio profiles to view details, navigate between parent and child studios, and sync favorites and ratings with Stash.
+- Browse studio scenes using the same cards as the rest of the app. Optionally include child studios, and keep the active studio scope and filters as playback loads more scenes.
+
+### 简体中文
+
+- 从自定义底部导航打开「厂商」列表。支持浏览厂商 Logo、按名称或别名搜索，以及排序、筛选和分页。
+- 在厂商详情查看资料并跳转至父厂商或子厂商。收藏和评分与 Stash 服务端同步。
+- 厂商影片复用现有影片卡片，可选择包含子厂商的影片。跨页续播时保留厂商范围和筛选条件。
 
 ## [1.13.2-lzcy1.2.0] - 2026-11-10
 

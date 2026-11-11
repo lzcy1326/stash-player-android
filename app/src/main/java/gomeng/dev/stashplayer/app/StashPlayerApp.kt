@@ -32,6 +32,7 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import coil.decode.SvgDecoder
 import gomeng.dev.stashplayer.core.network.StashHttpClient
 import gomeng.dev.stashplayer.app.navigation.StashNavHost
 import gomeng.dev.stashplayer.app.navigation.isFoldLikeLayoutBySmallestWidthDp
@@ -75,6 +76,7 @@ class StashPlayerApp : Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
         .okHttpClient(StashHttpClient.shared)
         .components {
+            add(SvgDecoder.Factory())
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 add(ImageDecoderDecoder.Factory())
             } else {

@@ -53,6 +53,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import gomeng.dev.stashplayer.core.ui.components.StashEntityBrowseControls
 import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.core.model.formatGalleryFileSize
 import gomeng.dev.stashplayer.core.model.SceneCardModel
@@ -267,7 +268,7 @@ fun PerformerDetailRoute(
                             Text(stringResource(R.string.performer_summary, current.count, duration, size))
                         }
                     }
-                    PerformerBrowseControls(
+                    StashEntityBrowseControls(
                         query = scenesState.input, onQueryChange = { scenesState.input = it },
                         searchLabel = stringResource(R.string.performer_scene_search),
                         sortLabel = sortOptions.firstOrNull { it.sort == scenesState.sort }?.label ?: stringResource(R.string.performer_scene_sort),

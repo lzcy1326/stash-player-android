@@ -45,6 +45,19 @@ sealed interface PlayerPlaybackQueueContinuation {
         override val hasMore: Boolean,
     ) : PlayerPlaybackQueueContinuation
 
+    data class Studio(
+        val profile: StashServerProfile,
+        val studioId: String,
+        val includeChildren: Boolean,
+        val query: String,
+        val sort: String,
+        val direction: StashSortDirection,
+        val videoFilter: StashVideoFilterState,
+        override val nextPage: Int,
+        override val pageSize: Int,
+        override val hasMore: Boolean,
+    ) : PlayerPlaybackQueueContinuation
+
     data class Performer(
         val profile: StashServerProfile,
         val performerId: String,
@@ -67,6 +80,7 @@ fun PlayerPlaybackQueueContinuation.afterLoadedPage(
     return when (this) {
         is PlayerPlaybackQueueContinuation.Browse -> copy(nextPage = nextPage, hasMore = hasMore)
         is PlayerPlaybackQueueContinuation.Explore -> copy(nextPage = nextPage, hasMore = hasMore)
+        is PlayerPlaybackQueueContinuation.Studio -> copy(nextPage = nextPage, hasMore = hasMore)
         is PlayerPlaybackQueueContinuation.Performer -> copy(nextPage = nextPage, hasMore = hasMore)
     }
 }

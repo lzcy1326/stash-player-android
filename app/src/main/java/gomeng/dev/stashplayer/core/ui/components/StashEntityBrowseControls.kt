@@ -1,4 +1,4 @@
-package gomeng.dev.stashplayer.feature.performers
+package gomeng.dev.stashplayer.core.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import gomeng.dev.stashplayer.R
 
 @Composable
-internal fun PerformerBrowseControls(
+internal fun StashEntityBrowseControls(
     query: String,
     onQueryChange: (String) -> Unit,
     searchLabel: String,

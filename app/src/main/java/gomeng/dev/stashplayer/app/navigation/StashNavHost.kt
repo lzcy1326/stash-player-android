@@ -96,6 +96,9 @@ import gomeng.dev.stashplayer.core.ui.theme.StashUiScaleProvider
 import gomeng.dev.stashplayer.feature.gallery.GalleryDetailRoute
 import gomeng.dev.stashplayer.feature.gallery.GalleryPhotoViewerOverlay
 import gomeng.dev.stashplayer.feature.gallery.GalleryRoute
+import gomeng.dev.stashplayer.feature.studios.StudiosRoute
+import gomeng.dev.stashplayer.feature.studios.StudioDetailRoute
+import gomeng.dev.stashplayer.feature.studios.StudioMutationCoordinator
 import gomeng.dev.stashplayer.feature.performers.PerformersRoute
 import gomeng.dev.stashplayer.feature.performers.PerformerDetailRoute
 import gomeng.dev.stashplayer.feature.performers.PerformerMutationCoordinator
@@ -197,6 +200,9 @@ fun StashNavHost(
     val runtimeProfile = loadedRuntimeProfile?.profile
     val latestRuntimeProfile by rememberUpdatedState(runtimeProfile)
     val performerMutationScope = rememberCoroutineScope()
+    val studioMutations = remember(runtimeProfile) {
+        runtimeProfile?.let { StudioMutationCoordinator(it, performerMutationScope) }
+    }
     val performerMutations = remember(runtimeProfile) {
         runtimeProfile?.let { PerformerMutationCoordinator(it, performerMutationScope) }
     }
@@ -342,6 +348,7 @@ fun StashNavHost(
         val activeProfile = runtimeProfile ?: return
         var continuation = playbackQueueContinuation ?: return
         if (continuation is PlayerPlaybackQueueContinuation.Performer && continuation.profile != activeProfile) return
+        if (continuation is PlayerPlaybackQueueContinuation.Studio && continuation.profile != activeProfile) return
         var queue = playbackQueue.withCurrent(sceneId)
         if (
             !shouldLoadMorePlayerPlaylistItems(
@@ -381,6 +388,16 @@ fun StashNavHost(
                         direction = activeContinuation.direction,
                         videoFilter = activeContinuation.videoFilter,
                     )
+                    is PlayerPlaybackQueueContinuation.Studio -> client.findSceneCardsPage(
+                        perPage = activeContinuation.pageSize,
+                        page = pageToLoad,
+                        query = activeContinuation.query,
+                        sort = activeContinuation.sort,
+                        direction = activeContinuation.direction,
+                        videoFilter = activeContinuation.videoFilter,
+                        studioId = activeContinuation.studioId,
+                        includeStudioChildren = activeContinuation.includeChildren,
+                    )
                     is PlayerPlaybackQueueContinuation.Performer -> client.findSceneCardsPage(
                         perPage = activeContinuation.pageSize,
                         page = pageToLoad,
@@ -399,6 +416,9 @@ fun StashNavHost(
             )
             continuation = continuation.afterLoadedPage(pageToLoad, result.totalCount)
             if (result.scenes.isEmpty() && continuation is PlayerPlaybackQueueContinuation.Performer) {
+                continuation = continuation.copy(hasMore = false)
+            }
+            if (result.scenes.isEmpty() && continuation is PlayerPlaybackQueueContinuation.Studio) {
                 continuation = continuation.copy(hasMore = false)
             }
             queue = appendLoadedResultPlaybackQueue(queue, scenes)
@@ -681,7 +701,19 @@ fun StashNavHost(
                         )
                     }
                     composable(TopLevelDestination.Studios.route) {
-                        TopLevelPlaceholder(TopLevelDestination.Studios)
+                        StudiosRoute(profile = runtimeProfile, mutations = studioMutations, onOpenStudio = { id, scenes ->
+                            navController.navigate("studio/${Uri.encode(id)}/${if (scenes) "scenes" else "profile"}")
+                        })
+                    }
+                    composable("studio/{studioId}/{section}") { entry ->
+                        StudioDetailRoute(
+                            studioId = entry.arguments?.getString("studioId").orEmpty(),
+                            showScenes = entry.arguments?.getString("section") == "scenes",
+                            profile = runtimeProfile, mutations = studioMutations,
+                            onBack = { navController.popBackStack() },
+                            onOpenStudio = { id -> navController.navigate("studio/${Uri.encode(id)}/profile") },
+                            onOpenScene = { sceneId, scenes, randomShuffle, continuation -> openPlaybackQueueScene(sceneId, scenes, randomShuffle, continuation) },
+                        )
                     }
                     composable(TopLevelDestination.Settings.route) {
                         SettingsRoute(
@@ -844,12 +876,14 @@ private fun isTopLevelDestinationSelected(
     destination: TopLevelDestination,
 ): Boolean = when (destination) {
     TopLevelDestination.Settings -> SettingsDestinations.isSettingsRoute(currentRoute)
+    TopLevelDestination.Studios -> currentRoute?.startsWith("studio/") == true || hierarchyRoutes?.any { it == destination.route } == true
     else -> hierarchyRoutes?.any { it == destination.route } == true
 }
 
 private fun PlayerPlaybackQueueContinuation.videoFilterState() = when (this) {
     is PlayerPlaybackQueueContinuation.Browse -> videoFilter
     is PlayerPlaybackQueueContinuation.Explore -> videoFilter
+    is PlayerPlaybackQueueContinuation.Studio -> videoFilter
     is PlayerPlaybackQueueContinuation.Performer -> videoFilter
 }
 

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="studios_title">廠商</string>
+    <string name="studio_search">搜尋廠商或別名</string>
+    <string name="studio_filter_title">廠商篩選</string>
+    <string name="studio_filter_count">廠商篩選（%1$d）</string>
+    <string name="studio_favorites">僅顯示收藏廠商</string>
+    <string name="studio_parent">上層廠商</string>
+    <string name="studio_children">子廠商（%1$d）</string>
+    <string name="studio_include_children">包含子廠商影片</string>
+    <string name="studio_organized">已整理</string>
+    <string name="studio_yes">是</string>
+    <string name="studio_no">否</string>
+    <string name="studio_count">%1$d 個廠商</string>
+    <string name="studio_performers">%1$d 位演員</string>
+    <string name="studio_load_error">無法載入廠商</string>
+    <string name="studio_empty">沒有符合的廠商，請更換搜尋內容或清除篩選。</string>
+    <string name="studio_detail_error">無法載入廠商資料</string>
+    <string name="studio_add_favorite">收藏廠商</string>
+    <string name="studio_remove_favorite">取消收藏廠商</string>
+    <string name="studio_update_error">廠商更新失敗，請檢查連線後重試。</string>
+    <string name="studio_rating">廠商評分</string>
+    <string name="studio_sort_children">子廠商數量</string>
+    <string name="studio_sort_created">建立時間</string>
+    <string name="studio_sort_images">圖片數量</string>
+    <string name="studio_sort_galleries">圖集數量</string>
+    <string name="studio_not_connected">請先在設定中連接 Stash 伺服器，再瀏覽廠商。</string>
+    <string name="studio_sort_name">名稱</string>
+</resources>

@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import gomeng.dev.stashplayer.core.ui.components.StashEntityBrowseControls
 import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.core.network.StashGraphQlClient
 import gomeng.dev.stashplayer.core.network.StashPerformerCard
@@ -198,7 +199,7 @@ fun PerformersRoute(
             TextButton(onClick = { page = 1; resetScroll = true; if (state.sort == "random") state.randomSeed = nextStashRandomSortSeed(); refresh++ }, enabled = !loading) { Text(stringResource(R.string.performers_refresh)) }
         }
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
-            PerformerBrowseControls(
+            StashEntityBrowseControls(
                 query = input, onQueryChange = { input = it }, searchLabel = stringResource(R.string.performers_search),
                 sortLabel = stringResource(sortOptions.first { it.first == state.sort }.second), onOpenSort = { showSort = true },
                 ascending = state.direction == "ASC", onToggleDirection = {

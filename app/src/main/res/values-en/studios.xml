@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="studios_title">Studios</string>
+    <string name="studio_search">Search studios or aliases</string>
+    <string name="studio_filter_title">Studio filters</string>
+    <string name="studio_filter_count">Studio filters (%1$d)</string>
+    <string name="studio_favorites">Favorite studios only</string>
+    <string name="studio_parent">Parent studio</string>
+    <string name="studio_children">Subsidiary studios (%1$d)</string>
+    <string name="studio_include_children">Include subsidiary studios</string>
+    <string name="studio_organized">Organized</string>
+    <string name="studio_yes">Yes</string>
+    <string name="studio_no">No</string>
+    <string name="studio_count">%1$d studios</string>
+    <string name="studio_performers">%1$d performers</string>
+    <string name="studio_load_error">Unable to load studios</string>
+    <string name="studio_empty">No studios match. Try another search or clear filters.</string>
+    <string name="studio_detail_error">Unable to load this studio</string>
+    <string name="studio_add_favorite">Favorite studio</string>
+    <string name="studio_remove_favorite">Unfavorite studio</string>
+    <string name="studio_update_error">Studio update failed. Check the connection and try again.</string>
+    <string name="studio_rating">Studio rating</string>
+    <string name="studio_sort_children">Subsidiary studio count</string>
+    <string name="studio_sort_created">Created at</string>
+    <string name="studio_sort_images">Image count</string>
+    <string name="studio_sort_galleries">Gallery count</string>
+    <string name="studio_not_connected">Connect to a Stash server in Settings to browse studios.</string>
+    <string name="studio_sort_name">Name</string>
+</resources>
