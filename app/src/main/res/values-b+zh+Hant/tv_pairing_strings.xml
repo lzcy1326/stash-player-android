@@ -1,0 +1,16 @@
+<resources>
+    <string name="tv_pairing_scan_action">掃一掃，設定電視</string>
+    <string name="tv_pairing_scan">掃碼傳送設定到電視</string>
+    <string name="tv_pairing_scan_prompt">掃描 Stash Player TV 的 QR Code，確認後再傳送已儲存的伺服器設定。</string>
+    <string name="tv_pairing_connecting">正在連線至電視…</string>
+    <string name="tv_pairing_confirm_title">已掃碼</string>
+    <string name="tv_pairing_confirm_message">要將「%1$s」已儲存的伺服器設定和驗證資訊傳送到這台電視嗎？</string>
+    <string name="tv_pairing_confirm_send">確認傳送</string>
+    <string name="tv_pairing_cancel">取消</string>
+    <string name="tv_pairing_confirmation_expired">配對已逾時，請在電視上重新整理 QR Code 後再掃描。</string>
+    <string name="tv_pairing_sending">正在傳送到電視…</string>
+    <string name="tv_pairing_invalid">請掃描 Stash Player TV 顯示的配對 QR Code。</string>
+    <string name="tv_pairing_saved">電視已連線至伺服器並儲存設定。</string>
+    <string name="tv_pairing_rejected">電視無法連線至 Stash，請查看電視上的提示。</string>
+    <string name="tv_pairing_send_failed">傳送失敗，請確認手機和電視在同一區域網路，再掃描新的 QR Code。</string>
+</resources>

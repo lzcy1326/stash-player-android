@@ -6,6 +6,27 @@ When bumping `versionName`, add a new section for the release version and summar
 
 ## [Unreleased]
 
+## [1.13.2-lzcy1.4.0] - 2026-11-13
+
+### English
+
+- Introduce an experimental Android TV build with remote-friendly browsing, search, playback, stream switching, and resume support.
+- Connect the TV to a saved phone server configuration by scanning its QR code and confirming the transfer on the phone. The TV shows a waiting state after scanning.
+- Add a scan shortcut beside refresh on the phone Home screen; keep the scanner in portrait and respect screen safe areas.
+
+### 简体中文
+
+- 新增 Android TV 体验版，支持遥控器操作、影片浏览和搜索、播放、切换播放源及续播。
+- 电视显示二维码后，可使用手机端扫码并确认，将手机已保存的服务器配置发送到电视；扫码后电视显示等待确认状态。
+- 手机首页新增扫一扫入口并改用刷新图标；扫码页面默认竖屏，优化屏幕边缘的文字显示。
+
+### 说明 / Notes
+
+- Android TV 为独立安装的 MVP 体验版，使用调试签名且允许调试，功能和兼容性仍在验证中；手机与电视需使用同一局域网完成扫码配对。
+- The Android TV APK is a separately installed, debug-signed and debuggable MVP preview; features and device compatibility are still being validated. Pairing requires the phone and TV to be on the same local network.
+- 已在 TCL Q9K 电视验证服务器连接和视频播放；更多电视型号及完整功能仍需进一步验证。
+- 本版采用常规版本码。已安装更高版本码测试包的设备不能直接覆盖安装；如需重装，请先备份本地配置。
+
 ## [1.13.2-lzcy1.3.0] - 2026-11-11
 
 ### English

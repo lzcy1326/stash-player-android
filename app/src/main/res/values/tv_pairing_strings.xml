@@ -1,0 +1,16 @@
+<resources>
+    <string name="tv_pairing_scan_action">Scan TV pairing code</string>
+    <string name="tv_pairing_scan">Scan to send server settings to TV</string>
+    <string name="tv_pairing_scan_prompt">Scan the code on Stash Player TV. You can review and confirm before sending your saved server settings.</string>
+    <string name="tv_pairing_connecting">Connecting to TV…</string>
+    <string name="tv_pairing_confirm_title">Code scanned</string>
+    <string name="tv_pairing_confirm_message">Send the saved settings for %1$s, including its credentials, to this TV?</string>
+    <string name="tv_pairing_confirm_send">Confirm and send</string>
+    <string name="tv_pairing_cancel">Cancel</string>
+    <string name="tv_pairing_confirmation_expired">Pairing expired. Scan a new code on the TV.</string>
+    <string name="tv_pairing_sending">Sending to TV…</string>
+    <string name="tv_pairing_invalid">Scan a pairing code from Stash Player TV.</string>
+    <string name="tv_pairing_saved">The TV connected and saved your server settings.</string>
+    <string name="tv_pairing_rejected">The TV could not connect to Stash. Check the message on the TV.</string>
+    <string name="tv_pairing_send_failed">Could not send settings. Check that both devices are on the same network and scan a new code.</string>
+</resources>

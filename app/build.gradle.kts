@@ -61,8 +61,8 @@ android {
         minSdk = 29
         targetSdk = 35
         // LZCY fork versionCode = upstream code * 1,000,000 + major * 10,000 + feature * 100 + fix.
-        versionCode = 59_010_300
-        versionName = "1.13.2-lzcy1.3.0"
+        versionCode = 59_010_400
+        versionName = "1.13.2-lzcy1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -82,6 +82,13 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+        }
+
+        create("tvPreview") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".tvpreview"
+            versionNameSuffix = "-tv-mvp"
+            matchingFallbacks += "debug"
         }
 
         release {
@@ -131,6 +138,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.8.2")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.compose.material:material-icons-extended")

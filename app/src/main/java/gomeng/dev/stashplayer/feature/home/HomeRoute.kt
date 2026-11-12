@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -18,11 +19,13 @@ import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +39,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import gomeng.dev.stashplayer.core.debug.StashDebugLogBuffer
@@ -48,12 +56,12 @@ import gomeng.dev.stashplayer.core.model.withStashRandomShuffleSeed
 import gomeng.dev.stashplayer.core.network.buildSimilarScenesRepository
 import gomeng.dev.stashplayer.core.network.StashGraphQlClient
 import gomeng.dev.stashplayer.core.network.StashServerProfile
+import gomeng.dev.stashplayer.core.network.StashSettingsRepository
 import gomeng.dev.stashplayer.core.ui.components.SceneCard
 import gomeng.dev.stashplayer.core.ui.components.rememberStashThumbnailModel
 import gomeng.dev.stashplayer.core.ui.designsystem.StashActionPill
 import gomeng.dev.stashplayer.core.ui.designsystem.StashEmptyState
 import gomeng.dev.stashplayer.core.ui.designsystem.StashEmptyStateModel
-import gomeng.dev.stashplayer.core.ui.designsystem.StashGhostButton
 import gomeng.dev.stashplayer.core.ui.designsystem.StashHeroMediaCard
 import gomeng.dev.stashplayer.core.ui.designsystem.StashScreenHeader
 import gomeng.dev.stashplayer.core.ui.designsystem.StashSectionHeader
@@ -62,6 +70,8 @@ import gomeng.dev.stashplayer.core.ui.designsystem.StashServerStatusCard as Stas
 import gomeng.dev.stashplayer.core.ui.designsystem.StashStatCard
 import gomeng.dev.stashplayer.core.ui.designsystem.stashServerStatusCardModel
 import gomeng.dev.stashplayer.feature.queue.buildQueuePlaybackRequest
+import gomeng.dev.stashplayer.feature.settings.TvPairingAction
+import gomeng.dev.stashplayer.feature.settings.rememberTvPairingAction
 import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.core.ui.i18n.stashString
 
@@ -79,6 +89,8 @@ fun HomeRoute(
 ) {
     val context = LocalContext.current
     val localRepository = remember(context) { StashLocalLibraryRepository(context) }
+    val settingsRepository = remember(context) { StashSettingsRepository(context) }
+    val tvPairingAction = rememberTvPairingAction(profile != null, settingsRepository)
     val queueScenes by localRepository.queueScenes.collectAsState(initial = emptyList())
     val watchLaterScenes by localRepository.watchLaterScenes.collectAsState(initial = emptyList())
     val favoriteScenes by localRepository.favoriteScenes.collectAsState(initial = emptyList())
@@ -184,6 +196,7 @@ fun HomeRoute(
         favoriteScenes = favoriteScenes,
         playbackHistoryScenes = playbackHistoryScenes,
         isRefreshing = isLoading,
+        tvPairingAction = tvPairingAction,
         error = error,
         onRefresh = { reloadToken++ },
         onOpenScene = onOpenScene,
@@ -212,6 +225,7 @@ private fun HomeHubContent(
     favoriteScenes: List<SceneCardModel>,
     playbackHistoryScenes: List<SceneCardModel>,
     isRefreshing: Boolean,
+    tvPairingAction: TvPairingAction,
     error: String?,
     onRefresh: () -> Unit,
     onOpenScene: (String, List<SceneCardModel>, Boolean) -> Unit,
@@ -245,22 +259,48 @@ private fun HomeHubContent(
         contentPadding = PaddingValues(bottom = 92.dp, top = 14.dp),
     ) {
         item {
-            StashScreenHeader(
-                title = stashString(R.string.auto_kr_0001),
-                subtitle = hubState.server.statusLabel,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
-                trailing = if (hasProfile) {
-                    {
-                        StashGhostButton(
-                            text = if (isRefreshing) stashString(R.string.auto_kr_0448) else stashString(R.string.auto_kr_0449),
-                            onClick = onRefresh,
-                            enabled = !isRefreshing,
-                        )
+            Column(Modifier.padding(horizontal = horizontalPadding)) {
+                StashScreenHeader(
+                    title = stashString(R.string.auto_kr_0001),
+                    subtitle = hubState.server.statusLabel,
+                    trailing = if (hasProfile) {
+                        {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                val refreshLabel = stashString(
+                                    if (isRefreshing) R.string.auto_kr_0448 else R.string.auto_kr_0449,
+                                )
+                                IconButton(
+                                    onClick = onRefresh,
+                                    enabled = !isRefreshing,
+                                    modifier = Modifier.semantics { contentDescription = refreshLabel },
+                                ) {
+                                    if (isRefreshing) {
+                                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                    } else {
+                                        Icon(Icons.Outlined.Refresh, contentDescription = null)
+                                    }
+                                }
+                                IconButton(onClick = tvPairingAction.onClick, enabled = tvPairingAction.enabled) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_scan),
+                                        contentDescription = stashString(R.string.tv_pairing_scan_action),
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        null
+                    },
+                )
+                (tvPairingAction.progressMessage ?: tvPairingAction.resultMessage)?.let { message ->
+                    Text(
+                        text = stashString(message),
+                        modifier = Modifier.padding(top = 6.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     }
-                } else {
-                    null
-                },
-            )
+            }
         }
 
         if (!hasProfile || error != null) {

@@ -1164,6 +1164,7 @@ private fun ServerSettingsContent(onOpenOnboarding: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(stringResource(R.string.settings_stash_server_section_title), style = MaterialTheme.typography.titleMedium)
+            SendServerToTv(savedProfile, repository)
             OutlinedTextField(
                 value = serverName,
                 onValueChange = { serverName = it },

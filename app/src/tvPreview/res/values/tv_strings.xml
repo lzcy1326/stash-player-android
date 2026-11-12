@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tv_app_name">Stash Player TV</string>
+    <string name="tv_show_pairing">Set up with phone</string>
+    <string name="tv_pairing_title">Scan to set up Stash</string>
+    <string name="tv_pairing_scanned">Code scanned. Waiting for confirmation on your phone.</string>
+    <string name="tv_pairing_waiting">On your phone, open Stash Player → Settings → Server → Scan to send server settings to TV. Connect both devices to the same local network. This code is valid for 3 minutes.</string>
+    <string name="tv_pairing_no_network">Connect the TV to Wi-Fi or Ethernet to start pairing.</string>
+    <string name="tv_pairing_expired">This code expired. Refresh to show a new one.</string>
+    <string name="tv_pairing_start_failed">Could not start pairing. Refresh to try again.</string>
+    <string name="tv_pairing_refresh">Refresh code</string>
+    <string name="tv_loading">Loading…</string>
+    <string name="tv_server">Server settings</string>
+    <string name="tv_setup_hint">Enter the Stash address reachable from this TV.</string>
+    <string name="tv_address">Server address</string>
+    <string name="tv_api_key">API key (if required)</string>
+    <string name="tv_connect">Connect and save</string>
+    <string name="tv_connecting">Connecting…</string>
+    <string name="tv_invalid_url">Enter a valid HTTP or HTTPS server address.</string>
+    <string name="tv_auth_error">Authentication failed. Check the server credentials.</string>
+    <string name="tv_connection_error">Could not connect to Stash. Check the address and network.</string>
+    <string name="tv_back">Back</string>
+    <string name="tv_library">Videos</string>
+    <string name="tv_search">Search videos</string>
+    <string name="tv_submit_search">Search</string>
+    <string name="tv_resume">Continue watching</string>
+    <string name="tv_empty">No videos found.</string>
+    <string name="tv_list_error">Could not load videos.</string>
+    <string name="tv_load_more">Load more</string>
+    <string name="tv_retry">Retry</string>
+    <string name="tv_play">Play</string>
+    <string name="tv_pause">Pause</string>
+    <string name="tv_rewind">−10 s</string>
+    <string name="tv_forward">+10 s</string>
+    <string name="tv_player_hint">OK: play/pause · Left/Right: seek · Up/Down: controls</string>
+    <string name="tv_player_error">Playback failed (%1\$s).</string>
+    <string name="tv_stream_unavailable">Could not load this video stream.</string>
+    <string name="tv_progress_not_saved">Playback progress could not be saved.</string>
+    <string name="tv_switch_stream">Switch stream</string>
+</resources>

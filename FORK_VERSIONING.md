@@ -16,6 +16,8 @@ v1.13.2-lzcy1.1.0
 
 ## Rules
 
+Update `versionName` and `versionCode` only when the maintainer explicitly requests a release. Keep the current version for routine fixes and local verification.
+
 1. Start from the exact upstream semantic version.
 2. Increment `major` for personal releases that introduce a major change.
 3. Increment `feature` for new fork-only functionality.

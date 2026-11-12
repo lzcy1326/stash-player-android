@@ -47,7 +47,7 @@ Keep the LZCY keystore and its credentials securely backed up. Never commit sign
 
 ## Versioning and Releases
 
-Follow [FORK_VERSIONING.md](FORK_VERSIONING.md) when changing `versionName` and `versionCode` in `app/build.gradle.kts`. Document release changes in [CHANGELOG.md](CHANGELOG.md), run the relevant checks, and build and verify the signed APK. Publish the matching `v`-prefixed tag and APK to this fork's [Releases](https://github.com/lzcy1326/stash-player-android/releases); do not reuse a published tag.
+Change `versionName` and `versionCode` in `app/build.gradle.kts` only when the maintainer explicitly requests a release, following [FORK_VERSIONING.md](FORK_VERSIONING.md). Routine fixes and local test builds keep the current version. Document release changes in [CHANGELOG.md](CHANGELOG.md), run the relevant checks, and build and verify the signed APK. Publish the matching `v`-prefixed tag and APK to this fork's [Releases](https://github.com/lzcy1326/stash-player-android/releases); do not reuse a published tag.
 
 ## Tech Stack
 

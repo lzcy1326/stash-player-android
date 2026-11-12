@@ -80,12 +80,14 @@ class StashPlayerController(
         playWhenReady: Boolean = true,
         requestHeaders: Map<String, String> = emptyMap(),
         captionTracks: List<StashCaptionTrack> = emptyList(),
+        mimeType: String? = null,
     ) {
         lastError = null
         resumePlaybackWhenReady = false
         httpDataSourceFactory.setDefaultRequestProperties(requestHeaders)
         val item = MediaItem.Builder()
             .setUri(uri)
+            .setMimeType(mimeType)
             .setSubtitleConfigurations(captionTracks.mapNotNull { it.toSubtitleConfigurationOrNull() })
             .setMediaMetadata(
                 androidx.media3.common.MediaMetadata.Builder()
