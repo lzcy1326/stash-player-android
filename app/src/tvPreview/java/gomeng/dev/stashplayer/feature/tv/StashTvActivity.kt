@@ -123,7 +123,7 @@ private fun StashTvApp() {
             )
             else -> {
                 val connected = activeProfile ?: server
-                key(connected) { TvLibrary(connected, onSettings = { editing = true }) }
+                key(connected) { TvHome(connected, onSettings = { editing = true }) }
             }
         }
     }

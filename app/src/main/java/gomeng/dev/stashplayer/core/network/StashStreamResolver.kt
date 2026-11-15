@@ -930,6 +930,9 @@ class StashGraphQlClient(
               findScene(id: ${'$'}id) {
                 id
                 title
+                date
+                details
+                performers { id name }
                 rating100
                 resume_time
                 play_count

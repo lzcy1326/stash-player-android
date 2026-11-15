@@ -6,6 +6,13 @@ When bumping `versionName`, add a new section for the release version and summar
 
 ## [Unreleased]
 
+- Android TV: hold left or right to scrub with a timeline and Stash sprite previews; release to seek while preserving play or pause state.
+- 电视端：长按遥控器左右键进行进度预览和快速定位，松开后跳转并保持播放或暂停状态。
+- Android TV: add performer and studio tabs with search, details, favorites, ratings, and scoped video browsing.
+- 电视端：新增演员、厂商页签，支持搜索、详情、收藏、评分和关联影片浏览。
+- Android TV: open a remote-friendly video detail page before playback, with metadata, retry, and focus restoration when returning to the library.
+- 电视端：播放前显示影片详情，支持查看资料、加载失败重试及返回列表时恢复焦点。
+
 ## [1.13.2-lzcy1.4.0] - 2026-11-13
 
 ### English

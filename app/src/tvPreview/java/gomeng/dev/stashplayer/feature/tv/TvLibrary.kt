@@ -59,7 +59,13 @@ import kotlinx.coroutines.CancellationException
 private const val TvPageSize = 18
 
 @Composable
-internal fun TvLibrary(profile: StashServerProfile, onSettings: () -> Unit) {
+internal fun TvLibrary(
+    profile: StashServerProfile,
+    onSettings: () -> Unit,
+    onSelectTab: ((TvSection) -> Unit)? = null,
+    scope: TvEntityScope? = null,
+    onExitScope: (() -> Unit)? = null,
+) {
     val client = remember(profile) { StashGraphQlClient(profile) }
     val gridState = rememberLazyGridState()
     val keyboard = LocalSoftwareKeyboardController.current
@@ -75,6 +81,7 @@ internal fun TvLibrary(profile: StashServerProfile, onSettings: () -> Unit) {
     var busy by remember { mutableStateOf(true) }
     var failed by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<SceneCardModel?>(null) }
+    var playing by remember { mutableStateOf(false) }
     var focusScene by remember { mutableStateOf<String?>(null) }
 
     fun loadFirstPage(newQuery: String, resumeOnly: Boolean) {
@@ -100,6 +107,9 @@ internal fun TvLibrary(profile: StashServerProfile, onSettings: () -> Unit) {
                 videoFilter = StashVideoFilterState(
                     playbackState = if (resumable) StashPlaybackState.Resumable else null,
                 ),
+                performerId = scope?.id?.takeIf { scope.section == TvSection.Performers },
+                studioId = scope?.id?.takeIf { scope.section == TvSection.Studios },
+                includeStudioChildren = scope?.includeChildren == true,
             )
             val previousIds = scenes.mapTo(mutableSetOf()) { it.id }
             val newItems = result.scenes.filter { previousIds.add(it.id) }
@@ -118,9 +128,19 @@ internal fun TvLibrary(profile: StashServerProfile, onSettings: () -> Unit) {
 
     val video = selected
     if (video != null) {
-        TvPlayer(client, profile, video) {
-            focusScene = video.id
-            selected = null
+        if (playing) {
+            TvPlayer(client, profile, video) { playing = false }
+        } else {
+            TvSceneDetail(
+                client = client,
+                profile = profile,
+                scene = video,
+                onPlay = { playing = true },
+                onBack = {
+                    focusScene = video.id
+                    selected = null
+                },
+            )
         }
         return
     }
@@ -132,6 +152,7 @@ internal fun TvLibrary(profile: StashServerProfile, onSettings: () -> Unit) {
             gridState.scrollToItem(index)
         }
     }
+    BackHandler(enabled = onExitScope != null) { onExitScope?.invoke() }
     BackHandler(enabled = query.isNotBlank() || resumable) {
         draft = ""
         loadFirstPage("", false)
@@ -140,10 +161,14 @@ internal fun TvLibrary(profile: StashServerProfile, onSettings: () -> Unit) {
         Modifier.fillMaxSize().padding(horizontal = 42.dp, vertical = 22.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            stringResource(if (resumable) R.string.tv_resume else R.string.tv_library),
-            style = MaterialTheme.typography.headlineMedium,
-        )
+        if (scope == null && onSelectTab != null) {
+            TvSectionNavigation(TvSection.Videos, onSelectTab)
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                TvButton(stringResource(R.string.tv_back), { onExitScope?.invoke() })
+                Text(scope?.name ?: stringResource(R.string.tv_library), style = MaterialTheme.typography.headlineMedium)
+            }
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = draft,

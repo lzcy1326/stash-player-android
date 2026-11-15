@@ -51,6 +51,9 @@ data class StashScene(
     val tags: List<SceneCardTagChip> = emptyList(),
     val captionBaseUrl: String? = null,
     val captions: List<StashSceneCaption> = emptyList(),
+    val date: String? = null,
+    val details: String? = null,
+    val performers: List<String> = emptyList(),
 ) {
     val preferredStream: StashStreamCandidate?
         get() = streamCandidates.firstOrNull()
@@ -824,6 +827,9 @@ private data class ApiImageVisualFile(
 private data class ApiScene(
     val id: String,
     val title: String? = null,
+    val date: String? = null,
+    val details: String? = null,
+    val performers: List<ApiNamedEntity> = emptyList(),
     val rating100: Int? = null,
     @Json(name = "resume_time") val resumeTime: Double? = null,
     @Json(name = "play_count") val playCount: Int? = null,
@@ -873,6 +879,9 @@ private data class ApiScene(
             tags = tags.mapNotNull { it.toSceneCardTagChipOrNull() },
             captionBaseUrl = paths?.caption?.trim()?.takeIf { it.isNotBlank() },
             captions = captions.orEmpty().mapNotNull { it.toDomainOrNull() },
+            date = date?.trim()?.takeIf { it.isNotBlank() },
+            details = details?.trim()?.takeIf { it.isNotBlank() },
+            performers = performers.mapNotNull { it.name?.trim()?.takeIf(String::isNotBlank) },
         )
     }
 

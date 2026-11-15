@@ -28,6 +28,7 @@ internal fun PlayerSpriteThumbnail(
     frame: StashSpriteFrame,
     serverProfile: StashServerProfile?,
     imageLoader: ImageLoader,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     // Key the request to the sheet, not the tile: scrubbing reuses Coil's decoded bitmap.
@@ -47,7 +48,7 @@ internal fun PlayerSpriteThumbnail(
     val bitmap = ((painter.state as? AsyncImagePainter.State.Success)?.result?.drawable as? BitmapDrawable)?.bitmap
     if (bitmap != null && frame.fitsSpriteSheet(bitmap.width, bitmap.height)) {
         val image = remember(bitmap) { bitmap.asImageBitmap() }
-        Canvas(Modifier.size(width = 112.dp, height = 63.dp)) {
+        Canvas(modifier.size(width = 112.dp, height = 63.dp)) {
             val scale = minOf(size.width / frame.width, size.height / frame.height)
             val width = (frame.width * scale).roundToInt().coerceAtLeast(1)
             val height = (frame.height * scale).roundToInt().coerceAtLeast(1)

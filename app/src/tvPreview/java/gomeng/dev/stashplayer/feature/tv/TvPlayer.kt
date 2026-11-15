@@ -1,6 +1,8 @@
 package gomeng.dev.stashplayer.feature.tv
 
 import android.view.KeyEvent
+import android.os.SystemClock
+import android.view.ViewConfiguration
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -28,10 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -40,6 +44,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import coil.ImageLoader
 import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.core.model.SceneCardModel
 import gomeng.dev.stashplayer.core.network.GraphQlStashStreamResolver
@@ -47,17 +52,21 @@ import gomeng.dev.stashplayer.core.network.ResolvedStashStreamCandidate
 import gomeng.dev.stashplayer.core.network.StashGraphQlClient
 import gomeng.dev.stashplayer.core.network.StashServerProfile
 import gomeng.dev.stashplayer.core.network.StashStream
+import gomeng.dev.stashplayer.core.network.findStashSpriteAtTime
 import gomeng.dev.stashplayer.core.player.AspectRatioMode
 import gomeng.dev.stashplayer.core.player.StashPlayerController
 import gomeng.dev.stashplayer.core.player.formatPlayerPosition
+import gomeng.dev.stashplayer.core.player.nextTvScrubTarget
 import gomeng.dev.stashplayer.core.player.resolvePlayerResumeActivitySavePayload
 import gomeng.dev.stashplayer.core.player.resolvePlayerResumeStartPositionMs
 import gomeng.dev.stashplayer.feature.player.PlayerSurface
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okhttp3.OkHttpClient
 
 @Composable
 internal fun TvPlayer(
@@ -67,6 +76,7 @@ internal fun TvPlayer(
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val controller = remember(scene.id) { StashPlayerController(context) }
     val player = controller.player
@@ -88,7 +98,45 @@ internal fun TvPlayer(
     var showHint by remember { mutableStateOf(true) }
     var closing by remember { mutableStateOf(false) }
     var savedPosition by remember { mutableLongStateOf(-1L) }
+    var heldDirection by remember { mutableIntStateOf(0) }
+    var scrubbing by remember { mutableStateOf(false) }
+    var scrubResume by remember { mutableStateOf(false) }
+    var previewTarget by remember { mutableStateOf<Long?>(null) }
+    var holdJob by remember { mutableStateOf<Job?>(null) }
+    var hidePreviewJob by remember { mutableStateOf<Job?>(null) }
+    val spriteLoader = remember(context) {
+        ImageLoader.Builder(context)
+            .okHttpClient { OkHttpClient.Builder().followRedirects(false).followSslRedirects(false).build() }
+            .build()
+    }
+    DisposableEffect(spriteLoader) { onDispose { spriteLoader.shutdown() } }
     val sources = remember(stream) { stream?.resolvedCandidates.orEmpty().distinctBy { it.uri } }
+    var spriteFrames by remember(stream) { mutableStateOf(stream?.spriteFrames.orEmpty()) }
+
+    LaunchedEffect(stream, client) {
+        val media = stream ?: return@LaunchedEffect
+        val vtt = media.spriteVttUrl ?: return@LaunchedEffect
+        if (spriteFrames.isNotEmpty()) return@LaunchedEffect
+        try {
+            spriteFrames = client.fetchSpriteFrames(vtt)
+        } catch (failure: CancellationException) {
+            throw failure
+        } catch (_: Exception) {
+            // A missing sprite must not block seeking or playback.
+        }
+    }
+
+    fun cancelScrub(resume: Boolean) {
+        val shouldResume = scrubbing && scrubResume && resume
+        heldDirection = 0
+        holdJob?.cancel()
+        holdJob = null
+        hidePreviewJob?.cancel()
+        hidePreviewJob = null
+        scrubbing = false
+        previewTarget = null
+        if (shouldResume) controller.resumePlaybackIfDesired(true)
+    }
 
     fun prepare(
         media: StashStream,
@@ -139,6 +187,7 @@ internal fun TvPlayer(
     fun closePlayer() {
         if (closing) return
         closing = true
+        cancelScrub(resume = false)
         controller.pause()
         saveProgress(onClose)
     }
@@ -183,12 +232,14 @@ internal fun TvPlayer(
             }
 
             override fun onPlayerError(error: PlaybackException) {
+                cancelScrub(resume = false)
                 playbackError = error.errorCodeName
             }
         }
         player.addListener(listener)
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP && !closing) {
+                cancelScrub(resume = false)
                 controller.pause()
                 saveProgress()
             }
@@ -215,17 +266,74 @@ internal fun TvPlayer(
     }
 
     val hasError = loadFailed || playbackError != null
-    val showControls = controlsVisible || hasError
+    val showControls = (controlsVisible && !scrubbing) || hasError
     LaunchedEffect(showControls, hasError) {
         if (showControls) controlsFocus.requestFocus() else surfaceFocus.requestFocus()
     }
     BackHandler {
-        if (controlsVisible && !hasError) controlsVisible = false else closePlayer()
+        if (scrubbing || heldDirection != 0) cancelScrub(resume = true)
+        else if (controlsVisible && !hasError) controlsVisible = false else closePlayer()
     }
 
     Box(
         Modifier.fillMaxSize().background(Color.Black).onPreviewKeyEvent { event ->
-            val code = event.nativeKeyEvent.keyCode
+            val native = event.nativeKeyEvent
+            val code = native.keyCode
+            val direction = when (code) {
+                KeyEvent.KEYCODE_DPAD_LEFT -> -1
+                KeyEvent.KEYCODE_DPAD_RIGHT -> 1
+                else -> 0
+            }
+            if (direction != 0 && !closing && !hasError) {
+                when (native.action) {
+                    KeyEvent.ACTION_DOWN -> {
+                        if (native.repeatCount == 0 && heldDirection == 0) {
+                            heldDirection = direction
+                            hidePreviewJob?.cancel()
+                            previewTarget = null
+                            val startedAt = SystemClock.uptimeMillis()
+                            holdJob = scope.launch {
+                                delay(ViewConfiguration.getLongPressTimeout().toLong())
+                                if (heldDirection != direction || !ready || duration <= 0L) return@launch
+                                scrubResume = player.playWhenReady
+                                previewTarget = player.currentPosition.coerceAtLeast(0L)
+                                controller.holdPlaybackForSeekPreview()
+                                scrubbing = true
+                                while (heldDirection == direction && scrubbing) {
+                                    previewTarget = nextTvScrubTarget(
+                                        previewTarget ?: 0L, direction,
+                                        SystemClock.uptimeMillis() - startedAt, duration,
+                                    )
+                                    delay(250)
+                                }
+                            }
+                        }
+                    }
+                    KeyEvent.ACTION_UP -> {
+                        if (heldDirection == direction) {
+                            holdJob?.cancel()
+                            holdJob = null
+                            heldDirection = 0
+                            if (native.isCanceled) {
+                                cancelScrub(resume = true)
+                            } else if (scrubbing) {
+                                val target = previewTarget ?: player.currentPosition
+                                scrubbing = false
+                                controller.seekTo(target, resumePlayback = scrubResume)
+                                hidePreviewJob = scope.launch {
+                                    delay(1_500)
+                                    previewTarget = null
+                                }
+                            } else if (controlsVisible) {
+                                focusManager.moveFocus(if (direction < 0) FocusDirection.Left else FocusDirection.Right)
+                            } else {
+                                seek(direction * 10_000L)
+                            }
+                        }
+                    }
+                }
+                return@onPreviewKeyEvent true
+            }
             val action = when {
                 closing || hasError -> null
                 code == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> ::togglePlayback
@@ -235,8 +343,6 @@ internal fun TvPlayer(
                 code == KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> ({ seek(10_000) })
                 showControls -> null
                 code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER -> ::togglePlayback
-                code == KeyEvent.KEYCODE_DPAD_LEFT -> ({ seek(-10_000) })
-                code == KeyEvent.KEYCODE_DPAD_RIGHT -> ({ seek(10_000) })
                 code == KeyEvent.KEYCODE_DPAD_UP || code == KeyEvent.KEYCODE_DPAD_DOWN ->
                     ({ controlsVisible = true })
                 else -> null
@@ -306,6 +412,16 @@ internal fun TvPlayer(
                     TvButton(stringResource(R.string.tv_back), ::closePlayer)
                 }
             }
+        }
+        previewTarget?.takeIf { !hasError }?.let { target ->
+            TvSeekPreview(
+                targetMs = target,
+                durationMs = duration,
+                frame = findStashSpriteAtTime(spriteFrames, target / 1000.0),
+                profile = profile,
+                imageLoader = spriteLoader,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
     }
 }
