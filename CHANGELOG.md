@@ -6,12 +6,26 @@ When bumping `versionName`, add a new section for the release version and summar
 
 ## [Unreleased]
 
-- Android TV: hold left or right to scrub with a timeline and Stash sprite previews; release to seek while preserving play or pause state.
-- 电视端：长按遥控器左右键进行进度预览和快速定位，松开后跳转并保持播放或暂停状态。
-- Android TV: add performer and studio tabs with search, details, favorites, ratings, and scoped video browsing.
-- 电视端：新增演员、厂商页签，支持搜索、详情、收藏、评分和关联影片浏览。
-- Android TV: open a remote-friendly video detail page before playback, with metadata, retry, and focus restoration when returning to the library.
-- 电视端：播放前显示影片详情，支持查看资料、加载失败重试及返回列表时恢复焦点。
+## [1.13.2-lzcy1.5.0] - 2026-11-16
+
+### English
+
+- Add an Android TV video detail page with metadata and resume information; restore focus to the selected video after returning.
+- Add TV performer and studio tabs with search, pagination, details, server-synchronized favorites and ratings, and related video browsing. Studio videos can include child studios.
+- Hold left or right on the TV remote to scrub with a progress bar and Stash thumbnail preview. Release to seek while preserving the playing or paused state; short presses still seek 10 seconds.
+
+### 简体中文
+
+- 电视端新增影片详情页，展示影片资料和续播位置；返回列表时恢复原影片焦点。
+- 新增电视端演员和厂商页签，支持搜索、分页、资料详情、与服务器同步收藏及评分，并可浏览关联影片。厂商影片可选择包含子厂商。
+- 播放时长按遥控器左右键可查看进度条和 Stash 缩略图预览，松开后跳转并保留播放或暂停状态；短按仍跳转 10 秒。
+
+### 说明 / Notes
+
+- Android TV 为独立安装的 MVP 体验版，使用调试签名且允许调试。新增功能已通过模拟器基本验证，尚需 TCL 真机验收。
+- 预览画面依赖 Stash 已生成的缩略图；未生成时仍可通过时间和进度条定位。
+- The Android TV APK is a separately installed, debug-signed and debuggable MVP preview. New functionality was tested on an emulator and still needs validation on the TCL TV.
+- Thumbnail previews require generated Stash sprites; seeking remains available when they are missing.
 
 ## [1.13.2-lzcy1.4.0] - 2026-11-13
 
