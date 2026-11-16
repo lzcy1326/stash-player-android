@@ -6,13 +6,14 @@ import org.junit.Test
 
 class BottomNavigationConfigurationTest {
     @Test fun missingOrInvalidConfigurationRestoresDefaults() {
+        assertEquals(listOf(NavigationFeature.Explore, NavigationFeature.Performers, NavigationFeature.Studios, NavigationFeature.Queue), defaultNavigationFeatures)
         assertEquals(defaultNavigationFeatures, restoreNavigationFeatures(null))
         assertEquals(defaultNavigationFeatures, restoreNavigationFeatures("home,settings,unknown"))
     }
 
     @Test fun restoreKeepsFirstValidUniqueFeaturesAndFillsMissingSlots() {
         assertEquals(
-            listOf(NavigationFeature.Studios, NavigationFeature.Explore, NavigationFeature.Shorts, NavigationFeature.Gallery),
+            listOf(NavigationFeature.Studios, NavigationFeature.Explore, NavigationFeature.Performers, NavigationFeature.Queue),
             restoreNavigationFeatures("studios,studios,unknown,explore"),
         )
         assertEquals(
@@ -28,13 +29,20 @@ class BottomNavigationConfigurationTest {
         assertNull(serializeNavigationFeatures(List(4) { NavigationFeature.Queue }))
     }
 
+    @Test fun savedNavigationIsPreservedWhenDefaultsChange() {
+        assertEquals(
+            listOf(NavigationFeature.Explore, NavigationFeature.Shorts, NavigationFeature.Gallery, NavigationFeature.Queue),
+            restoreNavigationFeatures("explore,shorts,gallery,queue"),
+        )
+    }
+
     @Test fun addingAtCapacityDoesNotReplaceAndRemovingThenAddingAppends() {
         val initial = defaultNavigationFeatures.toList()
-        assertEquals(AddNavigationFeatureResult.AtCapacity, addNavigationFeature(initial, NavigationFeature.Performers))
+        assertEquals(AddNavigationFeatureResult.AtCapacity, addNavigationFeature(initial, NavigationFeature.Shorts))
         assertEquals(defaultNavigationFeatures, initial)
         assertEquals(
-            AddNavigationFeatureResult.Added(listOf(NavigationFeature.Explore, NavigationFeature.Shorts, NavigationFeature.Queue, NavigationFeature.Performers)),
-            addNavigationFeature(initial - NavigationFeature.Gallery, NavigationFeature.Performers),
+            AddNavigationFeatureResult.Added(listOf(NavigationFeature.Explore, NavigationFeature.Performers, NavigationFeature.Queue, NavigationFeature.Shorts)),
+            addNavigationFeature(initial - NavigationFeature.Studios, NavigationFeature.Shorts),
         )
     }
 
@@ -42,7 +50,7 @@ class BottomNavigationConfigurationTest {
         assertEquals(defaultNavigationFeatures, moveNavigationFeature(defaultNavigationFeatures, -1, 2))
         assertEquals(defaultNavigationFeatures, moveNavigationFeature(defaultNavigationFeatures, 0, 4))
         assertEquals(
-            listOf(NavigationFeature.Shorts, NavigationFeature.Gallery, NavigationFeature.Explore, NavigationFeature.Queue),
+            listOf(NavigationFeature.Performers, NavigationFeature.Studios, NavigationFeature.Explore, NavigationFeature.Queue),
             moveNavigationFeature(defaultNavigationFeatures, 0, 2),
         )
     }

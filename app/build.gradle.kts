@@ -61,8 +61,8 @@ android {
         minSdk = 29
         targetSdk = 35
         // LZCY fork versionCode = upstream code * 1,000,000 + major * 10,000 + feature * 100 + fix.
-        versionCode = 59_010_500
-        versionName = "1.13.2-lzcy1.5.0"
+        versionCode = 60_010_500
+        versionName = "1.13.3-lzcy1.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

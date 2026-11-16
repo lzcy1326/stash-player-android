@@ -14,8 +14,8 @@ internal const val MAX_NAVIGATION_FEATURES = 4
 internal val navigationFeaturePool = NavigationFeature.entries.toList()
 internal val defaultNavigationFeatures = listOf(
     NavigationFeature.Explore,
-    NavigationFeature.Shorts,
-    NavigationFeature.Gallery,
+    NavigationFeature.Performers,
+    NavigationFeature.Studios,
     NavigationFeature.Queue,
 )
 

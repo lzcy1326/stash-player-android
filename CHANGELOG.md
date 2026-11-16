@@ -4,6 +4,25 @@ All notable changes to Stash Android Player are documented here.
 
 When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. Use the matching section for the GitHub Release notes.
 
+## [1.13.3-lzcy1.5.0] - 2026-11-16
+
+### 简体中文
+
+- 合并上游 1.13.3：删除弹窗不再要求额外勾选确认，默认同时删除原始视频、funscript 和生成的辅助文件。设置中可选择跳过确认，开启后删除将立即执行，包括原始文件。删除不可撤销；如需保留原始文件，请在弹窗中取消勾选。
+- 默认底部导航将短视频和图库替换为演员和厂商；已保存的自定义导航保持不变，可在设置中调整。
+- 改进手机播放手势：扩大亮度和音量手势区域，使滑块位置跟随手势布局，并修正长按倍速及提示显示。
+
+### English
+
+- Merge upstream 1.13.3: the delete dialog no longer requires an extra acknowledgement, and original videos, funscripts and generated files are selected by default. The optional setting to skip confirmation deletes immediately, including original files. Deletion cannot be undone; uncheck original-file deletion to keep originals.
+- Replace Shorts and Gallery with Performers and Studios in the default bottom navigation. Saved custom navigation remains unchanged and can be edited in Settings.
+- Improve mobile playback gestures, side control placement and press-and-hold playback speed behavior.
+
+### 说明 / Notes
+
+- Android TV APK 为独立安装的 MVP 体验版，使用调试签名且允许调试；本次合并后的电视端尚未完成真机验收。
+- The Android TV APK is a separately installed, debug-signed and debuggable MVP preview; this update has not been validated on a physical TV.
+
 ## [1.13.3] - 2026-11-15
 
 - English: Delete from the confirmation dialog without an extra acknowledgement checkbox. Original videos/funscripts and generated files are checked by default. Add an off-by-default Interface option to skip the dialog and delete immediately, including original files. File deletion is irreversible; uncheck original-file deletion in the dialog to keep originals.
