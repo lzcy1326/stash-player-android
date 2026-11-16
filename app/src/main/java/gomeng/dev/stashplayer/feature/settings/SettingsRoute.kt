@@ -2169,12 +2169,23 @@ private fun InterfaceSettingsContent(onOpenBottomNavigationEditor: () -> Unit) {
     val appLanguage by repository.appLanguage.collectAsState(
         initial = StashSettingsRepository.DEFAULT_APP_LANGUAGE,
     )
+    val skipSceneDeleteConfirmation by repository.skipSceneDeleteConfirmation.collectAsState(
+        initial = StashSettingsRepository.DEFAULT_SKIP_SCENE_DELETE_CONFIRMATION,
+    )
     val coroutineScope = rememberCoroutineScope()
 
     SettingsLinkCard(
         title = R.string.navigation_editor_entry,
         descriptionText = stringResource(R.string.navigation_editor_entry_description),
         onClick = onOpenBottomNavigationEditor,
+    )
+    SettingsSwitchCard(
+        title = R.string.settings_skip_scene_delete_confirmation,
+        description = R.string.settings_skip_scene_delete_confirmation_description,
+        checked = skipSceneDeleteConfirmation,
+        onCheckedChange = { enabled ->
+            coroutineScope.launch { repository.setSkipSceneDeleteConfirmation(enabled) }
+        },
     )
     SettingsRadioGroupCard(
         title = LanguageSettingCopy.title,
@@ -2595,6 +2606,11 @@ private fun SettingsSwitchCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(stringResource(title), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             Switch(
                 checked = checked,

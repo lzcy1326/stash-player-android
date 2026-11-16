@@ -61,11 +61,13 @@ Stash 很强大，但桌面 Web UI 在手机上并不总是顺手。**Stash Andr
 3. 打开 APK，并在 Android 提示时允许浏览器或文件管理器安装应用。
 4. 启动 **Stash Player** 并连接到你的 Stash 服务器。
 
-> 当前个人版：**v1.13.2-lzcy1.2.0**。后续更新请查看 [Releases](https://github.com/lzcy1326/stash-player-android/releases)。
+> 当前个人版：**v1.13.2-lzcy1.5.0**。后续更新请查看 [Releases](https://github.com/lzcy1326/stash-player-android/releases)。
 
 本个人版使用独立于上游应用的签名密钥。如果已安装同包名的上游版本，请先备份应用数据，再卸载上游版本并安装本 APK。已安装 LZCY 个人版的用户可直接覆盖升级。
 
 问题反馈请提交至 [Issues](https://github.com/lzcy1326/stash-player-android/issues)；个人版本规则和上游同步策略见 [FORK_VERSIONING.md](FORK_VERSIONING.md)。
+
+删除弹窗不再需要额外确认勾选。默认勾选删除原始视频、funscript 和生成的辅助文件，文件删除不可撤销。如需保留原始文件，请在弹窗中取消勾选原始文件删除。设置 → 界面 → **跳过删除确认**默认关闭；开启后，无论单选还是多选，都会立即删除，包括原始文件。
 
 收藏和选择性扫描保留 `data/...` 等服务器相对路径，并以空心或实心星标显示文件夹收藏状态。
 

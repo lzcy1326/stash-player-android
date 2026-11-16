@@ -99,11 +99,13 @@ The Images tab supports search, sort, filters, and full-screen browsing. In the 
 3. Open the APK and allow installs from your browser or file manager if Android asks.
 4. Launch **Stash Player** and connect it to your Stash server.
 
-Current personal fork release: **v1.13.2-lzcy1.2.0**. See [Releases](https://github.com/lzcy1326/stash-player-android/releases) for updates.
+Current personal fork release: **v1.13.2-lzcy1.5.0**. See [Releases](https://github.com/lzcy1326/stash-player-android/releases) for updates.
 
 This fork uses a different signing key from the upstream app. To switch from an upstream installation with the same package name, back up your app data first, then uninstall the upstream app before installing this APK. Updates to earlier LZCY releases can be installed directly.
 
 Report issues at [lzcy1326/stash-player-android/issues](https://github.com/lzcy1326/stash-player-android/issues). See [FORK_VERSIONING.md](FORK_VERSIONING.md) for the personal versioning and upstream sync policy.
+
+The delete dialog no longer requires an extra acknowledgement checkbox. Original videos/funscripts and generated files are selected for deletion by default; file deletion is irreversible. Uncheck original-file deletion in the dialog to keep originals. Settings → Interface → **Skip delete confirmation** is OFF by default; enabling it deletes immediately, including original files, for single and multiple selections.
 
 Server-relative paths such as `data/...` are preserved for favorites and selective scans; outlined/filled stars show the folder favorite state.
 

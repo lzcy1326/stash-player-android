@@ -99,11 +99,13 @@ Images 탭에서는 검색, 정렬, 필터와 전체화면 보기를 지원합�
 3. APK를 열고, Android가 요청하면 브라우저나 파일 관리자에 APK 설치 권한을 허용합니다.
 4. **Stash Player**를 실행하고 Stash 서버를 연결합니다.
 
-현재 개인 포크 릴리스: **v1.13.2-lzcy1.2.0**. 이후 업데이트는 [Releases](https://github.com/lzcy1326/stash-player-android/releases)에서 확인하세요.
+현재 개인 포크 릴리스: **v1.13.2-lzcy1.5.0**. 이후 업데이트는 [Releases](https://github.com/lzcy1326/stash-player-android/releases)에서 확인하세요.
 
 이 개인 포크는 업스트림 앱과 다른 서명 키를 사용합니다. 같은 패키지 이름의 업스트림 앱에서 전환하려면 먼저 앱 데이터를 백업하고 업스트림 앱을 삭제한 다음 이 APK를 설치하세요. 기존 LZCY 개인 버전은 바로 업데이트할 수 있습니다.
 
 문제는 [Issues](https://github.com/lzcy1326/stash-player-android/issues)에 제보하세요. 개인 버전 규칙과 업스트림 동기화 정책은 [FORK_VERSIONING.md](FORK_VERSIONING.md)를 참고하세요.
+
+삭제 팝업의 별도 확인 체크를 없앴습니다. 원본 영상·funscript와 생성된 보조 파일 삭제가 기본 체크되며, 파일 삭제는 되돌릴 수 없습니다. 원본을 보존하려면 팝업에서 원본 파일 삭제를 해제하세요. 설정 → 인터페이스 → **삭제 확인 팝업 생략**은 기본 OFF이며, 켜면 단일·다중 선택 모두 원본 파일까지 즉시 삭제합니다.
 
 `data/...` 같은 서버 상대 경로를 즐겨찾기와 선택 스캔에서 그대로 유지하며, 빈 별·채운 별로 폴더 즐겨찾기 상태를 표시합니다.
 
