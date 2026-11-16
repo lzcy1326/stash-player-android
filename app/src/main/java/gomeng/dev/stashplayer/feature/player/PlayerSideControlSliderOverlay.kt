@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.unit.dp
+import gomeng.dev.stashplayer.core.player.PlayerSideGestureLayout
 import kotlin.math.roundToInt
 
 internal enum class PlayerSideControlKind {
@@ -49,15 +50,17 @@ internal data class PlayerSideControlOverlayState(
 internal fun PlayerSideControlSliderOverlay(
     state: PlayerSideControlOverlayState,
     visible: Boolean,
+    sideGestureLayout: PlayerSideGestureLayout,
     onFractionChange: (Float) -> Unit,
     onChangeFinished: () -> Unit,
     modifier: Modifier = Modifier,
     fadeDurationMs: Int = 180,
 ) {
-    val alignment = when (state.kind) {
-        PlayerSideControlKind.Brightness -> Alignment.CenterEnd
-        PlayerSideControlKind.Volume -> Alignment.CenterStart
+    val isLeft = when (sideGestureLayout) {
+        PlayerSideGestureLayout.Default -> state.kind == PlayerSideControlKind.Brightness
+        PlayerSideGestureLayout.Reversed -> state.kind == PlayerSideControlKind.Volume
     }
+    val alignment = if (isLeft) Alignment.CenterStart else Alignment.CenterEnd
     val overlayAlpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
         animationSpec = tween(durationMillis = fadeDurationMs),

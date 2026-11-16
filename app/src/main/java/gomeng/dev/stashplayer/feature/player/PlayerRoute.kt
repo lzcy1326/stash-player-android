@@ -1156,8 +1156,8 @@ private fun RealPlayerRoute(
         }
     }
 
-    LaunchedEffect(hudText) {
-        if (hudText != null) {
+    LaunchedEffect(hudText, fastPlaybackHoldState.active) {
+        if (hudText != null && !fastPlaybackHoldState.active) {
             delay(1_200L)
             hudText = null
         }
@@ -2117,6 +2117,7 @@ private fun RealPlayerRoute(
                 PlayerSideControlSliderOverlay(
                     state = state,
                     visible = sideControlOverlayVisible,
+                    sideGestureLayout = playerSideGestureLayout,
                     onFractionChange = { fraction ->
                         markPlayerInteraction()
                         sideControlOverlayVisible = true

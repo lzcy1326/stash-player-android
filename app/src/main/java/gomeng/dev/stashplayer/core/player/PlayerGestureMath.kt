@@ -10,7 +10,7 @@ private val AXIS_LOCK_RATIO = 1.35f
 private val MIN_SEEK_WINDOW_MS = 120_000L
 private val MAX_SEEK_WINDOW_MS = 20 * 60 * 1000L
 private val SEEK_WINDOW_DURATION_DIVISOR = 8L
-private val PLAYER_VERTICAL_SIDE_CONTROL_FRACTION = 0.30f
+private val PLAYER_VERTICAL_SIDE_CONTROL_FRACTION = 0.50f
 private val PLAYER_VERTICAL_SIDE_CONTROL_VELOCITY_PROJECTION_SECONDS = 0.08f
 private val PLAYER_VERTICAL_SIDE_CONTROL_ACCELERATION_PROJECTION_SECONDS = 0.035f
 private val PLAYER_VERTICAL_SIDE_CONTROL_VELOCITY_BOOST_LIMIT = 0.18f
@@ -184,6 +184,9 @@ data class PlayerFastPlaybackHoldState(
         locked: Boolean,
         speedPreference: FastPlaybackHoldSpeedPreference = FastPlaybackHoldSpeedPreference.default,
     ): PlayerFastPlaybackHoldUpdate {
+        if (active) {
+            return PlayerFastPlaybackHoldUpdate(state = this, playbackSpeed = null, hudText = null)
+        }
         if (locked) {
             return PlayerFastPlaybackHoldUpdate(
                 state = Idle,
@@ -191,12 +194,11 @@ data class PlayerFastPlaybackHoldState(
                 hudText = playerLockedTouchHint(),
             )
         }
-        val speedMultiplier = speedPreference.playbackSpeed ?: return PlayerFastPlaybackHoldUpdate(
+        val speed = speedPreference.playbackSpeed ?: return PlayerFastPlaybackHoldUpdate(
             state = Idle,
             playbackSpeed = null,
             hudText = null,
         )
-        val speed = currentSpeed * speedMultiplier
         return PlayerFastPlaybackHoldUpdate(
             state = PlayerFastPlaybackHoldState(
                 active = true,
@@ -615,7 +617,9 @@ fun classifyPlayerPresentationDrag(
 
     return when (presentationMode) {
         PlayerPresentationMode.WatchPage -> when (startArea) {
-            PlayerPresentationGestureStartArea.PlayerSurface -> if (totalDy != 0f) {
+            PlayerPresentationGestureStartArea.PlayerSurface -> if (isPlayerSideControlGestureStart(startX, width)) {
+                PlayerPresentationGestureMode.ReservedPlaybackGesture
+            } else if (totalDy != 0f) {
                 PlayerPresentationGestureMode.EnterFullscreen
             } else {
                 PlayerPresentationGestureMode.None
@@ -775,12 +779,12 @@ fun settlePlayerPresentationDrag(
 
 private fun isPlayerBrightnessGestureStart(startX: Float, width: Float): Boolean {
     if (width <= 0f) return false
-    return startX <= width * PLAYER_VERTICAL_SIDE_CONTROL_FRACTION
+    return startX >= 0f && startX < width * PLAYER_VERTICAL_SIDE_CONTROL_FRACTION
 }
 
 private fun isPlayerVolumeGestureStart(startX: Float, width: Float): Boolean {
     if (width <= 0f) return false
-    return startX >= width * (1f - PLAYER_VERTICAL_SIDE_CONTROL_FRACTION)
+    return startX >= width * (1f - PLAYER_VERTICAL_SIDE_CONTROL_FRACTION) && startX <= width
 }
 
 private fun resolvePlayerSideGestureMode(

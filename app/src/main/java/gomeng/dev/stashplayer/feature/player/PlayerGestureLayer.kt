@@ -387,6 +387,7 @@ private suspend fun AwaitPointerEventScope.awaitTapOrHandleDrag(
                 dragMode = when {
                     playbackMode == PlayerGestureMode.None -> PlayerGestureMode.None
                     playbackMode == PlayerGestureMode.Seek -> playbackMode
+                    presentationSession?.gestureMode == PlayerPresentationGestureMode.ReservedPlaybackGesture -> playbackMode
                     currentPresentationMode == PlayerPresentationMode.Fullscreen -> playbackMode
                     else -> PlayerGestureMode.None
                 }
