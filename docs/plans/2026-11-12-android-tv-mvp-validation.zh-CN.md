@@ -59,6 +59,8 @@
 
 实际预览包使用独立构建类型 `tvPreview`，应用 ID 为 `gomeng.dev.stashplayer.tvpreview`，沿用 Android 10（API 29）最低要求。包内的电视 Activity 同时声明 Android TV 和普通桌面启动入口，便于在定制桌面查找。已实现配置、搜索、分页、继续观看列表、遥控器播放和切换播放源，影片卡片直接打开播放器。手机回归使用常规 Debug 构建。
 
+**后续向用户的 TCL 电视安装或更新时，默认使用下方「多屏互动安装流程」，由用户在电视端确认；不要先反复尝试普通 ADB 安装。**
+
 98Q9K 的公开规格列出 Android，具体系统版本以电视固件为准。可在电视设置的「关于本机」查看；如果电视已经开启官方调试并连接到 ADB，可用 `adb shell getprop ro.build.version.sdk` 确认，结果为 29 或更高即可满足最低版本要求。第三方应用安装还取决于电视的安装策略。参考 [98Q9K 规格](https://detail.zol.com.cn/1987/1986154/param.shtml) 和 [TCL 开发者平台](https://developer.tclyun.cn/)。
 
 1. 将 APK 复制到 U 盘，通过电视提供的文件管理或 APK 安装入口打开。安装完成后从应用列表启动 **Stash Player TV**。
@@ -84,6 +86,16 @@
 - 本次成功路径：用 ADB 连接并完成电视端授权；检查端口未被占用后执行 `adb -s <电视IP>:5555 reverse tcp:18769 tcp:18769`。电脑临时 HTTP 服务只监听 `127.0.0.1:18769`，只提供指定 APK；向电视的多屏互动 TCP 6553 端口发送安装请求，URL 为 `http://127.0.0.1:18769/stash-player-tv.apk`。协议使用四字节大端长度前缀、UTF-8 消息，先发 `159>>1>>0`，再发送来源为 2 的安装请求，包含包名、版本号与 URL 的 MD5；每五秒发送 `150>>` 保持会话。用户在电视提示框选择「同意」后，等待 `PROGRESS` 阶段 5，再用 `pm list packages` 验证。协议及字段参考 [同型号实测记录](https://github.com/pengchujin/aerial-tv/blob/main/docs/devices/tcl-mt5879-cn.md) 和 [参考客户端](https://github.com/pengchujin/aerial-tv/blob/main/tools/tcast-push.py)。
 - 完成后关闭临时服务并移除本次 ADB reverse 映射。若端口、IP、授权或电视策略变化，重新检测并根据实际结果调整。
 - 本次电视端报告安装成功，ADB 确认包已安装，电视 Activity 启动成功。用户已自行连接真实 Stash 服务器并确认可以正常播放观看；具体格式、续播、多次遥控器操作和断网恢复仍待按用例验证。服务器地址和 API Key 未记录。
+
+## 多屏互动安装流程（后续默认）
+
+1. 用 `adb devices -l` 确认当前在线的 TCL 电视和授权状态，使用实际返回的设备序列号；IP 可能变化，不要固定使用历史地址。核对目标 APK 的包名、版本码和签名，与电视上已有的 `gomeng.dev.stashplayer.tvpreview` 比较，确保能够覆盖安装并保留配置。若签名不一致或版本降级，先查明原因和数据保留方案，不要卸载应用。
+2. 检查电脑本地端口和电视的 ADB reverse 映射，选用未占用的端口（此前使用 `18769`），不要覆盖已有映射。建立 `adb -s <电视序列号> reverse tcp:<端口> tcp:<端口>`，在电脑 `127.0.0.1` 上启动仅提供目标 APK 的临时 HTTP 服务。
+3. 通过电视多屏互动 TCP `6553` 发起安装，使用上文所述的长度前缀、`159>>1>>0` 握手、来源为 `2` 的安装请求和 URL MD5；每五秒发送心跳，保持会话。参考上面的 [客户端](https://github.com/pengchujin/aerial-tv/blob/main/tools/tcast-push.py) 获取字段和状态定义。
+4. 看到 `confirm_pending` 后，请用户在电视上选择「同意」，等待下载及安装完成。`PROGRESS` 阶段 `5` 表示电视报告安装成功；阶段 `2` 或 `4`、拒绝或超时均不能当作成功。
+5. 执行 `adb -s <电视序列号> shell dumpsys package gomeng.dev.stashplayer.tvpreview`，确认实际 `versionName` 和 `versionCode` 与目标包一致。结束后关闭临时 HTTP 服务，只移除本次创建的 reverse 映射。
+
+2026-11-17 再次验证：普通 `adb install -r` 返回 `INSTALL_FAILED_VERIFICATION_FAILURE`；通过多屏互动、用户在电视上选择「同意」后，电视报告阶段 `5`，ADB 确认从 `1.13.2-lzcy1.4.1-tv-mvp` 覆盖更新到 `1.13.3-lzcy1.5.0-tv-mvp`，版本码 `60010500`。该记录验证安装及版本，未代替用户的应用功能验收。
 
 ## 手机扫码配置电视
 

@@ -4,6 +4,35 @@ All notable changes to Stash Android Player are documented here.
 
 When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. Use the matching section for the GitHub Release notes.
 
+## [1.13.3-lzcy1.5.1] - 2026-11-17
+
+### 简体中文
+
+- 电视端影片详情页改为整幅背景图，标题、资料与操作按钮叠在左下角并用渐隐过渡衔接，不再只占屏幕上半部、下方留出大片空白。
+- 电视端首页焦点图改为整幅铺满的背景图，文字叠在左侧渐隐层上；高度按屏幕比例计算，不再因 1080p 电视与模拟器的屏幕密度差异而显得过窄，并且随列表一起滚动。首页首次加载保持在顶部，焦点图完整显示。
+- 电视端网格按实际列数分页（1080p 电视为 7 列 × 3 行 = 21 条/页），影片、演员、厂商列表不再出现残缺的半行。
+- 电视端播放器左右键短按按连续按键递增跳转（10 → 20 → 30 → 60 秒）。
+- 电视端播放器长按左右键恢复进度条与 Stash 缩略图预览，拖动速率随按住时间由 1 倍增至 3 倍后封顶。
+- 预览浮层去掉整条半透明底板，只有进度条和预览窗口保留半透明背景，画面不再被遮挡。
+- 新增电视端布局验收脚本和模拟器说明（`tools/tv_preview.py`、`docs/android-tv-emulator-preview.zh-CN.md`），并补充跳转与拖动速率的单元测试。
+
+### English
+
+- TV video detail page now uses a full-bleed backdrop with the title, metadata and actions anchored bottom-left behind a gradient, instead of a small top block with an empty lower half.
+- TV home: the spotlight fills its full width with the artwork and overlays the text on a left-to-right scrim. Its height follows the screen ratio, so it no longer looks cramped on 1080p TVs whose density differs from the emulator, and it scrolls with the grid. The first load stays at the top so the banner is fully visible.
+- TV grids paginate by the real column count (7 columns × 3 rows = 21 items per page on 1080p), so video, performer and studio lists no longer end with a half-filled row.
+- TV player: quick presses of the direction keys step 10 → 20 → 30 → 60 seconds.
+- TV player: holding a direction key brings back the timeline with the Stash sprite preview. The scrub rate grows from 1× to 3× of the base step and then stays capped.
+- The seek overlay no longer paints a full-width panel; only the timeline and the preview window keep a translucent background.
+- Add the TV layout validation script and emulator notes (`tools/tv_preview.py`, `docs/android-tv-emulator-preview.zh-CN.md`) plus unit tests for the seek and scrub rates.
+
+### 说明 / Notes
+
+- 本版改动集中在 Android TV 端，手机端界面与功能未变，仅版本号随之升级。
+- Android TV 包仍为独立安装、debug 签名的 MVP 体验版。本轮已在 TCL 98Q9K 上通过多屏互动覆盖安装，并确认首页、网格、详情页与预览浮层的显示效果。
+- This release focuses on the Android TV build; the phone UI and features are unchanged and only carry the new version number.
+- The Android TV APK remains a separately installed, debug-signed MVP preview. This round was installed over the air on a TCL 98Q9K through the TV's multi-screen channel, and the home screen, grid, detail page and seek overlay were verified visually.
+
 ## [1.13.3-lzcy1.5.0] - 2026-11-16
 
 ### 简体中文

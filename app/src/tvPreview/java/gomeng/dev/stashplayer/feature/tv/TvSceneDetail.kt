@@ -6,11 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,16 +20,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.core.model.SceneCardModel
 import gomeng.dev.stashplayer.core.network.StashGraphQlClient
@@ -48,7 +45,6 @@ internal fun TvSceneDetail(
     onPlay: () -> Unit,
     onBack: () -> Unit,
 ) {
-    val context = LocalContext.current
     val playFocus = remember { FocusRequester() }
     var detail by remember(scene.id) { mutableStateOf<StashScene?>(null) }
     var loading by remember(scene.id) { mutableStateOf(true) }
@@ -71,30 +67,44 @@ internal fun TvSceneDetail(
     LaunchedEffect(scene.id) { playFocus.requestFocus() }
     BackHandler(onBack = onBack)
 
-    Row(
-        Modifier.fillMaxSize().padding(horizontal = 42.dp, vertical = 28.dp),
-        horizontalArrangement = Arrangement.spacedBy(28.dp),
-        verticalAlignment = Alignment.Top,
-    ) {
-        val imageUrl = detail?.screenshotUrl ?: scene.thumbnailUrl
+    // Full-bleed artwork with the metadata anchored to the bottom, so the page uses the whole
+    // screen instead of a small top-left block with an empty lower half.
+    Box(Modifier.fillMaxSize().background(Color.Black)) {
+        TvArtwork(
+            profile = profile,
+            url = detail?.screenshotUrl ?: scene.thumbnailUrl,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
         Box(
-            Modifier.weight(0.42f).aspectRatio(16f / 9f)
-                .clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surface),
+            Modifier.fillMaxSize().background(
+                Brush.horizontalGradient(
+                    0f to Color(0xF20B0A10),
+                    0.45f to Color(0xB30B0A10),
+                    0.78f to Color(0x1A0B0A10),
+                    1f to Color.Transparent,
+                ),
+            ),
+        )
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.verticalGradient(
+                    0.42f to Color.Transparent,
+                    1f to Color(0xF20B0A10),
+                ),
+            ),
+        )
+        Column(
+            Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth(0.68f)
+                .padding(start = 52.dp, end = 24.dp, bottom = 44.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            imageUrl?.let { url ->
-                val image = remember(profile, url, context) {
-                    val absolute = profile.absoluteUrl(url)
-                    ImageRequest.Builder(context).data(absolute).apply {
-                        profile.authHeadersFor(absolute).forEach { (name, value) -> addHeader(name, value) }
-                    }.build()
-                }
-                AsyncImage(image, contentDescription = null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-            }
-        }
-        Column(Modifier.weight(0.58f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
                 detail?.title ?: scene.title,
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -105,7 +115,9 @@ internal fun TvSceneDetail(
                 detail?.let { if (it.width != null && it.height != null) "${it.width} × ${it.height}" else null },
                 detail?.rating100?.let { stringResource(R.string.tv_detail_rating, it) },
             ).joinToString(" · ")
-            if (meta.isNotBlank()) Text(meta, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (meta.isNotBlank()) {
+                Text(meta, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 TvButton(stringResource(R.string.tv_play), onPlay, Modifier.focusRequester(playFocus))
                 TvButton(stringResource(R.string.tv_back), onBack)
@@ -119,13 +131,28 @@ internal fun TvSceneDetail(
                         Text(stringResource(R.string.tv_detail_resume, formatPlayerPosition((it * 1000).toLong())))
                     }
                     detail?.performers?.takeIf { it.isNotEmpty() }?.let {
-                        Text(stringResource(R.string.tv_detail_performers, it.joinToString("、")), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            stringResource(R.string.tv_detail_performers, it.joinToString("、")),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                     detail?.tags?.takeIf { it.isNotEmpty() }?.let {
-                        Text(stringResource(R.string.tv_detail_tags, it.joinToString("、") { tag -> tag.label }), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            stringResource(R.string.tv_detail_tags, it.joinToString("、") { tag -> tag.label }),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
-                    detail?.details?.let {
-                        Text(it, modifier = Modifier.fillMaxWidth(), maxLines = 4, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    detail?.details?.takeIf { it.isNotBlank() }?.let {
+                        Text(
+                            it,
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }

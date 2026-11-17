@@ -2,7 +2,6 @@ package gomeng.dev.stashplayer.feature.tv
 
 import android.view.KeyEvent
 import android.os.SystemClock
-import android.view.ViewConfiguration
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -56,9 +55,12 @@ import gomeng.dev.stashplayer.core.network.findStashSpriteAtTime
 import gomeng.dev.stashplayer.core.player.AspectRatioMode
 import gomeng.dev.stashplayer.core.player.StashPlayerController
 import gomeng.dev.stashplayer.core.player.formatPlayerPosition
+import gomeng.dev.stashplayer.core.player.TV_HOLD_THRESHOLD_MS
+import gomeng.dev.stashplayer.core.player.TV_REPEAT_WINDOW_MS
 import gomeng.dev.stashplayer.core.player.nextTvScrubTarget
 import gomeng.dev.stashplayer.core.player.resolvePlayerResumeActivitySavePayload
 import gomeng.dev.stashplayer.core.player.resolvePlayerResumeStartPositionMs
+import gomeng.dev.stashplayer.core.player.tvSeekStepMs
 import gomeng.dev.stashplayer.feature.player.PlayerSurface
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -104,6 +106,9 @@ internal fun TvPlayer(
     var previewTarget by remember { mutableStateOf<Long?>(null) }
     var holdJob by remember { mutableStateOf<Job?>(null) }
     var hidePreviewJob by remember { mutableStateOf<Job?>(null) }
+    var holdStartedAt by remember { mutableLongStateOf(0L) }
+    var pressCount by remember { mutableIntStateOf(0) }
+    var lastPressAt by remember { mutableLongStateOf(0L) }
     val spriteLoader = remember(context) {
         ImageLoader.Builder(context)
             .okHttpClient { OkHttpClient.Builder().followRedirects(false).followSslRedirects(false).build() }
@@ -289,12 +294,14 @@ internal fun TvPlayer(
                     KeyEvent.ACTION_DOWN -> {
                         if (native.repeatCount == 0 && heldDirection == 0) {
                             heldDirection = direction
+                            holdStartedAt = SystemClock.uptimeMillis()
                             hidePreviewJob?.cancel()
                             previewTarget = null
-                            val startedAt = SystemClock.uptimeMillis()
                             holdJob = scope.launch {
-                                delay(ViewConfiguration.getLongPressTimeout().toLong())
+                                delay(TV_HOLD_THRESHOLD_MS)
                                 if (heldDirection != direction || !ready || duration <= 0L) return@launch
+                                // Both directions scrub with the timeline and sprite preview; the
+                                // rate keeps growing with the hold time (see tvScrubStepMs).
                                 scrubResume = player.playWhenReady
                                 previewTarget = player.currentPosition.coerceAtLeast(0L)
                                 controller.holdPlaybackForSeekPreview()
@@ -302,9 +309,9 @@ internal fun TvPlayer(
                                 while (heldDirection == direction && scrubbing) {
                                     previewTarget = nextTvScrubTarget(
                                         previewTarget ?: 0L, direction,
-                                        SystemClock.uptimeMillis() - startedAt, duration,
+                                        SystemClock.uptimeMillis() - holdStartedAt, duration,
                                     )
-                                    delay(250)
+                                    delay(120)
                                 }
                             }
                         }
@@ -327,7 +334,11 @@ internal fun TvPlayer(
                             } else if (controlsVisible) {
                                 focusManager.moveFocus(if (direction < 0) FocusDirection.Left else FocusDirection.Right)
                             } else {
-                                seek(direction * 10_000L)
+                                // Quick repeated presses escalate 10s → 20s → 30s → 60s.
+                                val now = SystemClock.uptimeMillis()
+                                pressCount = if (now - lastPressAt <= TV_REPEAT_WINDOW_MS) pressCount + 1 else 1
+                                lastPressAt = now
+                                seek(direction * tvSeekStepMs(pressCount))
                             }
                         }
                     }

@@ -1,5 +1,7 @@
 package gomeng.dev.stashplayer.feature.tv
 
+import android.content.pm.ApplicationInfo
+import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
@@ -63,26 +65,39 @@ import kotlinx.coroutines.launch
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
+internal const val TvDemoServerUrl = "http://10.0.2.2:18772"
+
 class StashTvActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val demoProfile = if (
+            applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0 &&
+            Build.HARDWARE in setOf("ranchu", "goldfish") &&
+            intent.getBooleanExtra("demo", false)
+        ) {
+            StashServerProfile(baseUrl = TvDemoServerUrl, authMode = StashServerAuthMode.None)
+        } else {
+            null
+        }
         setContent {
             MaterialTheme(
                 colorScheme = darkColorScheme(
-                    primary = Color(0xFFC1A7FF),
-                    onPrimary = Color(0xFF211139),
-                    background = Color(0xFF101018),
-                    surface = Color(0xFF20202D),
+                    primary = Color(0xFFABE1FF),
+                    onPrimary = Color(0xFF122838),
+                    background = Color(0xFF111820),
+                    surface = Color(0xFF202C37),
+                    onSurface = Color(0xFFF4F8FC),
+                    onSurfaceVariant = Color(0xFFB3C1CD),
                 ),
             ) {
-                StashTvApp()
+                StashTvApp(demoProfile)
             }
         }
     }
 }
 
 @Composable
-private fun StashTvApp() {
+private fun StashTvApp(demoProfile: StashServerProfile?) {
     val context = LocalContext.current
     val repository = remember(context) { StashSettingsRepository(context.applicationContext) }
     var initialized by remember { mutableStateOf(false) }
@@ -91,7 +106,7 @@ private fun StashTvApp() {
     var editing by remember { mutableStateOf(false) }
 
     LaunchedEffect(repository) {
-        val saved = repository.savedServerProfile.first()
+        val saved = demoProfile ?: repository.savedServerProfile.first()
         profile = saved
         activeProfile = saved
         initialized = true
@@ -114,7 +129,7 @@ private fun StashTvApp() {
             server == null || editing -> TvServerSetup(
                 profile = server,
                 onBack = if (server == null) null else ({ editing = false }),
-                saveProfile = repository::saveServerProfile,
+                saveProfile = { if (demoProfile == null) repository.saveServerProfile(it) },
                 onConnected = {
                     profile = it.saved
                     activeProfile = it.active

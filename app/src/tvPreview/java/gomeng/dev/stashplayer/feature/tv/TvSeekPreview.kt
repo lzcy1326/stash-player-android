@@ -38,26 +38,37 @@ internal fun TvSeekPreview(
     modifier: Modifier = Modifier,
 ) {
     val fraction = if (durationMs > 0) (targetMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
+    val scrim = Color(0xCC1B1725)
+    // No full-width panel: the picture stays visible, only the preview window and the timeline
+    // carry a translucent backdrop of their own.
     Column(
-        modifier.fillMaxWidth().background(Color(0xE61B1725)).padding(horizontal = 42.dp, vertical = 18.dp),
+        modifier.fillMaxWidth().padding(horizontal = 42.dp, vertical = 18.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        BoxWithConstraints(Modifier.fillMaxWidth().height(130.dp)) {
-            val width = minOf(200.dp, maxWidth)
+        BoxWithConstraints(Modifier.fillMaxWidth().height(134.dp)) {
+            val width = minOf(208.dp, maxWidth)
             val offset = (maxWidth * fraction - width / 2).coerceIn(0.dp, maxWidth - width)
             Box(
-                Modifier.offset(x = offset).size(width, 112.dp).clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFF30303A)),
+                Modifier.offset(x = offset).size(width, 132.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(scrim)
+                    .padding(4.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 if (frame == null) {
                     Text(stringResource(R.string.tv_preview_unavailable), style = MaterialTheme.typography.labelMedium)
                 } else {
-                    PlayerSpriteThumbnail(frame, profile, imageLoader, Modifier.size(width, 112.dp))
+                    PlayerSpriteThumbnail(frame, profile, imageLoader, Modifier.size(width - 8.dp, 116.dp))
                 }
             }
         }
-        LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
-        Text("${formatPlayerPosition(targetMs)} / ${formatPlayerPosition(durationMs)}")
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(scrim)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
+            Text("${formatPlayerPosition(targetMs)} / ${formatPlayerPosition(durationMs)}")
+        }
     }
 }
