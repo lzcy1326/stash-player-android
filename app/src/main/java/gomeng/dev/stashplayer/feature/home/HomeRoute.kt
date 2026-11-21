@@ -1,5 +1,17 @@
 package gomeng.dev.stashplayer.feature.home
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Videocam
+import androidx.compose.material3.Card
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
+import coil.compose.AsyncImage
+import gomeng.dev.stashplayer.core.model.defaultStashMainTabSections
+import gomeng.dev.stashplayer.core.network.StashStudioCard
+import gomeng.dev.stashplayer.core.network.StashPerformerCard
+import kotlinx.coroutines.CancellationException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -86,6 +98,11 @@ fun HomeRoute(
     onOpenFavorites: () -> Unit,
     onOpenExplore: () -> Unit,
     onOpenShorts: () -> Unit,
+    onOpenRecentReleases: () -> Unit,
+    onOpenRecentStudios: () -> Unit,
+    onOpenRecentPerformers: () -> Unit,
+    onOpenStudio: (String) -> Unit,
+    onOpenPerformer: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val localRepository = remember(context) { StashLocalLibraryRepository(context) }
@@ -97,6 +114,10 @@ fun HomeRoute(
     val playbackHistoryScenes by localRepository.playbackHistoryScenes.collectAsState(initial = emptyList())
     val shortsInteractions by localRepository.shortsInteractions.collectAsState(initial = emptyList())
     var sections by remember(profile) { mutableStateOf<List<StashMainTabSection>>(emptyList()) }
+    var studios by remember(profile) { mutableStateOf(emptyList<StashStudioCard>()) }
+    var performers by remember(profile) { mutableStateOf(emptyList<StashPerformerCard>()) }
+    var studioLoadFailed by remember(profile) { mutableStateOf(false) }
+    var performerLoadFailed by remember(profile) { mutableStateOf(false) }
     var recommendedScenes by remember(profile) { mutableStateOf<List<SceneCardModel>>(emptyList()) }
     val recommendationSeed = remember(profile) { nextStashRandomSortSeed() }
     var isLoading by remember(profile) { mutableStateOf(false) }
@@ -115,7 +136,9 @@ fun HomeRoute(
         StashDebugLogBuffer.record("Home", "Server sections load started")
         isLoading = true
         error = null
-        runCatching { StashGraphQlClient(activeProfile).findMainTabSections() }
+        runCatching { StashGraphQlClient(activeProfile).findMainTabSections(
+            defaultStashMainTabSections().filter { it.id == "recently-released-scenes" },
+        ) }
             .onSuccess {
                 sections = it
                 StashDebugLogBuffer.record(
@@ -124,10 +147,31 @@ fun HomeRoute(
                 )
             }
             .onFailure {
+                if (it is CancellationException) throw it
                 error = homeHubErrorText(it.message ?: it::class.simpleName) ?: stashString(R.string.auto_kr_0447)
                 StashDebugLogBuffer.record("Home", "Server sections load failed", it)
             }
         isLoading = false
+    }
+
+    LaunchedEffect(profile, reloadToken) {
+        val server = profile ?: return@LaunchedEffect
+        runCatching { StashGraphQlClient(server).findStudioCardsPage(perPage = 12, sort = "created_at", direction = "DESC") }
+            .onSuccess { studios = it.studios; studioLoadFailed = false }
+            .onFailure {
+                if (it is CancellationException) throw it
+                studioLoadFailed = true
+            }
+    }
+
+    LaunchedEffect(profile, reloadToken) {
+        val server = profile ?: return@LaunchedEffect
+        runCatching { StashGraphQlClient(server).findPerformerCardsPage(perPage = 12, sort = "created_at", direction = "DESC") }
+            .onSuccess { performers = it.performers; performerLoadFailed = false }
+            .onFailure {
+                if (it is CancellationException) throw it
+                performerLoadFailed = true
+            }
     }
 
     LaunchedEffect(profile, favoriteScenes, shortsInteractions, sections, recommendationSeed) {
@@ -189,6 +233,10 @@ fun HomeRoute(
         isFoldLikeLayout = isFoldLikeLayout,
         hubState = hubState,
         sections = sections,
+        studios = studios,
+        performers = performers,
+        studioLoadFailed = studioLoadFailed,
+        performerLoadFailed = performerLoadFailed,
         recommendedScenes = recommendedScenes,
         serverProfile = profile,
         queueScenes = queueScenes,
@@ -206,6 +254,11 @@ fun HomeRoute(
         onOpenFavorites = onOpenFavorites,
         onOpenExplore = onOpenExplore,
         onOpenShorts = onOpenShorts,
+        onOpenRecentReleases = onOpenRecentReleases,
+        onOpenRecentStudios = onOpenRecentStudios,
+        onOpenRecentPerformers = onOpenRecentPerformers,
+        onOpenStudio = onOpenStudio,
+        onOpenPerformer = onOpenPerformer,
         onPlayQueue = { playQueue(shuffle = false) },
         onShuffleQueue = { playQueue(shuffle = true) },
     )
@@ -218,6 +271,10 @@ private fun HomeHubContent(
     isFoldLikeLayout: Boolean,
     hubState: HomeHubState,
     sections: List<StashMainTabSection>,
+    studios: List<StashStudioCard>,
+    performers: List<StashPerformerCard>,
+    studioLoadFailed: Boolean,
+    performerLoadFailed: Boolean,
     recommendedScenes: List<SceneCardModel>,
     serverProfile: StashServerProfile?,
     queueScenes: List<SceneCardModel>,
@@ -235,12 +292,15 @@ private fun HomeHubContent(
     onOpenFavorites: () -> Unit,
     onOpenExplore: () -> Unit,
     onOpenShorts: () -> Unit,
+    onOpenRecentReleases: () -> Unit,
+    onOpenRecentStudios: () -> Unit,
+    onOpenRecentPerformers: () -> Unit,
+    onOpenStudio: (String) -> Unit,
+    onOpenPerformer: (String) -> Unit,
     onPlayQueue: () -> Unit,
     onShuffleQueue: () -> Unit,
 ) {
     val horizontalPadding = if (isFoldLikeLayout) 24.dp else 14.dp
-    val cardWidth = if (isFoldLikeLayout) 168.dp else 142.dp
-    val thumbnailHeight = if (isFoldLikeLayout) 212.dp else 190.dp
     val hasProfile = !hubState.requiresSetup
     val serverScenes = sections.flatMap { it.scenes }
     val heroSelection = selectHomeHeroScene(
@@ -253,241 +313,255 @@ private fun HomeHubContent(
     val heroScene = heroSelection?.scene
     val heroScenes = heroSelection?.playbackScenes.orEmpty()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(bottom = 92.dp, top = 14.dp),
-    ) {
-        item {
-            Column(Modifier.padding(horizontal = horizontalPadding)) {
-                StashScreenHeader(
-                    title = stashString(R.string.auto_kr_0001),
-                    subtitle = hubState.server.statusLabel,
-                    trailing = if (hasProfile) {
-                        {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                val refreshLabel = stashString(
-                                    if (isRefreshing) R.string.auto_kr_0448 else R.string.auto_kr_0449,
-                                )
-                                IconButton(
-                                    onClick = onRefresh,
-                                    enabled = !isRefreshing,
-                                    modifier = Modifier.semantics { contentDescription = refreshLabel },
-                                ) {
-                                    if (isRefreshing) {
-                                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                                    } else {
-                                        Icon(Icons.Outlined.Refresh, contentDescription = null)
+    BoxWithConstraints {
+        val cardWidth = ((maxWidth - horizontalPadding * 2) * 0.75f).coerceAtMost(300.dp)
+        val thumbnailHeight = cardWidth * (9f / 16f)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 92.dp, top = 14.dp),
+        ) {
+            item {
+                Column(Modifier.padding(horizontal = horizontalPadding)) {
+                    StashScreenHeader(
+                        title = stashString(R.string.auto_kr_0001),
+                        subtitle = hubState.server.statusLabel,
+                        trailing = if (hasProfile) {
+                            {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    val refreshLabel = stashString(
+                                        if (isRefreshing) R.string.auto_kr_0448 else R.string.auto_kr_0449,
+                                    )
+                                    IconButton(
+                                        onClick = onRefresh,
+                                        enabled = !isRefreshing,
+                                        modifier = Modifier.semantics { contentDescription = refreshLabel },
+                                    ) {
+                                        if (isRefreshing) {
+                                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                        } else {
+                                            Icon(Icons.Outlined.Refresh, contentDescription = null)
+                                        }
+                                    }
+                                    IconButton(onClick = tvPairingAction.onClick, enabled = tvPairingAction.enabled) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_scan),
+                                            contentDescription = stashString(R.string.tv_pairing_scan_action),
+                                        )
                                     }
                                 }
-                                IconButton(onClick = tvPairingAction.onClick, enabled = tvPairingAction.enabled) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_scan),
-                                        contentDescription = stashString(R.string.tv_pairing_scan_action),
-                                    )
-                                }
                             }
-                        }
-                    } else {
-                        null
-                    },
-                )
-                (tvPairingAction.progressMessage ?: tvPairingAction.resultMessage)?.let { message ->
-                    Text(
-                        text = stashString(message),
-                        modifier = Modifier.padding(top = 6.dp).semantics { liveRegion = LiveRegionMode.Polite },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    }
-            }
-        }
-
-        if (!hasProfile || error != null) {
-            item {
-                HomeServerStatusCard(
-                    state = hubState,
-                    error = error,
-                    modifier = Modifier.padding(horizontal = horizontalPadding),
-                    onRefresh = onRefresh,
-                    onOpenSettings = onOpenSettings,
-                )
-            }
-        }
-
-        if (hasProfile) {
-            if (heroScene != null) {
-                item {
-                    HomeHeroCard(
-                        scene = heroScene,
-                        serverProfile = serverProfile,
-                        modifier = Modifier.padding(horizontal = horizontalPadding),
-                        onPlay = {
-                            val scenes = heroScenes.ifEmpty { listOf(heroScene) }
-                            if (heroSelection.resumesPlaybackQueue) {
-                                onResumeScene(heroScene.id, scenes)
-                            } else {
-                                onOpenScene(heroScene.id, scenes, false)
-                            }
+                        } else {
+                            null
                         },
                     )
+                    (tvPairingAction.progressMessage ?: tvPairingAction.resultMessage)?.let { message ->
+                        Text(
+                            text = stashString(message),
+                            modifier = Modifier.padding(top = 6.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        }
                 }
             }
 
-            item {
-                HomeMiniStatsRow(
-                    queueCount = queueScenes.size,
-                    watchLaterCount = watchLaterScenes.size,
-                    favoriteCount = favoriteScenes.size,
-                    modifier = Modifier.padding(horizontal = horizontalPadding),
-                )
-            }
-
-            item {
-                HomeQuickActionRow(
-                    modifier = Modifier.padding(horizontal = horizontalPadding),
-                    canPlayQueue = queueScenes.isNotEmpty(),
-                    canShuffleQueue = queueScenes.size > 1,
-                    onPlayQueue = onPlayQueue,
-                    onShuffleQueue = onShuffleQueue,
-                    onOpenQueue = onOpenQueue,
-                    onOpenFavorites = onOpenFavorites,
-                    onOpenExplore = onOpenExplore,
-                    onOpenShorts = onOpenShorts,
-                    onOpenSettings = onOpenSettings,
-                )
-            }
-
-            if (queueScenes.isNotEmpty()) {
+            if (!hasProfile || error != null) {
                 item {
-                    HomeScenePreviewRow(
-                        title = homePreviewSectionTitle(HomeHubSectionId.Queue),
-                        scenes = queueScenes.take(8),
-                        allScenes = queueScenes,
-                        cardWidth = cardWidth,
-                        thumbnailHeight = thumbnailHeight,
-                        horizontalPadding = horizontalPadding,
-                        serverProfile = serverProfile,
-                        onOpenScene = onOpenScene,
+                    HomeServerStatusCard(
+                        state = hubState,
+                        error = error,
+                        modifier = Modifier.padding(horizontal = horizontalPadding),
+                        onRefresh = onRefresh,
+                        onOpenSettings = onOpenSettings,
                     )
                 }
             }
 
-            if (watchLaterScenes.isNotEmpty()) {
-                item {
-                    HomeScenePreviewRow(
-                        title = homePreviewSectionTitle(HomeHubSectionId.WatchLater),
-                        scenes = watchLaterScenes.take(8),
-                        allScenes = watchLaterScenes,
-                        cardWidth = cardWidth,
-                        thumbnailHeight = thumbnailHeight,
-                        horizontalPadding = horizontalPadding,
-                        serverProfile = serverProfile,
-                        onOpenScene = onOpenScene,
-                    )
-                }
-            }
-
-            if (favoriteScenes.isNotEmpty()) {
-                item {
-                    HomeScenePreviewRow(
-                        title = homePreviewSectionTitle(HomeHubSectionId.Favorites),
-                        scenes = favoriteScenes.take(8),
-                        allScenes = favoriteScenes,
-                        cardWidth = cardWidth,
-                        thumbnailHeight = thumbnailHeight,
-                        horizontalPadding = horizontalPadding,
-                        serverProfile = serverProfile,
-                        onOpenScene = onOpenScene,
-                    )
-                }
-            }
-
-            if (recommendedScenes.isNotEmpty()) {
-                item {
-                    HomeScenePreviewRow(
-                        title = homePreviewSectionTitle(HomeHubSectionId.Recommended),
-                        scenes = recommendedScenes.take(8),
-                        allScenes = recommendedScenes,
-                        cardWidth = cardWidth,
-                        thumbnailHeight = thumbnailHeight,
-                        horizontalPadding = horizontalPadding,
-                        serverProfile = serverProfile,
-                        onOpenScene = onOpenScene,
-                    )
-                }
-            }
-
-        }
-
-        if (isRefreshing && sections.isEmpty() && hasProfile) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding, vertical = 12.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-        }
-
-        if (sections.isNotEmpty()) {
-            item {
-                StashSectionHeader(
-                    state = StashSectionHeaderModel(
-                        title = stashString(R.string.auto_kr_0450),
-                        subtitle = stashString(R.string.auto_kr_0451),
-                    ),
-                    modifier = Modifier.padding(horizontal = horizontalPadding),
-                )
-            }
-        }
-
-        items(sections, key = { it.spec.id }) { section ->
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                StashSectionHeader(
-                    state = StashSectionHeaderModel(
-                        title = section.spec.title,
-                        itemCount = section.scenes.size,
-                    ),
-                    modifier = Modifier.padding(horizontal = horizontalPadding),
-                )
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(horizontal = horizontalPadding),
-                ) {
-                    items(section.scenes, key = { it.id }) { scene ->
-                        SceneCard(
-                            scene = scene,
-                            onClick = {
-                                if (section.spec.onlyResumable) {
-                                    onResumeScene(scene.id, section.scenes)
+            if (hasProfile) {
+                if (heroScene != null) {
+                    item {
+                        HomeHeroCard(
+                            scene = heroScene,
+                            serverProfile = serverProfile,
+                            modifier = Modifier.padding(horizontal = horizontalPadding),
+                            onPlay = {
+                                val scenes = heroScenes.ifEmpty { listOf(heroScene) }
+                                if (heroSelection.resumesPlaybackQueue) {
+                                    onResumeScene(heroScene.id, scenes)
                                 } else {
-                                    onOpenScene(scene.id, section.scenes, false)
+                                    onOpenScene(heroScene.id, scenes, false)
                                 }
                             },
-                            modifier = Modifier.width(cardWidth),
-                            thumbnailHeight = thumbnailHeight,
-                            thumbnailModel = rememberStashThumbnailModel(scene.thumbnailUrl, serverProfile),
+                        )
+                    }
+                }
+
+                item {
+                    HomeMiniStatsRow(
+                        queueCount = queueScenes.size,
+                        watchLaterCount = watchLaterScenes.size,
+                        favoriteCount = favoriteScenes.size,
+                        modifier = Modifier.padding(horizontal = horizontalPadding),
+                    )
+                }
+
+                item {
+                    HomeQuickActionRow(
+                        modifier = Modifier.padding(horizontal = horizontalPadding),
+                        canPlayQueue = queueScenes.isNotEmpty(),
+                        canShuffleQueue = queueScenes.size > 1,
+                        onPlayQueue = onPlayQueue,
+                        onShuffleQueue = onShuffleQueue,
+                        onOpenQueue = onOpenQueue,
+                        onOpenFavorites = onOpenFavorites,
+                        onOpenExplore = onOpenExplore,
+                        onOpenShorts = onOpenShorts,
+                        onOpenSettings = onOpenSettings,
+                    )
+                }
+
+            }
+            if (isRefreshing && sections.isEmpty() && hasProfile) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = horizontalPadding, vertical = 12.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+
+            items(sections, key = { it.spec.id }) { section ->
+                HomeScenePreviewRow(
+                    title = section.spec.title,
+                    scenes = section.scenes,
+                    allScenes = section.scenes,
+                    cardWidth = cardWidth,
+                    thumbnailHeight = thumbnailHeight,
+                    horizontalPadding = horizontalPadding,
+                    serverProfile = serverProfile,
+                    onOpenScene = onOpenScene,
+                    onViewAll = onOpenRecentReleases,
+                )
+            }
+            if (studios.isNotEmpty() || studioLoadFailed) {
+                item {
+                    HomeRecentEntityRow(
+                        title = stashString(R.string.home_recent_studios),
+                        entries = studios,
+                        key = { it.id },
+                        horizontalPadding = horizontalPadding,
+                        onViewAll = onOpenRecentStudios,
+                        loadFailed = studioLoadFailed,
+                        onRetry = onRefresh,
+                    ) { studio ->
+                        HomeRecentEntityCard(
+                            studio.name, studio.imagePath, studio.sceneCount, 142.dp, 16f / 9f,
+                            Icons.Outlined.Videocam, ContentScale.Fit, serverProfile,
+                            onClick = { onOpenStudio(studio.id) },
                         )
                     }
                 }
             }
-        }
+            if (performers.isNotEmpty() || performerLoadFailed) {
+                item {
+                    HomeRecentEntityRow(
+                        title = stashString(R.string.home_recent_performers),
+                        entries = performers,
+                        key = { it.id },
+                        horizontalPadding = horizontalPadding,
+                        onViewAll = onOpenRecentPerformers,
+                        loadFailed = performerLoadFailed,
+                        onRetry = onRefresh,
+                    ) { performer ->
+                        HomeRecentEntityCard(
+                            performer.name, performer.imagePath, performer.sceneCount, 110.dp, 3f / 4f,
+                            Icons.Outlined.Person, ContentScale.Crop, serverProfile,
+                            onClick = { onOpenPerformer(performer.id) },
+                        )
+                    }
+                }
+            }
 
-        if (hasProfile && !isRefreshing && sections.isEmpty() && error == null) {
-            item {
-                StashEmptyState(
-                    state = StashEmptyStateModel(
-                        title = stashString(R.string.auto_kr_0452),
-                        message = stashString(R.string.auto_kr_0453),
-                        primaryActionLabel = stashString(R.string.auto_kr_0002),
-                    ),
-                    modifier = Modifier.padding(horizontal = horizontalPadding),
-                    onPrimaryAction = onOpenExplore,
-                )
+            if (hasProfile) {
+                if (queueScenes.isNotEmpty()) {
+                    item {
+                        HomeScenePreviewRow(
+                            title = homePreviewSectionTitle(HomeHubSectionId.Queue),
+                            scenes = queueScenes.take(8),
+                            allScenes = queueScenes,
+                            cardWidth = cardWidth,
+                            thumbnailHeight = thumbnailHeight,
+                            horizontalPadding = horizontalPadding,
+                            serverProfile = serverProfile,
+                            onOpenScene = onOpenScene,
+                        )
+                    }
+                }
+
+                if (watchLaterScenes.isNotEmpty()) {
+                    item {
+                        HomeScenePreviewRow(
+                            title = homePreviewSectionTitle(HomeHubSectionId.WatchLater),
+                            scenes = watchLaterScenes.take(8),
+                            allScenes = watchLaterScenes,
+                            cardWidth = cardWidth,
+                            thumbnailHeight = thumbnailHeight,
+                            horizontalPadding = horizontalPadding,
+                            serverProfile = serverProfile,
+                            onOpenScene = onOpenScene,
+                        )
+                    }
+                }
+
+                if (favoriteScenes.isNotEmpty()) {
+                    item {
+                        HomeScenePreviewRow(
+                            title = homePreviewSectionTitle(HomeHubSectionId.Favorites),
+                            scenes = favoriteScenes.take(8),
+                            allScenes = favoriteScenes,
+                            cardWidth = cardWidth,
+                            thumbnailHeight = thumbnailHeight,
+                            horizontalPadding = horizontalPadding,
+                            serverProfile = serverProfile,
+                            onOpenScene = onOpenScene,
+                        )
+                    }
+                }
+
+                if (recommendedScenes.isNotEmpty()) {
+                    item {
+                        HomeScenePreviewRow(
+                            title = homePreviewSectionTitle(HomeHubSectionId.Recommended),
+                            scenes = recommendedScenes.take(8),
+                            allScenes = recommendedScenes,
+                            cardWidth = cardWidth,
+                            thumbnailHeight = thumbnailHeight,
+                            horizontalPadding = horizontalPadding,
+                            serverProfile = serverProfile,
+                            onOpenScene = onOpenScene,
+                        )
+                    }
+                }
+
+            }
+
+            if (hasProfile && !isRefreshing && sections.isEmpty() && error == null) {
+                item {
+                    StashEmptyState(
+                        state = StashEmptyStateModel(
+                            title = stashString(R.string.auto_kr_0452),
+                            message = stashString(R.string.auto_kr_0453),
+                            primaryActionLabel = stashString(R.string.auto_kr_0002),
+                        ),
+                        modifier = Modifier.padding(horizontal = horizontalPadding),
+                        onPrimaryAction = onOpenExplore,
+                    )
+                }
             }
         }
     }
@@ -639,6 +713,7 @@ private fun HomeScenePreviewRow(
     horizontalPadding: androidx.compose.ui.unit.Dp,
     serverProfile: StashServerProfile?,
     onOpenScene: (String, List<SceneCardModel>, Boolean) -> Unit,
+    onViewAll: (() -> Unit)? = null,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         StashSectionHeader(
@@ -647,6 +722,7 @@ private fun HomeScenePreviewRow(
                 itemCount = allScenes.size,
             ),
             modifier = Modifier.padding(horizontal = horizontalPadding),
+            onActionClick = onViewAll,
         )
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -659,7 +735,81 @@ private fun HomeScenePreviewRow(
                     onClick = { onOpenScene(scene.id, allScenes, false) },
                     modifier = Modifier.width(cardWidth),
                     thumbnailHeight = thumbnailHeight,
+                    prioritizeStudioCode = true,
                     thumbnailModel = thumbnailModel,
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun <T> HomeRecentEntityRow(
+    title: String,
+    entries: List<T>,
+    key: (T) -> String,
+    horizontalPadding: Dp,
+    onViewAll: () -> Unit,
+    loadFailed: Boolean,
+    onRetry: () -> Unit,
+    card: @Composable (T) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        StashSectionHeader(
+            state = StashSectionHeaderModel(
+                title = title,
+                actionLabel = stashString(if (loadFailed) R.string.home_retry else R.string.home_view_all),
+            ),
+            modifier = Modifier.padding(horizontal = horizontalPadding),
+            onActionClick = if (loadFailed) onRetry else onViewAll,
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = horizontalPadding),
+        ) {
+            items(entries, key = key) { card(it) }
+        }
+    }
+}
+
+@Composable
+private fun HomeRecentEntityCard(
+    name: String,
+    imagePath: String?,
+    sceneCount: Int,
+    width: Dp,
+    aspectRatio: Float,
+    fallbackIcon: ImageVector,
+    contentScale: ContentScale,
+    profile: StashServerProfile?,
+    onClick: () -> Unit,
+) {
+    Card(onClick = onClick, modifier = Modifier.width(width)) {
+        Box(
+            modifier = Modifier.fillMaxWidth().aspectRatio(aspectRatio),
+            contentAlignment = Alignment.Center,
+        ) {
+            val imageModel = rememberStashThumbnailModel(imagePath, profile)
+            if (imageModel == null) {
+                Icon(fallbackIcon, contentDescription = null)
+            } else {
+                AsyncImage(
+                    model = imageModel,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize().padding(if (contentScale == ContentScale.Fit) 8.dp else 0.dp),
+                    contentScale = contentScale,
+                    error = androidx.compose.ui.graphics.vector.rememberVectorPainter(fallbackIcon),
+                )
+            }
+        }
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Text(name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (sceneCount > 0) {
+                Text(
+                    stashString(R.string.performers_scene_count, sceneCount),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

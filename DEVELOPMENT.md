@@ -47,7 +47,7 @@ Keep the LZCY keystore and its credentials securely backed up. Never commit sign
 
 ## Versioning and Releases
 
-Change `versionName` and `versionCode` in `app/build.gradle.kts` only when the maintainer explicitly requests a release, following [FORK_VERSIONING.md](FORK_VERSIONING.md). Routine fixes and local test builds keep the current version. Document release changes in [CHANGELOG.md](CHANGELOG.md), run the relevant checks, and build and verify the signed APK. Publish the matching `v`-prefixed tag and APK to this fork's [Releases](https://github.com/lzcy1326/stash-player-android/releases); do not reuse a published tag.
+Phone and TV share the repository but have independent release versions and update channels. Change a channel's `versionName` and `versionCode` only when the maintainer explicitly requests its release. Routine fixes and local test builds keep the current version. Follow [FORK_VERSIONING.md](FORK_VERSIONING.md) for channel-specific tags, APKs, update metadata, signing checks and the legacy-phone migration. Document channel changes in [CHANGELOG.md](CHANGELOG.md), run relevant checks, and verify the APK before publishing to this fork's [Releases](https://github.com/lzcy1326/stash-player-android/releases). Do not reuse a published tag. Phone and TV versions are configured separately in the Android build. The phone update checker reads its entry from updates/channels.json. The TV entry supports downloads and does not yet provide an in-app update prompt.
 
 ## Tech Stack
 

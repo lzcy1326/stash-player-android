@@ -40,4 +40,28 @@ class AppUpdateVersionComparisonTest {
 
         assertEquals("1.13.2-lzcy1.0.0", release?.versionName)
     }
+
+    @Test
+    fun channelManifestSelectsOnlyMatchingApk() {
+        val manifest = """
+            {
+              "phone": {
+                "versionName": "1.13.3-lzcy1.6.0",
+                "versionCode": 60010600,
+                "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.13.3-lzcy1.6.0/StashPlayer-Mobile-1.13.3-lzcy1.6.0.apk",
+                "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.13.3-lzcy1.6.0"
+              },
+              "tv": {
+                "versionName": "1.13.3-lzcy1.7.0",
+                "versionCode": 60010700,
+                "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/tv-v1.13.3-lzcy1.7.0/StashPlayer-TV-1.13.3-lzcy1.7.0.apk",
+                "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.13.3-lzcy1.7.0"
+              }
+            }
+        """.trimIndent()
+        assertEquals("1.13.3-lzcy1.6.0", parseChannelUpdate(manifest, "phone")?.versionName)
+        assertEquals("1.13.3-lzcy1.7.0", parseChannelUpdate(manifest, "tv")?.versionName)
+        assertEquals(null, parseChannelUpdate(manifest.replace("StashPlayer-Mobile-", "StashPlayer-TV-"), "phone"))
+        assertEquals(null, parseChannelUpdate("{}", "phone"))
+    }
 }

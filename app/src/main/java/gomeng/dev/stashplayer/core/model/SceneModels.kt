@@ -21,6 +21,8 @@ data class SceneCardModel(
     val playCount: Int? = null,
     val metadataBadges: List<SceneCardMetadataBadge> = emptyList(),
     val tagChips: List<SceneCardTagChip> = emptyList(),
+    val studioCode: String? = null,
+    val releaseDate: String? = null,
 ) {
     val subtitle: String
         get() = buildList {

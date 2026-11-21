@@ -1,0 +1,6 @@
+<resources>
+    <string name="home_recent_studios">최근 추가된 스튜디오</string>
+    <string name="home_recent_performers">최근 추가된 배우</string>
+    <string name="home_view_all">모두 보기</string>
+    <string name="home_retry">다시 시도</string>
+</resources>

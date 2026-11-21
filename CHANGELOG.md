@@ -4,6 +4,21 @@ All notable changes to Stash Android Player are documented here.
 
 When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. Use the matching section for the GitHub Release notes.
 
+## 手机端 [1.13.3-lzcy1.6.0] - 2026-11-21
+
+- 影片卡片新增番号与发行日期，移除卡片标签行。
+- 首页展示最近发布影片、最近添加厂商和最近添加演员，支持横向浏览与查看完整列表。
+- 首页影片卡加宽并采用横向封面，空间不足时日期换行。
+- 保留首页续播大卡片，移除重复的继续播放横滑栏。
+- 手机更新检查读取手机专属渠道。
+
+## 电视端 [1.13.3-lzcy1.6.0] - 2026-11-21
+
+- 首个正式电视版，支持遥控器浏览影片、演员和厂商，查看详情并播放影片。
+- 首页和影片详情展示大幅背景图，影片、演员和厂商列表按屏幕列数分页。
+- 支持遥控器左右键跳转和长按进度预览，可通过手机扫码发送服务器配置。
+- 正式电视版使用独立包名和正式签名，已安装的预览版需要重新安装和配置。
+
 ## [1.13.3-lzcy1.5.1] - 2026-11-17
 
 ### 简体中文

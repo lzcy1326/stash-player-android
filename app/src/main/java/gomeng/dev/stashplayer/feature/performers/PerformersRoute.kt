@@ -83,6 +83,7 @@ internal class PerformerListViewModel : ViewModel() {
     var loading by mutableStateOf(false)
     var error by mutableStateOf(false)
     var resetScroll by mutableStateOf(false)
+    var didApplyInitialSort = false
     var sort by mutableStateOf("name")
     var direction by mutableStateOf("ASC")
     var randomSeed by mutableIntStateOf(nextStashRandomSortSeed())
@@ -95,6 +96,7 @@ internal class PerformerListViewModel : ViewModel() {
 fun PerformersRoute(
     profile: StashServerProfile?,
     modifier: Modifier = Modifier,
+    startWithRecentlyAdded: Boolean = false,
     mutations: PerformerMutationCoordinator? = null,
     onOpenPerformer: (String, Boolean) -> Unit = { _, _ -> },
     loadPage: suspend (StashServerProfile, Int, String, String, String, Map<String, Any?>?) -> StashPerformerPage = { server, page, query, sort, direction, filter ->
@@ -102,6 +104,13 @@ fun PerformersRoute(
     },
 ) {
     val state: PerformerListViewModel = viewModel()
+    LaunchedEffect(startWithRecentlyAdded) {
+        if (startWithRecentlyAdded && !state.didApplyInitialSort) {
+            state.sort = "created_at"
+            state.direction = "DESC"
+            state.didApplyInitialSort = true
+        }
+    }
     var input by state::input
     var query by state::query
     var refresh by state::refresh
@@ -123,7 +132,7 @@ fun PerformersRoute(
         "name" to R.string.performer_sort_name, "rating" to R.string.performer_sort_rating,
         "scenes_count" to R.string.performer_sort_scenes, "latest_scene" to R.string.performer_sort_latest,
         "play_count" to R.string.performer_sort_plays, "updated_at" to R.string.performer_sort_updated,
-        "random" to R.string.performer_sort_random,
+        "random" to R.string.performer_sort_random, "created_at" to R.string.studio_sort_created,
     )
     LaunchedEffect(statuses, state.filter, state.sort) {
         val favoriteChanged = state.filter.favoriteOnly && items.any {

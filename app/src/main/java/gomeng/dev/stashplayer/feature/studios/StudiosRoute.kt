@@ -77,6 +77,7 @@ internal class StudioListViewModel : ViewModel() {
     var loading by mutableStateOf(false)
     var error by mutableStateOf(false)
     var resetScroll by mutableStateOf(false)
+    var didApplyInitialSort = false
     var sort by mutableStateOf("name")
     var direction by mutableStateOf("ASC")
     var randomSeed by mutableIntStateOf(nextStashRandomSortSeed())
@@ -89,6 +90,7 @@ internal class StudioListViewModel : ViewModel() {
 fun StudiosRoute(
     profile: StashServerProfile?,
     modifier: Modifier = Modifier,
+    startWithRecentlyAdded: Boolean = false,
     mutations: StudioMutationCoordinator? = null,
     onOpenStudio: (String, Boolean) -> Unit = { _, _ -> },
     loadPage: suspend (StashServerProfile, Int, String, String, String, Map<String, Any?>?) -> StashStudioPage = { server, page, query, sort, direction, filter ->
@@ -96,6 +98,13 @@ fun StudiosRoute(
     },
 ) {
     val state: StudioListViewModel = viewModel()
+    LaunchedEffect(startWithRecentlyAdded) {
+        if (startWithRecentlyAdded && !state.didApplyInitialSort) {
+            state.sort = "created_at"
+            state.direction = "DESC"
+            state.didApplyInitialSort = true
+        }
+    }
     var input by state::input
     var query by state::query
     var refresh by state::refresh

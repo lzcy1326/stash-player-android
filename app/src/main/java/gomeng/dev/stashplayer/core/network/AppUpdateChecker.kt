@@ -10,7 +10,7 @@ import okhttp3.Request
 
 const val STASH_ANDROID_RELEASES_URL = "https://github.com/lzcy1326/stash-player-android/releases"
 const val STASH_ANDROID_LATEST_RELEASE_API_URL =
-    "https://api.github.com/repos/lzcy1326/stash-player-android/releases/latest"
+    "https://raw.githubusercontent.com/lzcy1326/stash-player-android/main/updates/channels.json"
 
 data class AppUpdateApkAsset(
     val name: String,
@@ -47,7 +47,7 @@ class AppUpdateChecker(
             if (!response.isSuccessful) {
                 throw IllegalStateException("Latest release request failed: HTTP ${response.code}")
             }
-            parseGitHubLatestRelease(response.body?.string().orEmpty())
+            parseChannelUpdate(response.body?.string().orEmpty(), "phone")
                 ?: throw IllegalStateException("Latest release response is missing version data")
         }
     }
@@ -59,6 +59,40 @@ class AppUpdateChecker(
         )
     }
 }
+
+fun parseChannelUpdate(json: String, channel: String): AppUpdateRelease? {
+    val manifest = appUpdateMoshi.adapter(ChannelManifest::class.java).fromJson(json) ?: return null
+    val entry = when (channel) {
+        "phone" -> manifest.phone
+        "tv" -> manifest.tv
+        else -> null
+    } ?: return null
+    val version = entry.versionName?.takeIf { normalizeAppVersionName(it) == it } ?: return null
+    if (entry.versionCode == null || entry.versionCode <= 0) return null
+    val url = entry.apkUrl?.takeIf {
+        it.startsWith("https://github.com/lzcy1326/stash-player-android/releases/download/") &&
+            it.substringAfterLast('/').startsWith(if (channel == "phone") "StashPlayer-Mobile-" else "StashPlayer-TV-") &&
+            it.endsWith(".apk")
+    } ?: return null
+    val releaseUrl = entry.releaseUrl?.takeIf {
+        it.startsWith("https://github.com/lzcy1326/stash-player-android/releases/tag/")
+    } ?: return null
+    return AppUpdateRelease(
+        versionName = version,
+        releaseUrl = releaseUrl,
+        changelog = entry.notes?.trim()?.takeIf { it.isNotEmpty() },
+        apkAsset = AppUpdateApkAsset(name = url.substringAfterLast('/'), downloadUrl = url),
+    )
+}
+
+private data class ChannelManifest(val phone: ChannelEntry? = null, val tv: ChannelEntry? = null)
+private data class ChannelEntry(
+    val versionName: String? = null,
+    val versionCode: Long? = null,
+    val apkUrl: String? = null,
+    val releaseUrl: String? = null,
+    val notes: String? = null,
+)
 
 fun parseGitHubLatestRelease(json: String): AppUpdateRelease? {
     val release = appUpdateMoshi.adapter(GitHubLatestReleaseResponse::class.java).fromJson(json)

@@ -151,6 +151,7 @@ fun ExploreRoute(
     isFoldLikeLayout: Boolean,
     onOpenScene: (String, List<SceneCardModel>, Boolean, PlayerPlaybackQueueContinuation?) -> Unit,
     onOpenSettings: () -> Unit,
+    startWithRecentReleases: Boolean = false,
 ) {
     val sortOptions = remember { defaultStashExploreSortOptions() }
     val pageSizeOptions = remember { defaultStashExplorePageSizeOptions() }
@@ -309,7 +310,14 @@ fun ExploreRoute(
         }
     }
 
-    LaunchedEffect(persistedExploreFilterState) {
+    LaunchedEffect(persistedExploreFilterState, startWithRecentReleases) {
+        if (startWithRecentReleases) {
+            if (!didApplyPersistedExploreState) {
+                pageState = StashExplorePageState.initial(sortOptions.first { it.id == "released" })
+                didApplyPersistedExploreState = true
+            }
+            return@LaunchedEffect
+        }
         val persisted = persistedExploreFilterState ?: return@LaunchedEffect
         if (!didApplyPersistedExploreState) {
             val restored = StashExplorePageState.initialFromPersisted(sortOptions, pageSizeOptions, persisted)
@@ -327,7 +335,7 @@ fun ExploreRoute(
         pageState.pageSize,
         pageState.videoFilter,
     ) {
-        if (didApplyPersistedExploreState) {
+        if (didApplyPersistedExploreState && !startWithRecentReleases) {
             localRepository.saveExploreFilterState(pageState.toPersistedFilterState())
         }
     }

@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -46,9 +49,6 @@ import gomeng.dev.stashplayer.core.ui.designsystem.StashMediaCard
 import gomeng.dev.stashplayer.core.ui.designsystem.StashMetadataBadge
 import gomeng.dev.stashplayer.core.ui.designsystem.StashMetadataBadgeModel
 import gomeng.dev.stashplayer.core.ui.designsystem.StashSurfaceRole
-import gomeng.dev.stashplayer.core.ui.designsystem.StashTagChip
-import gomeng.dev.stashplayer.core.ui.designsystem.StashTagChipModel
-import gomeng.dev.stashplayer.core.ui.designsystem.buildStashTagChipOverflowState
 import gomeng.dev.stashplayer.core.ui.designsystem.stashSurfaceTreatment
 import gomeng.dev.stashplayer.core.ui.designsystem.toStashSurfaceThemeColor
 import gomeng.dev.stashplayer.core.ui.designsystem.stashThumbnailClip
@@ -57,7 +57,7 @@ import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.core.ui.i18n.stashString
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 fun SceneCard(
     scene: SceneCardModel,
     modifier: Modifier = Modifier,
@@ -74,6 +74,7 @@ fun SceneCard(
     showQuickActions: Boolean = true,
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit,
+    prioritizeStudioCode: Boolean = false,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val sceneCardLongClick = onLongClick?.let { longClick ->
@@ -235,33 +236,51 @@ fun SceneCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (shouldShowSceneCardInlineSubtitle(
-                        subtitle = scene.subtitle,
-                        hasMetadataBadges = scene.metadataBadges.isNotEmpty(),
-                        hasTagChips = scene.tagChips.isNotEmpty(),
-                    )
-                ) {
-                    Text(
-                        text = scene.subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                if (scene.tagChips.isNotEmpty()) {
-                    val tagState = buildStashTagChipOverflowState(
-                        tags = scene.tagChips.map { it.label },
-                        maxVisible = 3,
-                    )
+                if (prioritizeStudioCode) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        maxItemsInEachRow = 2,
+                    ) {
+                        scene.studioCode?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        scene.releaseDate?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                } else if (scene.studioCode != null || scene.releaseDate != null) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        tagState.visibleTags.forEach { tag ->
-                            StashTagChip(tag = StashTagChipModel(label = tag.displayLabel))
+                        scene.studioCode?.let { code ->
+                            Text(
+                                text = code,
+                                modifier = Modifier.weight(1f, fill = false),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
-                        if (tagState.hasOverflow) {
-                            StashTagChip(tag = StashTagChipModel(label = tagState.overflowLabel))
+                        scene.releaseDate?.let { date ->
+                            Text(
+                                text = date,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
                     }
                 }

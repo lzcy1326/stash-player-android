@@ -606,21 +606,29 @@ fun StashNavHost(
                             onOpenFavorites = { navigateTopLevel(TopLevelDestination.Queue) },
                             onOpenExplore = { navigateTopLevel(TopLevelDestination.Explore) },
                             onOpenShorts = { navigateTopLevel(TopLevelDestination.Shorts) },
+                            onOpenRecentReleases = { navController.navigate(TopLevelDestination.Explore.route + "/recent") },
+                            onOpenRecentStudios = { navController.navigate(TopLevelDestination.Studios.route + "/recent") },
+                            onOpenRecentPerformers = { navController.navigate(TopLevelDestination.Performers.route + "/recent") },
+                            onOpenStudio = { id -> navController.navigate("studio/${Uri.encode(id)}/profile") },
+                            onOpenPerformer = { id -> navController.navigate("performer/${Uri.encode(id)}/profile") },
                         )
                     }
-                    composable(TopLevelDestination.Explore.route) {
-                        ExploreRoute(
-                            isFoldLikeLayout = isFoldLikeLayout,
-                            onOpenScene = { sceneId, scenes, randomShuffle, continuation ->
-                                openPlaybackQueueScene(
-                                    sceneId = sceneId,
-                                    scenes = scenes,
-                                    randomShuffle = randomShuffle,
-                                    continuation = continuation,
-                                )
-                            },
-                            onOpenSettings = { navigateTopLevel(TopLevelDestination.Settings) },
-                        )
+                    for (route in listOf(TopLevelDestination.Explore.route, TopLevelDestination.Explore.route + "/recent")) {
+                        composable(route) {
+                            ExploreRoute(
+                                isFoldLikeLayout = isFoldLikeLayout,
+                                startWithRecentReleases = route.endsWith("/recent"),
+                                onOpenScene = { sceneId, scenes, randomShuffle, continuation ->
+                                    openPlaybackQueueScene(
+                                        sceneId = sceneId,
+                                        scenes = scenes,
+                                        randomShuffle = randomShuffle,
+                                        continuation = continuation,
+                                    )
+                                },
+                                onOpenSettings = { navigateTopLevel(TopLevelDestination.Settings) },
+                            )
+                        }
                     }
                     composable(TopLevelDestination.Shorts.route) {
                         ShortsRoute(
@@ -683,10 +691,12 @@ fun StashNavHost(
                             onOpenExplore = { navigateTopLevel(TopLevelDestination.Explore) },
                         )
                     }
-                    composable(TopLevelDestination.Performers.route) {
-                        PerformersRoute(profile = runtimeProfile, mutations = performerMutations, onOpenPerformer = { id, scenes ->
-                            navController.navigate("performer/${Uri.encode(id)}/${if (scenes) "scenes" else "profile"}")
-                        })
+                    for (route in listOf(TopLevelDestination.Performers.route, TopLevelDestination.Performers.route + "/recent")) {
+                        composable(route) {
+                            PerformersRoute(profile = runtimeProfile, startWithRecentlyAdded = route.endsWith("/recent"), mutations = performerMutations, onOpenPerformer = { id, scenes ->
+                                navController.navigate("performer/${Uri.encode(id)}/${if (scenes) "scenes" else "profile"}")
+                            })
+                        }
                     }
                     composable("performer/{performerId}/{section}") { entry ->
                         PerformerDetailRoute(
@@ -700,10 +710,12 @@ fun StashNavHost(
                             },
                         )
                     }
-                    composable(TopLevelDestination.Studios.route) {
-                        StudiosRoute(profile = runtimeProfile, mutations = studioMutations, onOpenStudio = { id, scenes ->
-                            navController.navigate("studio/${Uri.encode(id)}/${if (scenes) "scenes" else "profile"}")
-                        })
+                    for (route in listOf(TopLevelDestination.Studios.route, TopLevelDestination.Studios.route + "/recent")) {
+                        composable(route) {
+                            StudiosRoute(profile = runtimeProfile, startWithRecentlyAdded = route.endsWith("/recent"), mutations = studioMutations, onOpenStudio = { id, scenes ->
+                                navController.navigate("studio/${Uri.encode(id)}/${if (scenes) "scenes" else "profile"}")
+                            })
+                        }
                     }
                     composable("studio/{studioId}/{section}") { entry ->
                         StudioDetailRoute(
@@ -876,8 +888,8 @@ private fun isTopLevelDestinationSelected(
     destination: TopLevelDestination,
 ): Boolean = when (destination) {
     TopLevelDestination.Settings -> SettingsDestinations.isSettingsRoute(currentRoute)
-    TopLevelDestination.Studios -> currentRoute?.startsWith("studio/") == true || hierarchyRoutes?.any { it == destination.route } == true
-    else -> hierarchyRoutes?.any { it == destination.route } == true
+    TopLevelDestination.Studios -> currentRoute?.startsWith("studio/") == true || hierarchyRoutes?.any { it == destination.route || it == destination.route + "/recent" } == true
+    else -> hierarchyRoutes?.any { it == destination.route || it == destination.route + "/recent" } == true
 }
 
 private fun PlayerPlaybackQueueContinuation.videoFilterState() = when (this) {

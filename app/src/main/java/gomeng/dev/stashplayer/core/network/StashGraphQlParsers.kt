@@ -827,6 +827,7 @@ private data class ApiImageVisualFile(
 private data class ApiScene(
     val id: String,
     val title: String? = null,
+    val code: String? = null,
     val date: String? = null,
     val details: String? = null,
     val performers: List<ApiNamedEntity> = emptyList(),
@@ -906,6 +907,8 @@ private data class ApiScene(
                 durationText = durationText,
             ),
             tagChips = tags.mapNotNull { it.toSceneCardTagChipOrNull() },
+            studioCode = code?.trim()?.takeIf(String::isNotEmpty),
+            releaseDate = date?.trim()?.takeIf(String::isNotEmpty),
         )
     }
 

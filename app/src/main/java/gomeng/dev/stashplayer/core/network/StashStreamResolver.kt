@@ -814,6 +814,8 @@ class StashGraphQlClient(
                 scenes {
                   id
                   title
+                  code
+                  date
                   resume_time
                   play_count
                   studio { name }
