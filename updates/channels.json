@@ -1,0 +1,16 @@
+{
+  "phone": {
+    "versionName": "1.13.3-lzcy1.6.0",
+    "versionCode": 60010600,
+    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.13.3-lzcy1.6.0/StashPlayer-Mobile-1.13.3-lzcy1.6.0.apk",
+    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.13.3-lzcy1.6.0",
+    "notes": "首页新增最近发布影片、最近添加厂商和最近添加演员。影片卡片显示番号和发行日期。"
+  },
+  "tv": {
+    "versionName": "1.13.3-lzcy1.6.0",
+    "versionCode": 60010600,
+    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/tv-v1.13.3-lzcy1.6.0/StashPlayer-TV-1.13.3-lzcy1.6.0.apk",
+    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.13.3-lzcy1.6.0",
+    "notes": "首个正式电视版，支持遥控器浏览、播放和手机扫码配对。"
+  }
+}
