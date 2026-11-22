@@ -68,6 +68,13 @@ import java.util.concurrent.TimeUnit
 internal const val TvDemoServerUrl = "http://10.0.2.2:18772"
 
 class StashTvActivity : ComponentActivity() {
+    private var backgroundEpoch by mutableStateOf(0)
+
+    override fun onStop() {
+        super.onStop()
+        backgroundEpoch++
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val demoProfile = if (
@@ -90,20 +97,56 @@ class StashTvActivity : ComponentActivity() {
                     onSurfaceVariant = Color(0xFFB3C1CD),
                 ),
             ) {
-                StashTvApp(demoProfile)
+                StashTvApp(demoProfile, backgroundEpoch)
             }
         }
     }
 }
 
 @Composable
-private fun StashTvApp(demoProfile: StashServerProfile?) {
+private fun StashTvApp(demoProfile: StashServerProfile?, backgroundEpoch: Int) {
     val context = LocalContext.current
     val repository = remember(context) { StashSettingsRepository(context.applicationContext) }
     var initialized by remember { mutableStateOf(false) }
     var profile by remember { mutableStateOf<StashServerProfile?>(null) }
     var activeProfile by remember { mutableStateOf<StashServerProfile?>(null) }
-    var editing by remember { mutableStateOf(false) }
+    val privacy = remember(context) { TvPinStore(context.applicationContext) }
+    var enabled by remember { mutableStateOf(privacy.enabled) }
+    var unlockedEpoch by remember { mutableStateOf(-1) }
+    var page by remember { mutableStateOf(TvPrivacyPage.Home) }
+    var pendingPin by remember { mutableStateOf("") }
+    var pinError by remember { mutableStateOf<Int?>(null) }
+    var lockedUntil by remember { androidx.compose.runtime.mutableLongStateOf(privacy.lockedUntil) }
+    val locked = enabled && unlockedEpoch != backgroundEpoch
+    val activity = context as ComponentActivity
+
+    LaunchedEffect(backgroundEpoch) {
+        pendingPin = ""
+        pinError = null
+        if (locked) page = TvPrivacyPage.Home
+    }
+
+    androidx.compose.runtime.SideEffect {
+        val flag = android.view.WindowManager.LayoutParams.FLAG_SECURE
+        if (enabled) activity.window.addFlags(flag) else activity.window.clearFlags(flag)
+    }
+
+    fun show(next: TvPrivacyPage) {
+        pinError = null
+        page = next
+    }
+
+    BackHandler(page != TvPrivacyPage.Home || locked) {
+        when {
+            locked -> activity.finish()
+            page == TvPrivacyPage.Settings -> show(TvPrivacyPage.Home)
+            page == TvPrivacyPage.Privacy || page == TvPrivacyPage.Server -> show(TvPrivacyPage.Settings)
+            else -> {
+                pendingPin = ""
+                show(TvPrivacyPage.Privacy)
+            }
+        }
+    }
 
     LaunchedEffect(repository) {
         val saved = demoProfile ?: repository.savedServerProfile.first()
@@ -124,22 +167,105 @@ private fun StashTvApp(demoProfile: StashServerProfile?) {
 
     TvScreen {
         val server = profile
+        val visiblePage = if (locked) TvPrivacyPage.Unlock else page
+        val pinTitle = when (visiblePage) {
+            TvPrivacyPage.Unlock -> R.string.tv_pin_unlock
+            TvPrivacyPage.Change, TvPrivacyPage.Disable -> R.string.tv_pin_current
+            TvPrivacyPage.Create -> R.string.tv_pin_create
+            TvPrivacyPage.Confirm -> R.string.tv_pin_confirm
+            else -> null
+        }
         when {
+            pinTitle != null -> key(visiblePage, backgroundEpoch) {
+                TvPinScreen(
+                    title = stringResource(pinTitle),
+                    exitHint = stringResource(if (locked) R.string.tv_pin_exit else R.string.tv_pin_cancel),
+                    error = pinError?.let { stringResource(it) },
+                    lockedUntil = if (visiblePage in listOf(TvPrivacyPage.Unlock, TvPrivacyPage.Change, TvPrivacyPage.Disable)) lockedUntil else 0L,
+                ) { pin ->
+                    try {
+                        when (visiblePage) {
+                            TvPrivacyPage.Create -> {
+                                pendingPin = pin
+                                show(TvPrivacyPage.Confirm)
+                            }
+                            TvPrivacyPage.Confirm -> {
+                                if (pin == pendingPin) {
+                                    privacy.save(pin)
+                                    enabled = true
+                                    lockedUntil = 0L
+                                    unlockedEpoch = -1
+                                    show(TvPrivacyPage.Home)
+                                } else {
+                                    show(TvPrivacyPage.Create)
+                                    pinError = R.string.tv_pin_mismatch
+                                }
+                                pendingPin = ""
+                            }
+                            else -> {
+                                val valid = privacy.verify(pin)
+                                lockedUntil = privacy.lockedUntil
+                                if (!valid) {
+                                    pinError = R.string.tv_pin_wrong
+                                } else when (visiblePage) {
+                                    TvPrivacyPage.Unlock -> {
+                                        pendingPin = ""
+                                        unlockedEpoch = backgroundEpoch
+                                        show(TvPrivacyPage.Home)
+                                    }
+                                    TvPrivacyPage.Change -> show(TvPrivacyPage.Create)
+                                    TvPrivacyPage.Disable -> {
+                                        privacy.disable()
+                                        enabled = false
+                                        show(TvPrivacyPage.Privacy)
+                                    }
+                                    else -> Unit
+                                }
+                            }
+                        }
+                    } catch (_: Exception) {
+                        pinError = R.string.tv_pin_error
+                    }
+                }
+            }
+            page == TvPrivacyPage.Settings -> TvSettingsChoices(
+                R.string.tv_settings,
+                listOf(R.string.tv_server to { show(TvPrivacyPage.Server) },
+                    R.string.tv_privacy to { show(TvPrivacyPage.Privacy) }),
+            )
+            page == TvPrivacyPage.Privacy -> TvPrivacySettings(
+                enabled = enabled,
+                onToggle = { show(if (enabled) TvPrivacyPage.Disable else TvPrivacyPage.Create) },
+                onChange = { show(TvPrivacyPage.Change) },
+            )
             !initialized -> Text(stringResource(R.string.tv_loading))
-            server == null || editing -> TvServerSetup(
+            server == null || page == TvPrivacyPage.Server -> TvServerSetup(
                 profile = server,
-                onBack = if (server == null) null else ({ editing = false }),
+                onBack = if (server == null) null else ({ show(TvPrivacyPage.Settings) }),
                 saveProfile = { if (demoProfile == null) repository.saveServerProfile(it) },
                 onConnected = {
                     profile = it.saved
                     activeProfile = it.active
-                    editing = false
+                    show(TvPrivacyPage.Home)
                 },
             )
             else -> {
                 val connected = activeProfile ?: server
-                key(connected) { TvHome(connected, onSettings = { editing = true }) }
+                key(connected) { TvHome(connected, onSettings = { show(TvPrivacyPage.Settings) }) }
             }
+        }
+    }
+}
+
+@Composable
+private fun TvSettingsChoices(title: Int, choices: List<Pair<Int, () -> Unit>>) {
+    val focus = remember(title) { FocusRequester() }
+    LaunchedEffect(title) { focus.requestFocus() }
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(stringResource(title), style = MaterialTheme.typography.headlineMedium)
+        choices.forEachIndexed { index, (label, action) ->
+            TvButton(stringResource(label), onClick = action,
+                modifier = if (index == 0) Modifier.focusRequester(focus) else Modifier)
         }
     }
 }

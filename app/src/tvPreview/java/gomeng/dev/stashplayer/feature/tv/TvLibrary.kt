@@ -38,6 +38,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import gomeng.dev.stashplayer.R
 import gomeng.dev.stashplayer.core.model.SceneCardModel
@@ -184,6 +188,35 @@ internal fun TvLibrary(
         draft = ""
         loadFirstPage("", false)
     }
+    val density = LocalDensity.current
+    val measurer = rememberTextMeasurer()
+    val metadataStyle = MaterialTheme.typography.labelMedium
+    val titleStyle = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
+    // All cards use the tallest caption on this page, so wrapped dates do not stagger the grid.
+    val captionHeight = remember(scenes, columns, configuration.screenWidthDp, density, measurer, metadataStyle, titleStyle) {
+        with(density) {
+            val gridWidth = configuration.screenWidthDp.dp - TvSideInset * 2 - TvGridContentPadding
+            val textWidth = ((gridWidth - TvTileSpacing * (columns - 1)) / columns - 20.dp)
+                .toPx().toInt().coerceAtLeast(1)
+            val gap = 8.dp.roundToPx()
+            val titleHeight = measurer.measure("影片", titleStyle, maxLines = 1).size.height
+            val baselineHeight = measurer.measure("2024-03-29", metadataStyle, maxLines = 1).size.height
+            val metadataHeight = scenes.maxOfOrNull { scene ->
+                val code = scene.studioCode?.let {
+                    measurer.measure(it, metadataStyle.copy(fontWeight = FontWeight.SemiBold),
+                        constraints = Constraints(maxWidth = textWidth)).size
+                }
+                val date = scene.releaseDate?.let { measurer.measure(it, metadataStyle, maxLines = 1).size }
+                when {
+                    code == null -> date?.height ?: baselineHeight
+                    date == null -> code.height
+                    code.width + gap + date.width <= textWidth -> maxOf(code.height, date.height)
+                    else -> code.height + date.height
+                }
+            } ?: baselineHeight
+            ((titleHeight + metadataHeight).toDp() + 8.dp).coerceAtLeast(54.dp)
+        }
+    }
     Column(
         Modifier.fillMaxSize().padding(horizontal = TvSideInset, vertical = 18.dp),
         verticalArrangement = Arrangement.spacedBy(9.dp),
@@ -255,6 +288,9 @@ internal fun TvLibrary(
                     image = scene.thumbnailUrl,
                     title = scene.title,
                     subtitle = scene.studio,
+                    studioCode = scene.studioCode,
+                    releaseDate = scene.releaseDate,
+                    captionHeight = captionHeight,
                     duration = scene.durationText,
                     progress = scene.progress,
                     playable = true,

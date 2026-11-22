@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -88,6 +90,7 @@ internal fun TvArtwork(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TvBrowseTile(
     profile: StashServerProfile,
@@ -102,6 +105,9 @@ internal fun TvBrowseTile(
     progress: Float = 0f,
     playable: Boolean = false,
     contentScale: ContentScale = ContentScale.Crop,
+    studioCode: String? = null,
+    releaseDate: String? = null,
+    captionHeight: Dp = 54.dp,
 ) {
     val requester = remember { FocusRequester() }
     var focused by remember { mutableStateOf(false) }
@@ -156,13 +162,26 @@ internal fun TvBrowseTile(
             }
         }
         Column(
-            Modifier.fillMaxWidth().height(54.dp).padding(horizontal = 10.dp),
+            Modifier.fillMaxWidth().height(captionHeight).padding(horizontal = 10.dp),
             verticalArrangement = Arrangement.Center,
         ) {
             Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(subtitle, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant,
-                maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (studioCode == null && releaseDate == null) {
+                Text(subtitle, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+            } else {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    studioCode?.let {
+                        Text(it, style = MaterialTheme.typography.labelMedium,
+                            color = colors.primary, fontWeight = FontWeight.SemiBold)
+                    }
+                    releaseDate?.let {
+                        Text(it, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+            }
         }
     }
 }

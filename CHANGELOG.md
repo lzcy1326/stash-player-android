@@ -4,6 +4,12 @@ All notable changes to Stash Android Player are documented here.
 
 When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. Use the matching section for the GitHub Release notes.
 
+## 电视端 [1.13.3-lzcy1.6.1] - 2026-11-22
+
+- 增加隐私保护开关，可设置四位 PIN，启动应用或返回应用时需要验证。
+- 支持修改和关闭 PIN，连续输错五次后等待 30 秒。
+- 影片卡片增加番号和发行日期，空间不足时日期换行，支持首页、搜索、继续观看及演员和厂商影片列表。
+
 ## 手机端 [1.13.3-lzcy1.6.0] - 2026-11-21
 
 - 影片卡片新增番号与发行日期，移除卡片标签行。

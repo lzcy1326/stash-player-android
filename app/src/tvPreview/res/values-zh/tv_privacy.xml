@@ -1,0 +1,17 @@
+<resources>
+    <string name="tv_settings">设置</string>
+    <string name="tv_privacy">隐私保护</string>
+    <string name="tv_privacy_on">隐私保护：已开启</string>
+    <string name="tv_privacy_off">隐私保护：已关闭</string>
+    <string name="tv_pin_unlock">输入 PIN 解锁</string>
+    <string name="tv_pin_current">输入当前 PIN</string>
+    <string name="tv_pin_create">设置 4 位 PIN</string>
+    <string name="tv_pin_confirm">再次输入 PIN</string>
+    <string name="tv_pin_change">修改 PIN</string>
+    <string name="tv_pin_exit">按返回键退出</string>
+    <string name="tv_pin_cancel">按返回键取消</string>
+    <string name="tv_pin_wait">请在 %1$d 秒后重试</string>
+    <string name="tv_pin_wrong">PIN 不正确，请重试</string>
+    <string name="tv_pin_mismatch">两次 PIN 不一致，请重新设置</string>
+    <string name="tv_pin_error">无法读取或保存 PIN</string>
+</resources>

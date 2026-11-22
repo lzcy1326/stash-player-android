@@ -121,7 +121,7 @@ private fun TvSectionNavigation(selected: TvSection, onSelect: (TvSection) -> Un
             )
         }
         Box(Modifier.weight(1f))
-        TvButton(stringResource(R.string.tv_server), onClick = onSettings)
+        TvButton(stringResource(R.string.tv_settings), onClick = onSettings)
     }
 }
 

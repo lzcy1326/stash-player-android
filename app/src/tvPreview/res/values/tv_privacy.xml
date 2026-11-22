@@ -1,0 +1,17 @@
+<resources>
+    <string name="tv_settings">Settings</string>
+    <string name="tv_privacy">Privacy protection</string>
+    <string name="tv_privacy_on">Privacy protection: On</string>
+    <string name="tv_privacy_off">Privacy protection: Off</string>
+    <string name="tv_pin_unlock">Enter PIN to unlock</string>
+    <string name="tv_pin_current">Enter current PIN</string>
+    <string name="tv_pin_create">Set a 4-digit PIN</string>
+    <string name="tv_pin_confirm">Confirm your PIN</string>
+    <string name="tv_pin_change">Change PIN</string>
+    <string name="tv_pin_exit">Press Back to exit</string>
+    <string name="tv_pin_cancel">Press Back to cancel</string>
+    <string name="tv_pin_wait">Try again in %1$d s</string>
+    <string name="tv_pin_wrong">Incorrect PIN. Try again.</string>
+    <string name="tv_pin_mismatch">PINs do not match. Set it again.</string>
+    <string name="tv_pin_error">Could not read or save PIN.</string>
+</resources>

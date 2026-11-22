@@ -194,8 +194,8 @@ dependencies {
 androidComponents {
     onVariants(selector().withBuildType("tvRelease")) { variant ->
         variant.outputs.forEach { output ->
-            output.versionCode.set(60_010_600)
-            output.versionName.set("1.13.3-lzcy1.6.0")
+            output.versionCode.set(60_010_601)
+            output.versionName.set("1.13.3-lzcy1.6.1")
         }
     }
 }
