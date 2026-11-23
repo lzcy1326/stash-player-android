@@ -61,8 +61,8 @@ android {
         minSdk = 29
         targetSdk = 35
         // LZCY fork versionCode = upstream code * 1,000,000 + major * 10,000 + feature * 100 + fix.
-        versionCode = 60_010_600
-        versionName = "1.13.3-lzcy1.6.0"
+        versionCode = 60_010_601
+        versionName = "1.13.3-lzcy1.6.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -194,8 +194,8 @@ dependencies {
 androidComponents {
     onVariants(selector().withBuildType("tvRelease")) { variant ->
         variant.outputs.forEach { output ->
-            output.versionCode.set(60_010_601)
-            output.versionName.set("1.13.3-lzcy1.6.1")
+            output.versionCode.set(60_010_602)
+            output.versionName.set("1.13.3-lzcy1.6.2")
         }
     }
 }

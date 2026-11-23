@@ -534,7 +534,6 @@ private fun RealPlayerRoute(
     val presentationTransitionActive = presentationRouteState.presentationTransitionActive
     val fullscreenChromeActive = presentationRouteState.fullscreenChromeActive
     val playerSurfacePresentationMode = presentationRouteState.playerSurfacePresentationMode
-        .takeIf { canChangePlayerPresentation }
     val presentationDragUpdate = presentationRouteState.dragUpdate
     val presentationProgressAnimation = remember(sceneId) {
         Animatable(if (presentationRouteState.targetMode == PlayerPresentationMode.Fullscreen) 1f else 0f)
@@ -2077,6 +2076,7 @@ private fun RealPlayerRoute(
             gestureExclusionBounds = playerGestureExclusionBounds,
             gesturesSuspendedByModalSurface = playerGesturesSuspended,
             presentationMode = playerSurfacePresentationMode,
+            presentationDragEnabled = canChangePlayerPresentation,
             onPresentationDragUpdate = { update ->
                 markPlayerInteraction()
                 controlsVisible = true

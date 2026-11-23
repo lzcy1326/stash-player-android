@@ -424,7 +424,7 @@ internal fun TvPlayer(
                 }
             }
         }
-        previewTarget?.takeIf { !hasError }?.let { target ->
+        previewTarget?.takeUnless { showControls }?.let { target ->
             TvSeekPreview(
                 targetMs = target,
                 durationMs = duration,

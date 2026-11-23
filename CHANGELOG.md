@@ -4,6 +4,16 @@ All notable changes to Stash Android Player are documented here.
 
 When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. Use the matching section for the GitHub Release notes.
 
+## 手机端 [1.13.3-lzcy1.6.1] - 2026-11-23
+
+- 修复横屏播放时，左侧上下滑无法调节亮度、右侧上下滑无法调节音量的问题。
+- 放大长按预览的缩略图，背景仅覆盖预览小窗。
+- 修复预览时出现两条进度条的问题。控制栏可见时，主进度条跟随预览目标，小窗显示缩略图、目标时间和跳转幅度。
+
+## 电视端 [1.13.3-lzcy1.6.2] - 2026-11-23
+
+- 修复长按遥控器左右键跳转后，松手时预览进度条与常规进度条短暂重叠的问题。常规控制栏恢复时，预览立即收起。
+
 ## 电视端 [1.13.3-lzcy1.6.1] - 2026-11-22
 
 - 增加隐私保护开关，可设置四位 PIN，启动应用或返回应用时需要验证。

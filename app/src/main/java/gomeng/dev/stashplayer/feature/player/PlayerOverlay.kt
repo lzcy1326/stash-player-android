@@ -2,6 +2,8 @@ package gomeng.dev.stashplayer.feature.player
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -240,19 +242,18 @@ fun PlayerOverlay(
     DisposableEffect(spriteImageLoader) {
         onDispose { spriteImageLoader.shutdown() }
     }
-    val playbackFraction = if (durationMs > 0L) {
-        (positionMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
-    } else {
-        0f
-    }
     var sliderDragging by remember { mutableStateOf(false) }
     var sliderPreviewFraction by remember { mutableFloatStateOf(0f) }
     var activePlaybackOptionSheet by remember { mutableStateOf<PlayerSeparatedPlaybackOptionSheet?>(null) }
-    val sliderFraction = if (sliderDragging) sliderPreviewFraction else playbackFraction
-    val displayedPositionMs = if (sliderDragging && durationMs > 0L) {
-        (sliderFraction * durationMs).roundToLong()
-    } else {
-        positionMs
+    val displayedPositionMs = when {
+        sliderDragging && durationMs > 0L -> (sliderPreviewFraction * durationMs).roundToLong()
+        seekPreview != null && durationMs > 0L -> seekPreview.targetPositionMs.coerceIn(0L, durationMs)
+        else -> positionMs
+    }
+    val sliderFraction = when {
+        sliderDragging -> sliderPreviewFraction
+        durationMs > 0L -> (displayedPositionMs.toFloat() / durationMs).coerceIn(0f, 1f)
+        else -> 0f
     }
     val backAction = resolvePlayerBackAction(
         playlistDrawerOpen = false,
@@ -391,6 +392,7 @@ fun PlayerOverlay(
                     frame = preview.frame,
                     serverProfile = serverProfile,
                     imageLoader = spriteImageLoader,
+                    showProgress = !visibilityPolicy.showBottomControls,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .navigationBarsPadding()
@@ -518,11 +520,13 @@ private fun PlayerSeekPreviewTimelineCard(
     frame: StashSpriteFrame?,
     serverProfile: StashServerProfile?,
     imageLoader: ImageLoader,
+    showProgress: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier
-            .fillMaxWidth(0.76f)
+            .widthIn(max = 260.dp)
+            .fillMaxWidth()
             .semantics {
                 contentDescription = state.contentDescription
             },
@@ -540,39 +544,43 @@ private fun PlayerSeekPreviewTimelineCard(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                frame?.let { PlayerSpriteThumbnail(it, serverProfile, imageLoader) }
+                frame?.let {
+                    PlayerSpriteThumbnail(it, serverProfile, imageLoader, Modifier.size(144.dp, 81.dp))
+                }
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
-                        text = state.deltaLabel,
+                        text = state.targetLabel,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
-                        color = StashColors.Primary,
+                        color = StashColors.TextPrimary,
                     )
                     Text(
-                        text = "${state.targetLabel} / ${state.durationLabel}",
+                        text = state.deltaLabel,
                         style = MaterialTheme.typography.labelMedium,
-                        color = StashColors.TextPrimary,
                         fontWeight = FontWeight.Medium,
+                        color = StashColors.Primary,
                     )
                 }
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(5.dp)
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(StashRadii.Pill))
-                    .background(Color.White.copy(alpha = 0.22f)),
-            ) {
+            if (showProgress) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(state.targetFraction)
+                        .fillMaxWidth()
                         .height(5.dp)
                         .clip(androidx.compose.foundation.shape.RoundedCornerShape(StashRadii.Pill))
-                        .background(StashColors.Primary),
-                )
+                        .background(Color.White.copy(alpha = 0.22f)),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(state.targetFraction)
+                            .height(5.dp)
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(StashRadii.Pill))
+                            .background(StashColors.Primary),
+                    )
+                }
             }
         }
     }

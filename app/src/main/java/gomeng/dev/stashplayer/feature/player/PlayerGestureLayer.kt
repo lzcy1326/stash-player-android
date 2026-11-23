@@ -67,6 +67,7 @@ fun PlayerGestureLayer(
     gestureExclusionBounds: PlayerGestureExclusionBounds? = null,
     gesturesSuspendedByModalSurface: Boolean = false,
     presentationMode: PlayerPresentationMode? = null,
+    presentationDragEnabled: Boolean = true,
     onPresentationDragUpdate: (PlayerPresentationDragUpdate?) -> Unit = {},
     onPresentationDragRelease: (PlayerPresentationDragRelease) -> Unit = {},
 ) {
@@ -91,6 +92,7 @@ fun PlayerGestureLayer(
     val latestGestureExclusionBounds by rememberUpdatedState(gestureExclusionBounds)
     val latestGesturesSuspendedByModalSurface by rememberUpdatedState(gesturesSuspendedByModalSurface)
     val latestPresentationMode by rememberUpdatedState(presentationMode)
+    val latestPresentationDragEnabled by rememberUpdatedState(presentationDragEnabled)
     val latestOnPresentationDragUpdate by rememberUpdatedState(onPresentationDragUpdate)
     val latestOnPresentationDragRelease by rememberUpdatedState(onPresentationDragRelease)
 
@@ -129,6 +131,7 @@ fun PlayerGestureLayer(
                             onFastPlaybackHoldEnd = latestOnFastPlaybackHoldEnd,
                             previewFrameFor = latestPreviewFrameFor,
                             presentationMode = { latestPresentationMode },
+                            presentationDragEnabled = { latestPresentationDragEnabled },
                             onPresentationDragUpdate = latestOnPresentationDragUpdate,
                             onPresentationDragRelease = latestOnPresentationDragRelease,
                         )
@@ -171,6 +174,7 @@ fun PlayerGestureLayer(
                                         onFastPlaybackHoldEnd = latestOnFastPlaybackHoldEnd,
                                         previewFrameFor = latestPreviewFrameFor,
                                         presentationMode = { latestPresentationMode },
+                                        presentationDragEnabled = { latestPresentationDragEnabled },
                                         onPresentationDragUpdate = latestOnPresentationDragUpdate,
                                         onPresentationDragRelease = latestOnPresentationDragRelease,
                                     )
@@ -229,12 +233,13 @@ private suspend fun AwaitPointerEventScope.awaitTapOrHandleDrag(
     onFastPlaybackHoldEnd: () -> Unit,
     previewFrameFor: (Long) -> StashSpriteFrame?,
     presentationMode: () -> PlayerPresentationMode?,
+    presentationDragEnabled: () -> Boolean,
     onPresentationDragUpdate: (PlayerPresentationDragUpdate?) -> Unit,
     onPresentationDragRelease: (PlayerPresentationDragRelease) -> Unit,
 ): PlayerPointerGestureResult {
     val dragStart = down.position
     var totalDrag = Offset.Zero
-    var presentationSession: PlayerPresentationDragSession? = presentationMode()?.let { mode ->
+    var presentationSession: PlayerPresentationDragSession? = presentationMode()?.takeIf { presentationDragEnabled() }?.let { mode ->
         startPlayerPresentationDragSession(
             currentMode = mode,
             startArea = PlayerPresentationGestureStartArea.PlayerSurface,

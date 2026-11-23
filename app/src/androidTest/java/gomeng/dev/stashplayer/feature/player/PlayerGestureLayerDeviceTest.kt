@@ -30,7 +30,7 @@ class PlayerGestureLayerDeviceTest {
     private var holdEnds = 0
     private var presentationUpdates = 0
 
-    private fun showPlayer(mode: PlayerPresentationMode, locked: Boolean = false) {
+    private fun showPlayer(mode: PlayerPresentationMode, locked: Boolean = false, presentationDragEnabled: Boolean = true) {
         compose.setContent {
             Box(Modifier.fillMaxSize()) {
                 PlayerGestureLayer(
@@ -43,6 +43,7 @@ class PlayerGestureLayerDeviceTest {
                     onFastPlaybackHoldStart = { holdStarts++ }, onFastPlaybackHoldEnd = { holdEnds++ },
                     previewFrameFor = { null }, modifier = Modifier.testTag("player-surface"),
                     presentationMode = mode,
+                    presentationDragEnabled = presentationDragEnabled,
                     onPresentationDragUpdate = { presentationUpdates++ },
                 )
             }
@@ -59,6 +60,21 @@ class PlayerGestureLayerDeviceTest {
             down(Offset(width * 0.58f, height * 0.65f)); moveBy(Offset(0f, -height * 0.25f)); up()
         }
         compose.runOnIdle { assertTrue("right side should increase volume", volume > 0.5f); assertEquals(0, presentationUpdates) }
+    }
+
+    @Test fun fullscreenSideGesturesWorkWhenPresentationChangesAreDisabled() {
+        showPlayer(PlayerPresentationMode.Fullscreen, presentationDragEnabled = false)
+        compose.onNodeWithTag("player-surface").performTouchInput {
+            down(Offset(width * 0.25f, height * 0.65f)); moveBy(Offset(0f, -height * 0.25f)); up()
+        }
+        compose.onNodeWithTag("player-surface").performTouchInput {
+            down(Offset(width * 0.75f, height * 0.65f)); moveBy(Offset(0f, -height * 0.25f)); up()
+        }
+        compose.runOnIdle {
+            assertTrue(brightness > 0.5f)
+            assertTrue(volume > 0.5f)
+            assertEquals(0, presentationUpdates)
+        }
     }
 
     @Test fun longPressStartsAndEndsExactlyOnce() {
