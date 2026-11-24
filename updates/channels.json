@@ -1,16 +1,16 @@
 {
   "phone": {
-    "versionName": "1.13.3-lzcy1.6.1",
-    "versionCode": 60010601,
-    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.13.3-lzcy1.6.1/StashPlayer-Mobile-1.13.3-lzcy1.6.1.apk",
-    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.13.3-lzcy1.6.1",
-    "notes": "修复横屏亮度和音量手势，放大预览缩略图并消除重复进度条。"
+    "versionName": "1.14.0-lzcy1.0.0",
+    "versionCode": 61010000,
+    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.14.0-lzcy1.0.0/StashPlayer-Mobile-1.14.0-lzcy1.0.0.apk",
+    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.0-lzcy1.0.0",
+    "notes": "合并上游 1.14.0，新增队列保存、搜索历史与收藏，并调整全屏返回。"
   },
   "tv": {
-    "versionName": "1.13.3-lzcy1.6.2",
-    "versionCode": 60010602,
-    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/tv-v1.13.3-lzcy1.6.2/StashPlayer-TV-1.13.3-lzcy1.6.2.apk",
-    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.13.3-lzcy1.6.2",
-    "notes": "修复松开遥控器后预览进度条与常规进度条短暂重叠的问题。"
+    "versionName": "1.14.0-lzcy1.0.0",
+    "versionCode": 61010000,
+    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/tv-v1.14.0-lzcy1.0.0/StashPlayer-TV-1.14.0-lzcy1.0.0.apk",
+    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.0-lzcy1.0.0",
+    "notes": "影片搜索新增最近记录与收藏，支持遥控器重新搜索。"
   }
 }
