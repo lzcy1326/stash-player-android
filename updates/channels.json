@@ -1,16 +1,16 @@
 {
   "phone": {
-    "versionName": "1.14.0-lzcy1.0.0",
-    "versionCode": 61010000,
-    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.14.0-lzcy1.0.0/StashPlayer-Mobile-1.14.0-lzcy1.0.0.apk",
-    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.0-lzcy1.0.0",
+    "versionName": "1.14.0-lzcy1.6.0",
+    "versionCode": 61010600,
+    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.14.0-lzcy1.6.0/StashPlayer-Mobile-1.14.0-lzcy1.6.0.apk",
+    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.0-lzcy1.6.0",
     "notes": "合并上游 1.14.0，新增队列保存、搜索历史与收藏，并调整全屏返回。"
   },
   "tv": {
-    "versionName": "1.14.0-lzcy1.0.0",
-    "versionCode": 61010000,
-    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/tv-v1.14.0-lzcy1.0.0/StashPlayer-TV-1.14.0-lzcy1.0.0.apk",
-    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.0-lzcy1.0.0",
+    "versionName": "1.14.0-lzcy1.6.0",
+    "versionCode": 61010600,
+    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/tv-v1.14.0-lzcy1.6.0/StashPlayer-TV-1.14.0-lzcy1.6.0.apk",
+    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.0-lzcy1.6.0",
     "notes": "影片搜索新增最近记录与收藏，支持遥控器重新搜索。"
   }
 }
