@@ -38,6 +38,8 @@
     <string name="tv_include_children_on">Child studios: included</string>
     <string name="tv_include_children_off">Child studios: excluded</string>
     <string name="tv_search">Search videos</string>
+    <string name="tv_search_history">Search history</string>
+    <string name="tv_search_history_empty">No recent searches.</string>
     <string name="tv_submit_search">Search</string>
     <string name="tv_resume">Continue watching</string>
     <string name="tv_empty">No videos found.</string>

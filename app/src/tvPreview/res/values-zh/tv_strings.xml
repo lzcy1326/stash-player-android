@@ -38,6 +38,8 @@
     <string name="tv_include_children_on">子厂商：包含</string>
     <string name="tv_include_children_off">子厂商：不包含</string>
     <string name="tv_search">搜索影片</string>
+    <string name="tv_search_history">搜索历史</string>
+    <string name="tv_search_history_empty">暂无搜索记录。</string>
     <string name="tv_submit_search">搜索</string>
     <string name="tv_resume">继续观看</string>
     <string name="tv_empty">没有找到影片。</string>

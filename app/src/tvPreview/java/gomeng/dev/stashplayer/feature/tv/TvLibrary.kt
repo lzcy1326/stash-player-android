@@ -1,6 +1,7 @@
 package gomeng.dev.stashplayer.feature.tv
 
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -20,13 +23,16 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,23 +40,33 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import gomeng.dev.stashplayer.R
+import gomeng.dev.stashplayer.core.local.RecentSearchTerm
+import gomeng.dev.stashplayer.core.local.StashLocalLibraryRepository
 import gomeng.dev.stashplayer.core.model.SceneCardModel
 import gomeng.dev.stashplayer.core.model.StashPlaybackState
 import gomeng.dev.stashplayer.core.model.StashVideoFilterState
+import gomeng.dev.stashplayer.core.model.normalizeStashDiscoveryQuery
 import gomeng.dev.stashplayer.core.network.StashGraphQlClient
 import gomeng.dev.stashplayer.core.network.StashServerProfile
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun TvLibrary(
@@ -72,6 +88,17 @@ internal fun TvLibrary(
     val keyboard = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val searchButton = remember { FocusRequester() }
+    val historyButton = remember { FocusRequester() }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val repository = remember(context) { StashLocalLibraryRepository(context) }
+    val history = remember(repository) {
+        repository.recentSearchTerms.catch { error ->
+            if (error is IOException) emit(emptyList()) else throw error
+        }
+    }
+    var showSearchHistory by remember { mutableStateOf(false) }
+    val searchWriteError = stringResource(R.string.search_history_write_failed)
     var draft by remember { mutableStateOf("") }
     var query by remember { mutableStateOf("") }
     var resumable by remember { mutableStateOf(false) }
@@ -97,6 +124,24 @@ internal fun TvLibrary(
         focusScene = null
         highlightedScene = null
         busy = true
+    }
+
+    fun recordSearch(text: String, favorite: Boolean? = null) {
+        if (text.isBlank()) return
+        coroutineScope.launch {
+            try {
+                repository.recordSearchTerm(text, favorite)
+            } catch (_: IOException) {
+                Toast.makeText(context, searchWriteError, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun submitSearch(text: String) {
+        val normalized = normalizeStashDiscoveryQuery(text)
+        draft = normalized
+        loadFirstPage(normalized, false)
+        recordSearch(normalized)
     }
 
     LaunchedEffect(scope, page, reload, pageSize) {
@@ -246,13 +291,17 @@ internal fun TvLibrary(
                     keyboardActions = KeyboardActions(onSearch = {
                         keyboard?.hide()
                         searchButton.requestFocus()
-                        loadFirstPage(draft.trim(), false)
+                        submitSearch(draft)
                     }),
                 )
                 TvButton(stringResource(R.string.tv_submit_search), {
                     keyboard?.hide()
-                    loadFirstPage(draft.trim(), false)
+                    submitSearch(draft)
                 }, Modifier.focusRequester(searchButton))
+                TvButton(stringResource(R.string.tv_search_history), {
+                    keyboard?.hide()
+                    showSearchHistory = true
+                }, Modifier.focusRequester(historyButton))
                 TvButton(stringResource(if (resumable) R.string.tv_library else R.string.tv_resume), {
                     draft = ""
                     loadFirstPage("", !resumable)
@@ -328,5 +377,68 @@ internal fun TvLibrary(
                 }
             }
         }
+    }
+    if (showSearchHistory && scope == null) {
+        val terms by history.collectAsState(initial = emptyList())
+        TvSearchHistoryDialog(
+            terms = terms,
+            onDismiss = {
+                showSearchHistory = false
+                historyButton.requestFocus()
+            },
+            onSearch = { term ->
+                showSearchHistory = false
+                searchButton.requestFocus()
+                submitSearch(term)
+            },
+            onFavorite = { term -> recordSearch(term.query, !term.favorite) },
+        )
+    }
+}
+
+@Composable
+private fun TvSearchHistoryDialog(
+    terms: List<RecentSearchTerm>,
+    onDismiss: () -> Unit,
+    onSearch: (String) -> Unit,
+    onFavorite: (RecentSearchTerm) -> Unit,
+) {
+    val closeFocus = remember { FocusRequester() }
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(shape = MaterialTheme.shapes.large) {
+            Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(stringResource(R.string.tv_search_history), style = MaterialTheme.typography.titleLarge)
+                    TvButton(stringResource(R.string.tv_back), onDismiss, Modifier.focusRequester(closeFocus))
+                }
+                if (terms.isEmpty()) {
+                    Text(stringResource(R.string.tv_search_history_empty))
+                } else {
+                    LazyColumn(Modifier.heightIn(max = 260.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        items(terms.size, key = { terms[it].query }) { index ->
+                            val term = terms[index]
+                            val favoriteAction = stringResource(
+                                if (term.favorite) R.string.search_history_unfavorite else R.string.search_history_favorite,
+                                term.query,
+                            )
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                TvButton(term.query, { onSearch(term.query) }, Modifier.weight(1f))
+                                TvButton(if (term.favorite) "★" else "☆", { onFavorite(term) },
+                                    Modifier.semantics { contentDescription = favoriteAction })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        LaunchedEffect(Unit) { closeFocus.requestFocus() }
     }
 }
