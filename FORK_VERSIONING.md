@@ -14,7 +14,7 @@ For example, both channels may start at `1.13.3-lzcy1.5.1`. A TV-only fix can re
 
 1. Change a channel's `versionName` and `versionCode` only when the maintainer explicitly requests a release of that channel. Routine development and temporary verification builds keep the channel's current version.
 2. Increment the personal `major` for a major change, `feature` for new functionality, and `fix` for a bug-fix-only release. Make the decision independently for phone and TV.
-3. An upstream merge alone does not release either channel. When a channel is first released on a new upstream version, use the exact upstream version and reset that channel's personal suffix to `1.0.0`, subject to the version-code checks below. The other channel advances only when it is released.
+3. An upstream merge alone does not release either channel. When releasing on a new upstream version, update the upstream portion and **retain the channel's personal suffix**. Never reset the personal suffix merely because the upstream version changed. Continue from the channel's last correctly released personal revision and apply rule 2 when the release warrants an increment. The maintainer may explicitly specify the revision, as with `1.14.0-lzcy1.6.0`. The other channel advances only when it is released.
 4. Keep `versionCode` strictly increasing relative to every previously distributed build of the same application ID. The existing formula may be used independently for each channel if it produces a value greater than that channel's installed and published codes:
 
    ```text

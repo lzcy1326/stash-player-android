@@ -4,6 +4,19 @@ All notable changes to Stash Android Player are documented here.
 
 When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. Use the matching section for the GitHub Release notes.
 
+## 手机端 [1.14.0-lzcy1.6.0] - 2026-11-24
+
+- 修正个人版本号，保留 `lzcy1.6.0` 版本系列。
+- 合并上游 1.14.0，支持保存最多 10 个完整播放队列，并从队列页恢复影片及播放进度。
+- 探索页记录最近 50 条搜索词，支持收藏搜索词，收藏不计入最近记录上限。
+- 调整全屏返回操作，支持从屏幕边缘滑动返回。
+
+## 电视端 [1.14.0-lzcy1.6.0] - 2026-11-24
+
+- 修正个人版本号，保留 `lzcy1.6.0` 版本系列。
+- 影片页新增搜索历史，保存最近 50 条搜索词，支持使用遥控器再次搜索和收藏搜索词，收藏不计入最近记录上限。
+- 合并上游 1.14.0 的共享代码更新。电视端搜索功能已由用户在 TCL 电视验证。
+
 ## 手机端 [1.14.0-lzcy1.0.0] - 2026-11-24
 
 - 合并上游 1.14.0，支持保存最多 10 个完整播放队列，并从队列页恢复影片及播放进度。
