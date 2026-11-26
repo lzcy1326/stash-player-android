@@ -1,163 +1,108 @@
-<div align="center">
+# Stash Android Player · LZCY 個人版
 
-# Stash Android Player
+**在手機上依演員和廠商找片，在電視上用遙控器瀏覽、播放與續看同一個 Stash 媒體庫。**
 
-### 讓自架 Stash 媒體庫在 Android 上更順手。
+LZCY 個人版基於 [Stash Android Player 上游專案](https://github.com/gomeng-dev/stash-player-android)。它加入獨立的 Android TV 版，也改進了手機端的瀏覽與播放體驗。兩個版本都直接連線到你自己的 Stash 伺服器。
 
-在手機上瀏覽、搜尋、排隊、滑動短影音，並使用以手勢為核心的原生播放器觀看內容，同時媒體庫仍保留在你自己的 Stash 伺服器上。
+[下載手機版](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) · [下載電視版](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) · [所有發行版本](https://github.com/lzcy1326/stash-player-android/releases)
 
-<p>
-  <a href="README.md"><img alt="English README" src="https://img.shields.io/badge/README-English-7c3aed?style=for-the-badge"></a>
-  <a href="README.ko.md"><img alt="Korean README" src="https://img.shields.io/badge/README-%ED%95%9C%EA%B5%AD%EC%96%B4-7c3aed?style=for-the-badge"></a>
-  <a href="README.zh-CN.md"><img alt="Simplified Chinese README" src="https://img.shields.io/badge/README-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-7c3aed?style=for-the-badge"></a>
-  <a href="https://github.com/lzcy1326/stash-player-android/releases"><img alt="下載 APK" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
-  <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-34d399?style=for-the-badge&logo=android&logoColor=white">
-  <img alt="Kotlin + Compose" src="https://img.shields.io/badge/Kotlin%20%2B%20Compose-111827?style=for-the-badge&logo=kotlin&logoColor=white">
-</p>
+[English](README.md) · [简体中文](README.zh-CN.md) · [한국어](README.ko.md)
 
-<img src="docs/assets/readme/screenshots/00-hero.png" alt="Stash Android Player 預覽，顯示首頁、探索、佇列、播放器控制、圖片和圖庫欣賞模式" width="100%">
+## 相較於上游，LZCY 個人版有哪些改進？
 
-</div>
+### 獨立 Android TV 版
 
----
+- **用遙控器瀏覽媒體庫。** 影片、演員和廠商各有獨立頁籤，可以搜尋、查看詳細資料和瀏覽相關影片。影片首頁與詳細資料頁使用大幅背景，清單會依畫面欄數分頁，離開播放器後焦點會回到原本的影片卡片。
+- **用方向鍵定位播放進度。** 短按左右鍵即可快轉或倒轉，長按可檢視進度及 Stash 縮圖預覽。影片頁提供繼續觀看，搜尋紀錄可用來再次搜尋或加上星號收藏。
+- **用手機掃描 QR Code 配對。** 使用已連線至 Stash 的手機版掃描電視上的 QR Code，確認後就能傳送伺服器設定。
+- **共用電視可啟用 PIN 碼。** 設定四位數 PIN 碼後，啟動或返回應用程式時需要驗證。
 
-## 為什麼使用它？
-
-Stash 很強大，但桌面 Web UI 在手機上不一定順手。**Stash Android Player** 為你的自架媒體庫提供原生 Android 體驗：
-
-- **首頁**：繼續觀看、開啟本機清單，並快速開始播放。
-- **探索**：在同一個畫面搜尋、篩選、排序、隨機/洗牌、使用已儲存篩選器和批次操作。
-- **短影音**：以直向動態瀏覽較短的影片。
-- **佇列 / 稍後觀看 / 收藏**：本機儲存在裝置上。
-- **觀看頁 + Media3 播放器**：支援手勢、全螢幕、串流選擇、字幕、PiP 和播放清單控制。
-- **推薦**：在觀看頁查看媒體庫中的相似影片。
-- **圖庫**：瀏覽 Stash 圖庫和圖片，支援全螢幕照片檢視器；欣賞模式會隱藏頂部列和底部工具。
-
-不需要託管服務。應用程式會直接連線到你的 Stash 伺服器，不會把媒體庫中繼資料上傳到本專案。
-
-## 截圖
-
-以下截圖來自使用公開示範媒體執行的真實 Android 應用程式，不包含私人媒體、伺服器位址、API Key、憑證、Cookie 或個人媒體庫資料。
+以下截圖使用示範媒體庫。電視版以英文介面呈現，手機版以簡體中文介面呈現。
 
 <p align="center">
-  <img src="docs/assets/readme/screenshots/01-home.png" alt="有繼續觀看和媒體庫捷徑的首頁" width="220">
-  <img src="docs/assets/readme/screenshots/02-explore.png" alt="有搜尋、篩選和影片卡片的探索頁" width="220">
-  <img src="docs/assets/readme/screenshots/03-shorts.png" alt="有直向播放和本機回饋的短影音動態" width="220">
-</p>
-<p align="center">
-  <img src="docs/assets/readme/screenshots/04-queue.png" alt="有稍後觀看和本機清單的播放佇列" width="220">
-  <img src="docs/assets/readme/screenshots/05-watch-page.png" alt="有中繼資料、評分、標籤和操作的觀看頁" width="220">
-  <img src="docs/assets/readme/screenshots/06-player-controls.png" alt="有進度列、速度、鎖定和全螢幕的播放器控制" width="220">
-</p>
-<p align="center">
-  <img src="docs/assets/readme/screenshots/07-images.png" alt="有搜尋、排序和篩選的圖片瀏覽頁" width="220">
-  <img src="docs/assets/readme/screenshots/08-photo-viewer.png" alt="隱藏頂部列和底部工具的照片欣賞模式" width="220">
+  <img src="docs/assets/readme/screenshots/lzcy-tv-home.png" alt="電視版影片首頁，大幅推薦背景下方顯示影片清單" width="880">
+  <br><sub>電視版影片首頁</sub>
 </p>
 
-## 安裝
+| 影片詳細資料 | 搜尋紀錄與星號收藏 |
+| --- | --- |
+| <img src="docs/assets/readme/screenshots/lzcy-tv-details.png" alt="電視版影片詳細資料頁，在大幅背景上顯示影片資料和播放按鈕" width="420"> | <img src="docs/assets/readme/screenshots/lzcy-tv-search-history.png" alt="電視版搜尋紀錄，已將關鍵字 lake 加上星號收藏" width="420"> |
 
-1. 在 Android 手機上開啟[最新發布版](https://github.com/lzcy1326/stash-player-android/releases)。
-2. 下載 APK。
-3. 開啟 APK，並在 Android 提示時允許瀏覽器或檔案管理器安裝應用程式。
-4. 啟動 **Stash Player** 並連線到你的 Stash 伺服器。
+### 手機上更容易找片與播放
 
-> 目前個人版本：**v1.13.3-lzcy1.5.1**。後續更新請查看 [Releases](https://github.com/lzcy1326/stash-player-android/releases)。
+- **演員和廠商各有獨立瀏覽頁。** 支援搜尋、篩選和排序，也能從資料頁瀏覽與播放相關影片。演員與廠商的收藏和評分可同步到 Stash，瀏覽廠商影片時也可納入旗下廠商的影片。
+- **依習慣調整底部導覽。** 預設提供首頁、探索、演員、廠商、佇列和設定。可在「設定 → 介面 → 底部導覽」加入常用入口並拖曳排序，短影音和圖庫也能加回。
+- **從首頁探索新內容。** 繼續觀看卡片下方可瀏覽最近發行的影片，以及最近新增的演員和廠商。影片卡片顯示番號和發行日期。
+- **改進橫向與直向播放操作。** 調整橫向播放時的亮度與音量手勢、進度預覽和播放器控制項。續播時會顯示上次進度，也可以選擇從頭播放。
 
-此個人版本使用不同於上游應用程式的簽署金鑰。若已安裝相同套件名稱的上游版本，請先備份應用程式資料，再解除安裝上游版本並安裝此 APK。已安裝 LZCY 個人版本的使用者可直接覆蓋升級。
+| 演員瀏覽 | 廠商瀏覽 | 編輯底部導覽 |
+| --- | --- | --- |
+| <img src="docs/assets/readme/screenshots/lzcy-mobile-performers.png" alt="手機版演員清單，可搜尋、篩選與排序" width="220"> | <img src="docs/assets/readme/screenshots/lzcy-mobile-studios.png" alt="手機版廠商清單，顯示廠商及旗下廠商" width="220"> | <img src="docs/assets/readme/screenshots/lzcy-mobile-navigation.png" alt="手機版底部導覽設定，可新增、移除或重新排列入口" width="220"> |
 
-問題回報請提交至 [Issues](https://github.com/lzcy1326/stash-player-android/issues)；個人版本規則與上游同步策略請見 [FORK_VERSIONING.md](FORK_VERSIONING.md)。
+### 簡體中文介面更易讀
 
-刪除視窗不再需要額外確認勾選。預設勾選刪除原始影片、funscript 和產生的輔助檔案，檔案刪除無法復原。若要保留原始檔案，請在視窗中取消勾選原始檔案刪除。設定 → 介面 → **略過刪除確認**預設關閉；啟用後，無論單選或多選，都會立即刪除，包括原始檔案。
+重新整理探索、圖庫、播放器和設定的簡體中文用語，讓篩選條件、播放狀態及操作提示更清楚。例如簡體中文介面的方向從「景观 / 肖像」改為「横屏 / 竖屏」，圖庫的「表演者」改為「演员」，播放器的音量提示從「卷」改為「音量」。
 
-收藏和選擇性掃描保留 `data/...` 等伺服器相對路徑，並以空心或實心星號顯示資料夾收藏狀態。
+## 下載與安裝
 
-在設定 → 伺服器 → 資料夾選擇中收藏常用掃描資料夾，即可從掃描設定清單直接掃描或取消收藏，無須重新開啟選擇器。收藏依伺服器及驗證設定儲存在本機。
+手機和電視分別提供獨立 APK，目前皆為 **`1.14.1-lzcy1.6.0`**。版本變更請參閱 [更新紀錄](CHANGELOG.md)。
 
-在觀看頁及全螢幕播放中拖曳時間軸或水平滑動定位時顯示 Stash 精靈圖縮圖；預覽無法使用時保留時間資訊。
+| 裝置 | 發行頁 |
+| --- | --- |
+| Android 手機或平板 | [手機版 APK](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) |
+| Android TV | [電視版 APK](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) |
 
-## 需要什麼
+- **手機。** 下載手機版 APK 後開啟安裝。使用相同簽署金鑰的 LZCY 版本可以直接更新。若已安裝套件名稱相同、簽署金鑰不同的上游版，請先備份資料，再移除上游版並安裝個人版。
+- **電視。** 以裝置支援的方式安裝電視版 APK。使用相同簽署金鑰的 LZCY 電視版可以直接更新。早期電視預覽版使用不同的套件名稱，切換到正式版時需要重新設定伺服器。
 
-- Android 10 或更新版本。
-- 手機可以連到的 Stash 伺服器。
-- 一種連線方式：
-  - 可信任的本機伺服器且未啟用認證，
-  - Stash API Key，
-  - Stash 使用者名稱/密碼登入。
+需要 Android 10 以上版本，以及裝置可連線的 Stash 伺服器。媒體、搜尋結果與清單皆由你的伺服器提供。
 
 ## 首次連線
 
-首次啟動時，輸入 Stash 伺服器位址並選擇符合伺服器設定的認證方式。
+1. 在手機或電視上開啟 Stash Player，輸入裝置可連線的 Stash 網址，例如 `http://192.168.0.10:9999`。
+2. 選擇伺服器使用的驗證方式。手機版支援不需驗證、API 金鑰或 Stash 帳號密碼。電視版可以手動輸入網址及 API 金鑰，也可以接收手機傳送的設定。
+3. 測試連線，成功後儲存。掃描 QR Code 配對時，請將兩台裝置連到同一區域網路，並在手機上確認傳送。
 
-常見範例：
+<details>
+<summary>更多手機版截圖</summary>
 
-- `http://192.168.0.10:9999`
-- `http://stash.local:9999`
-- 你自己的 HTTPS 反向代理位址
+部分截圖來自較早的版本，底部導覽會因版本和個人設定而異。
 
-點選 **測試連線**。成功後儲存伺服器，應用程式會開啟首頁。
+<p align="center">
+  <img src="docs/assets/readme/screenshots/01-home.png" alt="手機首頁和繼續觀看入口" width="220">
+  <img src="docs/assets/readme/screenshots/02-explore.png" alt="探索頁的搜尋、篩選和影片卡片" width="220">
+  <img src="docs/assets/readme/screenshots/06-player-controls.png" alt="手機播放器的進度、倍速與全螢幕控制" width="220">
+</p>
 
-## 主要功能
+<p align="center">
+  <img src="docs/assets/readme/screenshots/03-shorts.png" alt="短影音清單" width="220">
+  <img src="docs/assets/readme/screenshots/04-queue.png" alt="佇列與稍後觀看" width="220">
+  <img src="docs/assets/readme/screenshots/05-watch-page.png" alt="觀看頁與影片資料" width="220">
+</p>
 
-### 首頁
+<p align="center">
+  <img src="docs/assets/readme/screenshots/07-images.png" alt="圖片頁的搜尋和篩選" width="220">
+  <img src="docs/assets/readme/screenshots/08-photo-viewer.png" alt="照片欣賞模式" width="220">
+</p>
 
-首頁用於快速開始觀看：繼續上次的影片、前往探索或短影音、開啟佇列/稍後觀看/收藏，並查看應用程式更新狀態。
+</details>
 
-### 探索
+## 其他常用功能
 
-探索合併了瀏覽與搜尋。無論輸入搜尋字詞或直接瀏覽整個媒體庫，都可以使用標籤、日期、時長、評分、媒體品質、觀看狀態、本機收藏、已儲存篩選器、隨機排序和批次操作。
+- 手機的「探索」支援搜尋、篩選、排序、隨機播放與批次選取，也可儲存常用篩選條件。
+- 手機可儲存最多 10 個播放佇列並恢復進度。搜尋欄顯示最近 50 筆搜尋關鍵字，已收藏的關鍵字不計入上限。
+- 手機播放器支援手勢定位、長按加速、切換串流來源、字幕、控制鎖定與子母畫面。
+- 手機也能瀏覽短影音、圖庫與圖片，並使用「稍後觀看」、本機收藏及播放紀錄。
 
-### 短影音
+## 隱私與使用說明
 
-短影音是直向動態。它會預先載入附近項目以提升滑動流暢度，並把回饋保存在裝置上。
+- 伺服器設定、本機清單與搜尋紀錄都存在裝置上。應用程式直接連線到你的 Stash 伺服器，無需註冊專案帳號，也不會將媒體庫的中繼資料上傳到本專案。
+- 演員和廠商的收藏及評分會寫回 Stash。本機影片清單、影片收藏和搜尋關鍵字則保存在各自的裝置上。
+- 進度縮圖需要 Stash 已產生的預覽圖。即使沒有預覽圖，仍可依時間定位。
+- 刪除影片時，確認視窗預設勾選刪除原始檔案。如需保留，請在確認前取消勾選。「略過刪除確認」預設關閉，開啟後單筆或批次刪除都會立即執行，包含原始檔案。
 
-可用手勢包括點一下播放/暫停、滑動到下一項、雙擊喜歡、長按暫時 1.5 倍速播放，以及拖動進度列精準定位。
+## 回饋與開發
 
-### 觀看頁和播放器
+[回報問題](https://github.com/lzcy1326/stash-player-android/issues) · [開發說明](DEVELOPMENT.md) · [手機與電視發行規則](FORK_VERSIONING.md)
 
-觀看頁把影片、場景操作、中繼資料和推薦內容放在一起。播放器支援全螢幕、直向觀看頁模式、雙擊快轉/倒退、水平拖動定位、側邊亮度/音量手勢、長按倍速、鎖定模式、串流選擇、字幕、PiP、方向控制和播放清單導覽。
-
-### 本機清單
-
-這些清單儲存在 Android 裝置上：
-
-- **佇列**：現在想連續觀看的內容。
-- **稍後觀看**：以後再看的內容。
-- **收藏**：僅在本應用程式內使用的本機收藏標記。
-- **播放記錄**：用於首頁和佇列的本機繼續觀看記錄。
-
-### 設定與語言
-
-設定中可以選擇應用程式語言，包括系統預設、韓語、英語、簡體中文和繁體中文。伺服器設定也可以切換 Stash 的「從包含圖片的資料夾建立圖庫」選項，並在確認後啟動媒體庫掃描。
-
-## 隱私
-
-Stash Android Player 是連線到你自己伺服器的直接用戶端。
-
-- 伺服器設定、API Key、工作階段 Cookie、本機清單、歷史和短影音回饋都儲存在裝置上。
-- 使用者名稱/密碼登入只會保存刷新工作階段所需的材料。請勿公開裝置備份或日誌。
-- 最近應用程式隱私選項可以隱藏 Android 最近工作中的應用程式預覽。
-- 偵錯日誌會隱藏敏感認證資訊。
-- 分享截圖時，請避免顯示真實伺服器位址、檔名、憑證或私人媒體。
-
-## 疑難排解
-
-| 問題 | 可以嘗試 |
-| --- | --- |
-| 連線失敗 | 確認手機可以透過同一網路、VPN 或反向代理存取 Stash URL。 |
-| 縮圖不顯示 | 重新測試伺服器連線，並確認目前認證方式仍然有效。 |
-| 重新啟動後登入失效 | 在設定中重新輸入使用者名稱/密碼以更新工作階段刷新材料。 |
-| 短影音為空 | 檢查媒體庫中是否有短於設定裡最大時長的影片。 |
-| 推薦為空 | 檢查媒體庫中是否有其他影片，以及影片中繼資料是否可用。 |
-| APK 無法安裝 | 允許開啟 APK 的瀏覽器、檔案管理器或安裝器安裝未知應用程式。 |
-
-## 開發
-
-面向一般使用者的安裝和使用說明在上方。建置方式、專案結構、簽署和驗證命令見 [DEVELOPMENT.md](DEVELOPMENT.md)。
-
-```bash
-./gradlew :app:assembleDebug
-```
-
-## 授權
-
-MIT。詳見 [LICENSE](LICENSE)。
+本專案採用 [MIT 授權](LICENSE)。

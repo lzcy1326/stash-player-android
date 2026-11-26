@@ -1,170 +1,108 @@
-<div align="center">
+# Stash Android Player · LZCY Edition
 
-# Stash Android Player
+**Browse your Stash library by performer or studio on your phone, then browse, play, and resume on Android TV with a remote.**
 
-### Your Stash library, finally comfortable on Android.
+The LZCY edition is based on the [upstream Stash Android Player project](https://github.com/gomeng-dev/stash-player-android). It adds a dedicated Android TV app and improves browsing and playback on phones. Both apps connect directly to your own Stash server.
 
-A native Android client for people who already run Stash and want the phone experience to feel fast, private, and built for one hand.
+[Download for Android phones](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) · [Download for Android TV](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) · [All releases](https://github.com/lzcy1326/stash-player-android/releases)
 
-<p>
-  <a href="README.ko.md"><img alt="Korean README" src="https://img.shields.io/badge/README-%ED%95%9C%EA%B5%AD%EC%96%B4-7c3aed?style=for-the-badge"></a>
-  <a href="README.zh-CN.md"><img alt="Simplified Chinese README" src="https://img.shields.io/badge/README-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-7c3aed?style=for-the-badge"></a>
-  <a href="README.zh-TW.md"><img alt="Traditional Chinese README" src="https://img.shields.io/badge/README-%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-7c3aed?style=for-the-badge"></a>
-  <a href="https://github.com/lzcy1326/stash-player-android/releases"><img alt="Download APK" src="https://img.shields.io/badge/download-APK-34d399?style=for-the-badge&logo=github&logoColor=white"></a>
-  <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-34d399?style=for-the-badge&logo=android&logoColor=white">
-  <img alt="Kotlin + Compose" src="https://img.shields.io/badge/Kotlin%20%2B%20Compose-111827?style=for-the-badge&logo=kotlin&logoColor=white">
-</p>
+[简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [한국어](README.ko.md)
 
-<img src="docs/assets/readme/screenshots/00-hero.png" alt="Stash Android Player preview showing Home, Explore, Queue, Player controls, Images, and Gallery appreciation mode" width="100%">
+## What's different in the LZCY edition?
 
-</div>
+### Dedicated Android TV app
 
----
+- **Browse with your remote.** Videos, performers, and studios have their own tabs, with search, detail pages, and related videos. The video home and detail pages use large backdrops. Lists adapt to the number of columns, and exiting playback returns focus to the original video card.
+- **Find your place with the D-pad.** Tap left or right to seek. Hold to preview the timeline with Stash thumbnails. The video tab offers Continue Watching, and search history lets you rerun or star a query.
+- **Pair with your phone.** Scan the QR code on the TV with the phone app and confirm to send your server settings. The phone must already be connected to Stash.
+- **Set a PIN on a shared TV.** A four-digit PIN can protect the app when it opens or returns to the foreground.
 
-## Why this exists
-
-Stash is great as a server. On a phone, the desktop web UI can feel like work.
-
-**Stash Android Player** keeps your library on your own Stash server and gives the day-to-day browsing and watching flow a native Android shell: quick resume, proper bottom navigation, local lists, swipe-friendly discovery, and a player that understands phone gestures.
-
-No hosted account. No cloud sync service. No metadata upload to this project.
-
-## What you get
-
-- **A home screen that starts where you left off.** Resume the latest scene, open your queue, jump to Watch Later, or start browsing without digging through menus.
-- **Explore that works like a real app.** Search, filter, sort, shuffle, switch layouts, save filters, and batch-select scenes from one place.
-- **Local lists for phone-side intent.** Queue, Watch Later, Favorites, recent playback, and Shorts feedback live on the device so you can organize your viewing flow without rewriting your whole Stash library.
-- **A watch page around the video.** Metadata, rating, tags, actions, similar videos, and the player sit together instead of making you bounce between pages.
-- **A gesture-first player.** Double-tap seek, horizontal scrub, side brightness/volume, long-press speed hold, lock mode, stream selection, subtitles, PiP, fullscreen, and playlist controls.
-- **Gallery and image browsing.** Browse server-backed galleries and image folders, open the photo viewer, and use appreciation mode when you want the top and bottom chrome out of the way.
-- **Similar videos.** Discover other scenes related to the one you are watching.
-
-## Screenshots
-
-Captured from the real Android app with public demo media. These images do not show private media, server addresses, API keys, credentials, cookies, or personal library data.
+The screenshots use a demo library. The TV app is shown in English and the phone app in Simplified Chinese.
 
 <p align="center">
-  <img src="docs/assets/readme/screenshots/01-home.png" alt="Home screen with continue watching and library shortcuts" width="220">
-  <img src="docs/assets/readme/screenshots/02-explore.png" alt="Explore screen with search, filters, and scene cards" width="220">
-  <img src="docs/assets/readme/screenshots/03-shorts.png" alt="Shorts feed with vertical playback and local feedback" width="220">
-</p>
-<p align="center">
-  <img src="docs/assets/readme/screenshots/04-queue.png" alt="Playback queue with Watch Later and local lists" width="220">
-  <img src="docs/assets/readme/screenshots/05-watch-page.png" alt="Watch page with metadata, rating, tags, and actions" width="220">
-  <img src="docs/assets/readme/screenshots/06-player-controls.png" alt="Player controls with seek bar, speed, lock, and fullscreen" width="220">
-</p>
-<p align="center">
-  <img src="docs/assets/readme/screenshots/07-images.png" alt="Images browser with search, sort, and filters" width="220">
-  <img src="docs/assets/readme/screenshots/08-photo-viewer.png" alt="Photo viewer appreciation mode with chrome hidden" width="220">
+  <img src="docs/assets/readme/screenshots/lzcy-tv-home.png" alt="Android TV video home with a featured backdrop and a grid of videos" width="880">
+  <br><sub>Android TV video home</sub>
 </p>
 
-## The normal flow
+| Video details | Search history and starred queries |
+| --- | --- |
+| <img src="docs/assets/readme/screenshots/lzcy-tv-details.png" alt="Android TV video details with a large backdrop and Play button" width="420"> | <img src="docs/assets/readme/screenshots/lzcy-tv-search-history.png" alt="Android TV search history with the query lake starred" width="420"> |
 
-### 1. Open Home and keep watching
+### Easier browsing and playback on phones
 
-Home is for the moment you open the app and already know what you want. Resume, play the queue, check Watch Later, or go straight into discovery.
+- **Dedicated performer and studio pages.** Search, filter, and sort, then open a profile to browse and play related videos. Performer and studio favorites and ratings can sync to Stash. Studio browsing can include videos from child studios.
+- **Customizable bottom navigation.** Home, Explore, Performers, Studios, Queue, and Settings are available by default. Add or reorder shortcuts in Settings → Interface → Bottom navigation. Shorts and Gallery can be added back.
+- **More to discover on Home.** Below Continue Watching, see recently released videos and recently added performers and studios. Video cards show the catalog code and release date.
+- **Refined playback controls.** Landscape brightness and volume gestures, seek previews, and player controls have been adjusted. When a video resumes, the player shows the saved position and offers Start from Beginning.
 
-### 2. Find something without fighting filters
+| Performers | Studios | Bottom navigation editor |
+| --- | --- | --- |
+| <img src="docs/assets/readme/screenshots/lzcy-mobile-performers.png" alt="Phone performer list with search, filters, and sorting" width="220"> | <img src="docs/assets/readme/screenshots/lzcy-mobile-studios.png" alt="Phone studio list showing studios and a child studio" width="220"> | <img src="docs/assets/readme/screenshots/lzcy-mobile-navigation.png" alt="Phone bottom navigation editor with shortcuts to add, remove, or reorder" width="220"> |
 
-Explore combines browsing and search. You can filter by tags, date, duration, rating, watched state, local favorite, resolution/file type, and more. Random sort and shuffle are there when you do not want to think too hard.
+### Clearer Simplified Chinese
 
-### 3. Build a queue for this session
+Explore, Gallery, the player, and Settings have revised Simplified Chinese labels and prompts. For example, the orientation labels changed from “景观 / 肖像” to “横屏 / 竖屏” (landscape / portrait), the gallery filter changed from “表演者” to “演员” (performers), and the player changed from “卷” to “音量” (volume).
 
-Add scenes to Up Next, save items for later, or keep a local favorite list. The point is simple: your phone can have its own watching plan without forcing every tiny decision back into the server.
+## Download and install
 
-### 4. Watch with phone-native controls
+The phone and TV apps are published as separate APKs. Both are currently on **`1.14.1-lzcy1.6.0`**. See the [changelog](CHANGELOG.md) for version details.
 
-The player is built around touch:
+| Device | Release |
+| --- | --- |
+| Android phone or tablet | [Phone APK](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) |
+| Android TV | [TV APK](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) |
 
-- tap to reveal or hide controls,
-- double-tap to jump backward or forward,
-- drag horizontally to scrub,
-- swipe the sides for brightness and volume,
-- long-press for temporary speed-up,
-- lock the controls when you do not want accidental taps,
-- switch streams, subtitles, aspect, orientation, and playlist items from the overlay.
+- **Phone.** Download the phone APK and open it to install. You can update a LZCY release signed with the same key in place. If you have an upstream build with the same package name and a different signing key, back up your data, then uninstall the upstream app before installing the LZCY edition.
+- **TV.** Install the TV APK using a method supported by your device. You can update a LZCY TV release signed with the same key in place. The early TV preview used a different package name, so you'll need to set up the server again when switching from that preview.
 
-### 5. Use recommendations when they help
-
-The watch page can suggest similar videos from your library.
-
-### 6. Browse images without UI chrome
-
-The Images tab supports search, sort, filters, and full-screen browsing. In the photo viewer, Appreciation mode hides the top bar and bottom tools after activation so the image can fill the moment without extra UI noise.
-
-## Install
-
-1. Open the [latest public release](https://github.com/lzcy1326/stash-player-android/releases) on your Android phone.
-2. Download the APK.
-3. Open the APK and allow installs from your browser or file manager if Android asks.
-4. Launch **Stash Player** and connect it to your Stash server.
-
-Current personal fork release: **v1.13.3-lzcy1.5.1**. See [Releases](https://github.com/lzcy1326/stash-player-android/releases) for updates.
-
-This fork uses a different signing key from the upstream app. To switch from an upstream installation with the same package name, back up your app data first, then uninstall the upstream app before installing this APK. Updates to earlier LZCY releases can be installed directly.
-
-Report issues at [lzcy1326/stash-player-android/issues](https://github.com/lzcy1326/stash-player-android/issues). See [FORK_VERSIONING.md](FORK_VERSIONING.md) for the personal versioning and upstream sync policy.
-
-The delete dialog no longer requires an extra acknowledgement checkbox. Original videos/funscripts and generated files are selected for deletion by default; file deletion is irreversible. Uncheck original-file deletion in the dialog to keep originals. Settings → Interface → **Skip delete confirmation** is OFF by default; enabling it deletes immediately, including original files, for single and multiple selections.
-
-Server-relative paths such as `data/...` are preserved for favorites and selective scans; outlined/filled stars show the folder favorite state.
-
-Save frequently scanned folders as favorites in Settings → Server → folder selection. The scan settings list offers **Scan now** without reopening the picker, plus removal; favorites are stored locally per server/auth profile.
-
-Timeline and horizontal-drag seeking show cropped Stash sprite previews in watch-page and fullscreen playback, with time information retained when previews are unavailable.
-
-## Requirements
-
-- Android 10 or newer.
-- A Stash server reachable from your phone, either on your LAN, VPN, Tailscale, or your own HTTPS reverse proxy.
-- One authentication mode:
-  - trusted local server without auth,
-  - Stash API key,
-  - Stash username/password login.
+Both apps require Android 10 or later and a Stash server the device can reach. Your server supplies the media, search results, and library listings.
 
 ## First connection
 
-On first launch, enter your Stash server address and choose the matching auth method.
+1. Open Stash Player on your phone or TV and enter a Stash URL the device can reach, such as `http://192.168.0.10:9999`.
+2. Choose the authentication method required by your server. The phone supports no authentication, an API key, or Stash username and password. On TV, enter the server address and API key manually or receive the setup from your phone.
+3. Test the connection and save the settings. To pair by QR code, connect both devices to the same local network and confirm on the phone.
 
-Common examples:
+<details>
+<summary>More phone screenshots</summary>
 
-- `http://192.168.0.10:9999`
-- `http://stash.local:9999`
-- your own HTTPS reverse-proxy address
+Some screenshots show earlier versions. The bottom navigation depends on your installed version and settings.
 
-Tap **Test connection**. If it succeeds, save the server and the app opens Home.
+<p align="center">
+  <img src="docs/assets/readme/screenshots/01-home.png" alt="Phone home and Continue Watching" width="220">
+  <img src="docs/assets/readme/screenshots/02-explore.png" alt="Explore search, filters, and video cards" width="220">
+  <img src="docs/assets/readme/screenshots/06-player-controls.png" alt="Phone player timeline, speed, and fullscreen controls" width="220">
+</p>
 
-## Privacy
+<p align="center">
+  <img src="docs/assets/readme/screenshots/03-shorts.png" alt="Shorts feed" width="220">
+  <img src="docs/assets/readme/screenshots/04-queue.png" alt="Queue and Watch Later" width="220">
+  <img src="docs/assets/readme/screenshots/05-watch-page.png" alt="Watch page and video metadata" width="220">
+</p>
 
-This app is a direct client for your server.
+<p align="center">
+  <img src="docs/assets/readme/screenshots/07-images.png" alt="Image search and filters" width="220">
+  <img src="docs/assets/readme/screenshots/08-photo-viewer.png" alt="Photo viewer in Appreciation mode" width="220">
+</p>
 
-- Server settings, API keys, session cookies, local lists, playback history, and Shorts feedback stay on the device.
-- Password login stores the session material needed to refresh the session. Do not share device backups or debug logs publicly.
-- A recent-apps privacy option can hide the app preview from Android recents.
-- Debug logs redact sensitive auth material.
-- If you share your own screenshots, check for real server URLs, filenames, credentials, and private media first.
+</details>
 
-## Troubleshooting
+## Other features
 
-| Problem | Try this |
-| --- | --- |
-| Connection fails | Confirm the phone can reach your Stash URL on the same network, VPN, or reverse proxy. |
-| Thumbnails do not load | Re-test the server connection and confirm the selected auth method still works in Stash. |
-| Login stops working after restart | Re-enter the username/password from Settings so session refresh material is updated. |
-| Shorts is empty | Check that your library has scenes shorter than the Shorts maximum duration in Settings. |
-| Recommendations are empty | Check that your library contains other scenes and that their metadata is available. |
-| APK install is blocked | Allow APK installs for the browser, file manager, or installer app that opened the APK. |
+- Explore supports search, filters, sorting, shuffle, batch selection, and saved filters.
+- The phone saves up to 10 playback queues and can restore their progress. Phone search shows the 50 most recent queries, excluding starred queries from the limit.
+- The phone player supports gesture seeking, hold-to-speed-up, stream selection, subtitles, control lock, and picture-in-picture.
+- On the phone you can also browse Shorts, Gallery, and Images, and use Watch Later, local favorites, and playback history.
 
-## For developers
+## Privacy and usage notes
 
-This README is for people installing and using the app. Build instructions, project structure, signing notes, and verification commands live in [DEVELOPMENT.md](DEVELOPMENT.md).
+- Server settings, local lists, and search history are stored on the device. The app connects directly to your Stash server and works without a project account. It does not upload library metadata to this project.
+- Performer and studio favorites and ratings are written to Stash. Local video lists, video favorites, and search queries stay on the device where they were saved.
+- Seek thumbnails require previews generated by Stash. Time-based seeking works without them.
+- The video deletion dialog selects original file deletion by default. Clear that option before confirming if you want to keep the original files. Skip delete confirmation is off by default. Enabling it deletes immediately, including original files, for individual and batch deletions.
 
-Quick debug build:
+## Feedback and development
 
-```bash
-./gradlew :app:assembleDebug
-```
+[Report an issue](https://github.com/lzcy1326/stash-player-android/issues) · [Development guide](DEVELOPMENT.md) · [Phone and TV release policy](FORK_VERSIONING.md)
 
-## License
-
-MIT. See [LICENSE](LICENSE).
+The project is available under the [MIT license](LICENSE).
