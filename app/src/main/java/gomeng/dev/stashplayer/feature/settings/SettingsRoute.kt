@@ -1884,6 +1884,9 @@ private fun PlaybackSettingsContent() {
     val backgroundPlaybackEnabled by repository.backgroundPlaybackEnabled.collectAsState(
         initial = StashSettingsRepository.DEFAULT_BACKGROUND_PLAYBACK_ENABLED,
     )
+    val resumePlaybackEnabled by repository.resumePlaybackEnabled.collectAsState(
+        initial = StashSettingsRepository.DEFAULT_RESUME_PLAYBACK_ENABLED,
+    )
     val pictureInPictureEnabled by repository.pictureInPictureEnabled.collectAsState(
         initial = StashSettingsRepository.DEFAULT_PICTURE_IN_PICTURE_ENABLED,
     )
@@ -1905,6 +1908,15 @@ private fun PlaybackSettingsContent() {
     val coroutineScope = rememberCoroutineScope()
     var showShortsResetDialog by remember { mutableStateOf(false) }
     var shortsResetFeedback by remember { mutableStateOf<Int?>(null) }
+
+    SettingsSwitchCard(
+        title = R.string.settings_resume_playback_title,
+        description = R.string.settings_resume_playback_description,
+        checked = resumePlaybackEnabled,
+        onCheckedChange = { enabled ->
+            coroutineScope.launch { repository.setResumePlaybackEnabled(enabled) }
+        },
+    )
 
     SettingsRadioGroupCard(
         title = DefaultStreamPreferenceSettingCopy.title,
@@ -2597,6 +2609,7 @@ private fun SettingsSwitchCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -2612,10 +2625,7 @@ private fun SettingsSwitchCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-            )
+            Switch(checked = checked, onCheckedChange = null)
         }
     }
 }
