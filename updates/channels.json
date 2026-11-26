@@ -1,16 +1,16 @@
 {
   "phone": {
-    "versionName": "1.14.0-lzcy1.6.0",
-    "versionCode": 61010600,
-    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.14.0-lzcy1.6.0/StashPlayer-Mobile-1.14.0-lzcy1.6.0.apk",
-    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.0-lzcy1.6.0",
-    "notes": "合并上游 1.14.0，新增队列保存、搜索历史与收藏，并调整全屏返回。"
+    "versionName": "1.14.1-lzcy1.6.0",
+    "versionCode": 62010600,
+    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.14.1-lzcy1.6.0/StashPlayer-Mobile-1.14.1-lzcy1.6.0.apk",
+    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0",
+    "notes": "新增继续播放视频开关，可从头播放而保留观看进度。"
   },
   "tv": {
-    "versionName": "1.14.0-lzcy1.6.0",
-    "versionCode": 61010600,
-    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/tv-v1.14.0-lzcy1.6.0/StashPlayer-TV-1.14.0-lzcy1.6.0.apk",
-    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.0-lzcy1.6.0",
-    "notes": "影片搜索新增最近记录与收藏，支持遥控器重新搜索。"
+    "versionName": "1.14.1-lzcy1.6.0",
+    "versionCode": 62010600,
+    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/tv-v1.14.1-lzcy1.6.0/StashPlayer-TV-1.14.1-lzcy1.6.0.apk",
+    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0",
+    "notes": "同步上游 1.14.1 共享代码，保留现有电视播放功能。"
   }
 }
