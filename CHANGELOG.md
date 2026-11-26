@@ -4,6 +4,15 @@ All notable changes to Stash Android Player are documented here.
 
 When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. Use the matching section for the GitHub Release notes.
 
+## 手机端 [1.14.1-lzcy1.6.0] - 2026-11-26
+
+- 合并上游 1.14.1，在设置 → 播放新增“继续播放视频”开关，默认开启。关闭后从头播放，同时保留观看进度。
+- 兼容已保存的播放队列，并保留个人版自动续播和从头播放提示。
+
+## 电视端 [1.14.1-lzcy1.6.0] - 2026-11-26
+
+- 同步上游 1.14.1 的共享代码。新增的继续播放开关位于手机端设置，电视端继续使用现有播放逻辑。
+
 ## 手机端 [1.14.0-lzcy1.6.0] - 2026-11-24
 
 - 修正个人版本号，保留 `lzcy1.6.0` 版本系列。
