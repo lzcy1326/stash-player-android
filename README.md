@@ -4,7 +4,7 @@
 
 The LZCY edition is based on the [upstream Stash Android Player project](https://github.com/gomeng-dev/stash-player-android). It adds a dedicated Android TV app and improves browsing and playback on phones. Both apps connect directly to your own Stash server.
 
-[Download for Android phones](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) · [Download for Android TV](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) · [All releases](https://github.com/lzcy1326/stash-player-android/releases)
+[Download for Android phones](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.2-lzcy1.6.2) · [Download for Android TV](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) · [All releases](https://github.com/lzcy1326/stash-player-android/releases)
 
 [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [한국어](README.ko.md)
 
@@ -45,11 +45,11 @@ Explore, Gallery, the player, and Settings have revised Simplified Chinese label
 
 ## Download and install
 
-The phone and TV apps are published as separate APKs. Both are currently on **`1.14.1-lzcy1.6.0`**. See the [changelog](CHANGELOG.md) for version details.
+The phone and TV apps are published as separate APKs. The current phone version is **`1.14.2-lzcy1.6.2`**, and the current TV version is **`1.14.1-lzcy1.6.0`**. See the [changelog](CHANGELOG.md) for version details.
 
 | Device | Release |
 | --- | --- |
-| Android phone or tablet | [Phone APK](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) |
+| Android phone or tablet | [Phone APK](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.2-lzcy1.6.2) |
 | Android TV | [TV APK](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) |
 
 - **Phone.** Download the phone APK and open it to install. You can update a LZCY release signed with the same key in place. If you have an upstream build with the same package name and a different signing key, back up your data, then uninstall the upstream app before installing the LZCY edition.

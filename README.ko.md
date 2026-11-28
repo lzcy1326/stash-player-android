@@ -4,7 +4,7 @@
 
 LZCY 에디션은 [Stash Android Player 원본 프로젝트](https://github.com/gomeng-dev/stash-player-android)를 기반으로 합니다. Android TV 전용 앱을 추가하고 휴대폰의 탐색 및 재생 기능을 개선했습니다. 두 앱 모두 사용자의 Stash 서버에 직접 연결됩니다.
 
-[휴대폰용 다운로드](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) · [Android TV용 다운로드](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) · [전체 릴리스](https://github.com/lzcy1326/stash-player-android/releases)
+[휴대폰용 다운로드](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.2-lzcy1.6.2) · [Android TV용 다운로드](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) · [전체 릴리스](https://github.com/lzcy1326/stash-player-android/releases)
 
 [English](README.md) · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 
@@ -45,11 +45,11 @@ LZCY 에디션은 [Stash Android Player 원본 프로젝트](https://github.com/
 
 ## 다운로드 및 설치
 
-휴대폰용과 TV용 APK를 별도로 제공하며 현재 버전은 모두 **`1.14.1-lzcy1.6.0`**입니다. 버전별 변경 사항은 [변경 기록](CHANGELOG.md)을 참고하세요.
+휴대폰용과 TV용 APK를 별도로 제공합니다. 현재 휴대폰 버전은 **`1.14.2-lzcy1.6.2`**, TV 버전은 **`1.14.1-lzcy1.6.0`**입니다. 버전별 변경 사항은 [변경 기록](CHANGELOG.md)을 참고하세요.
 
 | 기기 | 릴리스 |
 | --- | --- |
-| Android 휴대폰 또는 태블릿 | [휴대폰용 APK](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) |
+| Android 휴대폰 또는 태블릿 | [휴대폰용 APK](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.2-lzcy1.6.2) |
 | Android TV | [TV용 APK](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) |
 
 - **휴대폰.** 휴대폰용 APK를 다운로드한 뒤 열어서 설치합니다. 같은 키로 서명된 LZCY 버전은 기존 앱 위에 업데이트할 수 있습니다. 패키지 이름이 같고 서명 키가 다른 원본 앱이 설치되어 있다면 데이터를 먼저 백업한 뒤 원본 앱을 제거하고 LZCY 에디션을 설치하세요.

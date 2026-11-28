@@ -1,10 +1,10 @@
 {
   "phone": {
-    "versionName": "1.14.1-lzcy1.6.0",
-    "versionCode": 62010600,
-    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.14.1-lzcy1.6.0/StashPlayer-Mobile-1.14.1-lzcy1.6.0.apk",
-    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0",
-    "notes": "新增继续播放视频开关，可从头播放而保留观看进度。"
+    "versionName": "1.14.2-lzcy1.6.2",
+    "versionCode": 63010602,
+    "apkUrl": "https://github.com/lzcy1326/stash-player-android/releases/download/phone-v1.14.2-lzcy1.6.2/StashPlayer-Mobile-1.14.2-lzcy1.6.2.apk",
+    "releaseUrl": "https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.2-lzcy1.6.2",
+    "notes": "优化检查更新卡片，显示下载进度与速度，切换页签后恢复下载。同步上游随机播放修复。"
   },
   "tv": {
     "versionName": "1.14.1-lzcy1.6.0",

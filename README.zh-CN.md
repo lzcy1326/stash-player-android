@@ -4,7 +4,7 @@
 
 LZCY 个人版基于 [Stash Android Player 上游项目](https://github.com/gomeng-dev/stash-player-android)，保留原生 Android 客户端的核心功能，增加独立的 Android TV 版，并改进手机端的浏览和播放体验。手机和电视都直接连接你自己的 Stash 服务器。
 
-[下载手机版](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) · [下载电视版](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) · [全部发行版本](https://github.com/lzcy1326/stash-player-android/releases)
+[下载手机版](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.2-lzcy1.6.2) · [下载电视版](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) · [全部发行版本](https://github.com/lzcy1326/stash-player-android/releases)
 
 [English](README.md) · [한국어](README.ko.md) · [繁體中文](README.zh-TW.md)
 
@@ -45,11 +45,11 @@ LZCY 个人版基于 [Stash Android Player 上游项目](https://github.com/gome
 
 ## 下载与安装
 
-当前手机和电视正式版均为 **`1.14.1-lzcy1.6.0`**，分别发布独立 APK。详细改动见 [更新日志](CHANGELOG.md)。
+手机和电视分别发布独立 APK。手机正式版为 **`1.14.2-lzcy1.6.2`**，电视正式版为 **`1.14.1-lzcy1.6.0`**。详细改动见 [更新日志](CHANGELOG.md)。
 
 | 设备 | 发行页 |
 | --- | --- |
-| Android 手机或平板 | [手机版 APK](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.1-lzcy1.6.0) |
+| Android 手机或平板 | [手机版 APK](https://github.com/lzcy1326/stash-player-android/releases/tag/phone-v1.14.2-lzcy1.6.2) |
 | Android TV | [电视版 APK](https://github.com/lzcy1326/stash-player-android/releases/tag/tv-v1.14.1-lzcy1.6.0) |
 
 - **手机**：下载手机版 APK 后打开安装。已安装同一签名的 LZCY 手机正式版可以覆盖更新。若已安装使用不同签名的同包名上游版，先备份数据，再卸载上游版并安装个人版。
