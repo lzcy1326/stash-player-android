@@ -4,6 +4,18 @@ All notable changes to Stash Android Player are documented here.
 
 When bumping `versionName`, add a new section for the release version and summarize the changes since the previous version. Use the matching section for the GitHub Release notes.
 
+## 手机端 [1.14.2-lzcy1.6.2] - 2026-11-28
+
+### LZCY 个人版改进
+
+- **合并检查更新与版本信息。** 当前版本固定显示在「检查更新」卡片中，发现新版本后可在同一处查看更新内容、下载和安装。
+- **下载按钮显示进度和速度。** 按钮按百分比填充紫色，旁边显示实时下载速度。
+- **切换页签后恢复下载状态。** 返回设置时继续显示同一笔下载的进度。下载并校验完成后可直接安装，下载失败时可重试。
+
+### 上游 v1.14.2 同步
+
+- 修复新开随机播放时顺序容易固定的问题。恢复已保存的队列时仍保留原来的播放顺序。
+
 ## 手机端 [1.14.1-lzcy1.6.0] - 2026-11-26
 
 - 合并上游 1.14.1，在设置 → 播放新增“继续播放视频”开关，默认开启。关闭后从头播放，同时保留观看进度。

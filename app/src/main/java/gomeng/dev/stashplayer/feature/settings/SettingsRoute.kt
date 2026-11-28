@@ -55,8 +55,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import gomeng.dev.stashplayer.R
-import gomeng.dev.stashplayer.core.network.AppUpdateChecker
-import gomeng.dev.stashplayer.core.network.AppUpdateInstaller
 import gomeng.dev.stashplayer.core.network.AppUpdateNotice
 import gomeng.dev.stashplayer.core.network.STASH_ANDROID_LATEST_RELEASE_API_URL
 import gomeng.dev.stashplayer.core.network.STASH_ANDROID_RELEASES_URL
@@ -2313,133 +2311,15 @@ private fun SupportSettingsContent(
     onUpdateNoticeChange: (AppUpdateNotice?) -> Unit,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val updateChecker = remember { AppUpdateChecker() }
-    val updateInstaller = remember { AppUpdateInstaller() }
-    val currentVersion = currentAppVersionName(context)
     var statusText by remember { mutableStateOf<String?>(null) }
-    var updateStatusText by remember { mutableStateOf<String?>(null) }
-    var isCheckingForUpdate by remember { mutableStateOf(false) }
-    var isDownloadingUpdate by remember { mutableStateOf(false) }
 
-    if (availableUpdateNotice != null) {
-        SettingsActionCard(
-            title = SupportSettingCopy.versionTitle,
-            descriptionText = stringResource(
-                R.string.settings_support_update_available,
-                availableUpdateNotice.latestVersionName,
-                availableUpdateNotice.currentVersionName,
-            ),
-            buttonText = when {
-                isDownloadingUpdate -> stringResource(R.string.settings_support_update_downloading)
-                availableUpdateNotice.apkAsset != null -> stringResource(R.string.settings_support_update_download_button)
-                else -> stringResource(R.string.settings_support_update_open_action)
-            },
-            enabled = !isDownloadingUpdate,
-            onClick = {
-                val apkAsset = availableUpdateNotice.apkAsset
-                if (apkAsset == null) {
-                    statusText = openSupportUrl(context, availableUpdateNotice.releaseUrl)
-                } else if (!updateInstaller.canRequestPackageInstalls(context)) {
-                    updateInstaller.openUnknownAppSourcesSettings(context)
-                    updateStatusText = context.getString(R.string.settings_support_update_install_permission_required)
-                } else {
-                    scope.launch {
-                        isDownloadingUpdate = true
-                        updateStatusText = context.getString(R.string.settings_support_update_downloading)
-                        runCatching {
-                            val apkFile = updateInstaller.downloadApk(context, apkAsset)
-                            updateInstaller.launchInstaller(context, apkFile)
-                        }.onSuccess {
-                            updateStatusText = context.getString(R.string.settings_support_update_install_started)
-                        }.onFailure {
-                            updateStatusText = context.getString(R.string.settings_support_update_download_failed)
-                        }
-                        isDownloadingUpdate = false
-                    }
-                }
-            },
-        )
-    } else {
-        SettingsLinkCard(
-            title = SupportSettingCopy.versionTitle,
-            descriptionText = stringResource(R.string.settings_support_version_description, currentVersion),
-            onClick = {
-                statusText = openSupportUrl(context, SupportSettingCopy.releasesUrl)
-            },
-        )
-    }
-    SettingsActionCard(
-        title = SupportSettingCopy.updateCheckTitle,
-        descriptionText = updateStatusText,
-        buttonText = if (isCheckingForUpdate) {
-            stringResource(R.string.settings_support_update_checking)
-        } else {
-            stringResource(R.string.settings_support_update_check_button)
-        },
-        enabled = !isCheckingForUpdate,
-        onClick = {
-            scope.launch {
-                isCheckingForUpdate = true
-                updateStatusText = context.getString(R.string.settings_support_update_checking)
-                runCatching { updateChecker.checkForUpdate(currentVersion) }
-                    .onSuccess { notice ->
-                        onUpdateNoticeChange(notice)
-                        updateStatusText = if (notice != null) {
-                            context.getString(
-                                R.string.settings_support_update_available,
-                                notice.latestVersionName,
-                                notice.currentVersionName,
-                            )
-                        } else {
-                            context.getString(R.string.settings_support_update_current, currentVersion)
-                        }
-                    }
-                    .onFailure {
-                        updateStatusText = context.getString(R.string.settings_support_update_failed)
-                    }
-                isCheckingForUpdate = false
-            }
-        },
-    )
+    PhoneUpdateCard(currentAppVersionName(context), availableUpdateNotice, onUpdateNoticeChange)
     SettingsLinkCard(
         title = SupportSettingCopy.issueTitle,
         descriptionText = null,
-        onClick = {
-            statusText = openSupportUrl(context, SupportSettingCopy.issuesUrl)
-        },
+        onClick = { statusText = openSupportUrl(context, SupportSettingCopy.issuesUrl) },
     )
-    statusText?.let {
-        Text(it, color = MaterialTheme.colorScheme.error)
-    }
-}
-
-@Composable
-private fun SettingsActionCard(
-    @StringRes title: Int,
-    descriptionText: String?,
-    buttonText: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(stringResource(title), style = MaterialTheme.typography.titleMedium)
-            descriptionText?.takeIf { it.isNotBlank() }?.let { text ->
-                Text(
-                    text,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Button(onClick = onClick, enabled = enabled) {
-                Text(buttonText)
-            }
-        }
-    }
+    statusText?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 }
 
 @Composable
